@@ -4,6 +4,7 @@
 
 import html5 from './html5';
 import mailru from './plugins/mailru-video';
+import mtslink from './plugins/mts-link';
 import rutube from './plugins/rutube';
 import vimeo from './plugins/vimeo';
 import vk from './plugins/vk-video';
@@ -46,7 +47,6 @@ const media = {
       this.elements.poster = createElement('div', {
         class: this.config.classNames.poster,
       });
-
       this.elements.wrapper.appendChild(this.elements.poster);
     }
 
@@ -70,6 +70,9 @@ const media = {
     }
     else if (this.isMailRu) {
       mailru.setup.call(this);
+    }
+    else if (this.isMTSLink) {
+      mtslink.setup.call(this);
     }
   },
 };

@@ -335,7 +335,7 @@ class Plyr {
   }
 
   get isEmbed() {
-    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu;
+    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink || this.isMTSLink;
   }
 
   get isYouTube() {
@@ -360,6 +360,10 @@ class Plyr {
 
   get isMailRu() {
     return this.provider === providers.mailru;
+  }
+
+  get isMTSLink() {
+    return this.provider === providers.mtslink;
   }
 
   get isVideo() {
@@ -1304,7 +1308,7 @@ class Plyr {
       // Vimeo does not always return
       setTimeout(doneOnce, 200);
     }
-    else if (this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu) {
+    else if (this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink) {
       // Destroy postMessage-based embed providers
       if (this.embed !== null && is.function(this.embed.destroy)) {
         this.embed.destroy();

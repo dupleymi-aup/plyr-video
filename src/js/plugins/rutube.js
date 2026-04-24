@@ -28,9 +28,37 @@ function parseId(url) {
   if (is.empty(url)) {
     return null;
   }
+
+  // Standard embed/video URLs: rutube.ru/play/embed/{id}, rutube.ru/video/{id}
   const regex = /rutube\.ru\/(?:play\/embed\/|video\/|embed\/)([a-f0-9]+)\/?/i;
   const match = url.match(regex);
-  return match && match[1] ? match[1] : url;
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  // Channel/video format: rutube.ru/channel/{channelId}/video/{videoId}
+  const channelRegex = /rutube\.ru\/channel\/\d+\/video\/([a-f0-9]+)\/?/i;
+  const channelMatch = url.match(channelRegex);
+  if (channelMatch && channelMatch[1]) {
+    return channelMatch[1];
+  }
+
+  // Short links: rutube.ru/r/{videoId}
+  const shortRegex = /rutube\.ru\/r\/([a-f0-9]+)\/?/i;
+  const shortMatch = url.match(shortRegex);
+  if (shortMatch && shortMatch[1]) {
+    return shortMatch[1];
+  }
+
+  // Alternative domain: play.rutube.ru/embed/{id}
+  const altRegex = /play\.rutube\.ru\/(?:embed|video)\/([a-f0-9]+)\/?/i;
+  const altMatch = url.match(altRegex);
+  if (altMatch && altMatch[1]) {
+    return altMatch[1];
+  }
+
+  // Fallback: treat the URL itself as video ID
+  return url;
 }
 
 const rutube = {
@@ -69,7 +97,7 @@ const rutube = {
       videoId,
       embedUrl,
       params,
-      allowedOrigins: ['https://rutube.ru', 'https://www.rutube.ru'],
+      allowedOrigins: ['https://rutube.ru', 'https://www.rutube.ru', 'https://play.rutube.ru'],
       handleMessage: rutube.handleMessage,
       label: 'Rutube',
     });
@@ -160,7 +188,7 @@ const rutube = {
 
       case 'player:error':
         player.media.error = {
-          code: data && data.type ? data.type : 1,
+          code: (data && data.type) ? data.type : 1,
           message: (data && data.message) || 'Rutube playback error',
         };
         triggerEvent.call(player, player.media, 'error');
