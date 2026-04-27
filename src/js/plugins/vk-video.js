@@ -6,6 +6,7 @@ import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, mapProviderErrorCode } from '../utils/provider-errors';
 import {
   assurePlaybackState,
   baseSetup,
@@ -13,11 +14,11 @@ import {
   defineMediaControls,
   defineMediaProperties,
   destroy,
-  fetchTitle,
   handleCaptionList,
   handleCueChange,
   handleCurrentTime,
 } from './base-embed';
+import fetch from '../utils/fetch';
 
 // VK quality HD values mapping
 const VK_HD_TO_RESOLUTION = { 1: 360, 2: 480, 3: 720, 4: 1080 };
@@ -56,7 +57,8 @@ function parseId(url) {
     return `oid=${zMatch[1]}&id=${zMatch[2]}`;
   }
 
-  return url;
+  // No valid VK video ID found in URL
+  return null;
 }
 
 // Parse VK postMessage format (objects/strings, not JSON { type, data })
@@ -83,7 +85,33 @@ const vk = {
   },
 
   getTitle(oid, videoId) {
-    fetchTitle.call(this, `https://vk.ru/al_video.php?act=show&al=1&video=${oid}_${videoId}`, 'VK Video');
+    // VK al_video.php returns HTML, not JSON — parse title from <meta og:title> or <title>
+    const player = this;
+    fetch(`https://vk.ru/al_video.php?act=show&al=1&video=${oid}_${videoId}`, 'text', false, 8000)
+      .then((html) => {
+        if (is.string(html)) {
+          // Try og:title meta tag first
+          const ogMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
+          if (ogMatch && ogMatch[1]) {
+            player.config.title = ogMatch[1];
+            ui.setTitle.call(player);
+            return;
+          }
+          // Fallback: extract from JSON payload embedded in HTML
+          const jsonMatch = html.match(/"title"\s*:\s*"([^"]+)"/);
+          if (jsonMatch && jsonMatch[1]) {
+            player.config.title = jsonMatch[1].replace(/\\u([0-9a-fA-F]{4})/g, (_, code) =>
+              String.fromCharCode(Number.parseInt(code, 16)),
+            );
+            ui.setTitle.call(player);
+          }
+        }
+      })
+      .catch((err) => {
+        if (player.config.debug) {
+          player.debug.warn('VK Video: Failed to fetch title:', err.message);
+        }
+      });
   },
 
   ready() {
@@ -295,10 +323,11 @@ const vk = {
 
       case 'vk_video:error':
       case 'error':
-        player.media.error = {
-          code: (data && data.code) || 1,
-          message: (data && data.message) || 'VK Video playback error',
-        };
+        player.media.error = createProviderError(
+          'vk',
+          mapProviderErrorCode('vk', (data && data.code) || 0),
+          (data && data.message) || undefined,
+        );
         triggerEvent.call(player, player.media, 'error');
         player.embed.state = 'error';
         break;

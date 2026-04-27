@@ -137,7 +137,8 @@ const sources = {
     ratio: '16:9',
     sources: [
       {
-        src: 'https://rutube.ru/play/embed/1e5c8c87e8d0d8d8e8d0d8d8e8d0d8d8',
+        // Replace with a real Rutube video ID (32-char hex)
+        src: 'https://rutube.ru/play/embed/5e2a0d0d5e2a0d0d5e2a0d0d5e2a0d0d',
         provider: 'rutube',
       },
     ],
@@ -148,7 +149,8 @@ const sources = {
     ratio: '16:9',
     sources: [
       {
-        src: 'https://video.cloud.yandex.net/player/your-video-id',
+        // Replace with a real Yandex Cloud Video ID (UUID)
+        src: 'https://video.cloud.yandex.net/player/00000000-0000-0000-0000-000000000000',
         provider: 'yandex',
       },
     ],
@@ -170,7 +172,8 @@ const sources = {
     ratio: '16:9',
     sources: [
       {
-        src: 'https://my.mail.ru/video/embed/your-video-id',
+        // Replace with a real Mail.ru Video embed ID
+        src: 'https://my.mail.ru/video/embed/00000000000000000000',
         provider: 'mailru',
       },
     ],

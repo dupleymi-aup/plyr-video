@@ -5,6 +5,7 @@
 import captions from '../captions';
 import controls from '../controls';
 import ui from '../ui';
+import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
 import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
@@ -45,16 +46,7 @@ function parseHash(url) {
   return found && found.length === 5 ? found[4] : null;
 }
 
-// Set playback state and trigger change (only on actual change)
-function assurePlaybackState(play) {
-  if (play && !this.embed.hasPlayed) {
-    this.embed.hasPlayed = true;
-  }
-  if (this.media.paused === play) {
-    this.media.paused = !play;
-    triggerEvent.call(this, this.media, play ? 'play' : 'pause');
-  }
-}
+// assurePlaybackState is now imported from utils/assure-playback-state
 
 const vimeo = {
   setup() {

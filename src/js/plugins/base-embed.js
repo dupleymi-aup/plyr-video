@@ -4,6 +4,7 @@
 
 import captions from '../captions';
 import ui from '../ui';
+import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
 import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
@@ -12,17 +13,8 @@ import sendCommand from '../utils/post-message';
 import { generateId } from '../utils/strings';
 import { setAspectRatio } from '../utils/style';
 
-// Set playback state and trigger change (only on actual change)
-export function assurePlaybackState(play) {
-  if (play && !this.embed.hasPlayed) {
-    this.embed.hasPlayed = true;
-  }
-
-  if (this.media.paused === play) {
-    this.media.paused = !play;
-    triggerEvent.call(this, this.media, play ? 'play' : 'pause');
-  }
-}
+// Re-export assurePlaybackState for providers that import from base-embed
+export { assurePlaybackState };
 
 // Validate origin against an allowlist
 export function isOriginAllowed(origin, allowed) {

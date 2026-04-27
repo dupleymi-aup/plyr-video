@@ -6,6 +6,7 @@ import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, errorCodes } from '../utils/provider-errors';
 import {
   assurePlaybackState,
   baseSetup,
@@ -273,10 +274,11 @@ const mailru = {
 
       case 'error':
       case 'player:error':
-        player.media.error = {
-          code: (data && data.code) ? data.code : 1,
-          message: (data && data.message) || 'Mail.ru Video playback error',
-        };
+        player.media.error = createProviderError(
+          'mailru',
+          errorCodes.API_ERROR,
+          (data && data.message) || undefined,
+        );
         triggerEvent.call(player, player.media, 'error');
         player.embed.state = 'error';
         break;

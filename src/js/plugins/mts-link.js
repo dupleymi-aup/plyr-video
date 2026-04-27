@@ -10,6 +10,7 @@ import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, errorCodes } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -18,6 +19,7 @@ import {
   destroy,
   fetchTitle,
   handleCaptionList,
+  handleChangeState,
   handleCueChange,
   handleCurrentQuality,
   handleCurrentTime,
@@ -52,7 +54,8 @@ function parseId(url) {
     return mtsMatch[1];
   }
 
-  return url;
+  // No valid MTS Link ID found in URL
+  return null;
 }
 
 const mtslink = {
@@ -81,6 +84,7 @@ const mtslink = {
 
     const embedUrl = `https://player.mts-link.ru/player/${videoId}`;
     const params = [];
+
     if (config.autoplay) params.push('autoplay=true');
     if (config.muted) params.push('muted=true');
     if (config.loop) params.push('loop=true');
@@ -124,43 +128,9 @@ const mtslink = {
         triggerEvent.call(player, player.media, 'timeupdate');
         break;
 
-      case 'player:changeState': {
-        if (!data || !data.state) break;
-        switch (data.state) {
-          case 'playing':
-            player.embed.hasPlayed = true;
-            if (player.media.paused) {
-              player.media.paused = false;
-              triggerEvent.call(player, player.media, 'play');
-              triggerEvent.call(player, player.media, 'playing');
-            }
-            break;
-          case 'pause':
-            if (!player.media.paused) {
-              player.media.paused = true;
-              triggerEvent.call(player, player.media, 'pause');
-            }
-            break;
-          case 'seeking':
-            player.media.seeking = true;
-            triggerEvent.call(player, player.media, 'seeking');
-            break;
-          case 'seeked':
-            player.media.seeking = false;
-            triggerEvent.call(player, player.media, 'seeked');
-            break;
-          case 'buffering':
-            triggerEvent.call(player, player.media, 'waiting');
-            break;
-          case 'completed':
-            player.media.paused = true;
-            triggerEvent.call(player, player.media, 'ended');
-            break;
-          default:
-            break;
-        }
+      case 'player:changeState':
+        handleChangeState(player, data);
         break;
-      }
 
       case 'player:durationChange':
         if (data && is.number(data.duration)) {
@@ -208,10 +178,11 @@ const mtslink = {
         break;
 
       case 'player:error':
-        player.media.error = {
-          code: (data && data.code) || 1,
-          message: (data && data.message) || 'MTS Link playback error',
-        };
+        player.media.error = createProviderError(
+          'mtslink',
+          errorCodes.API_ERROR,
+          (data && data.message) || undefined,
+        );
         triggerEvent.call(player, player.media, 'error');
         break;
 

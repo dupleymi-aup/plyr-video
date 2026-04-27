@@ -6,6 +6,7 @@ import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, errorCodes, mapProviderErrorCode } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -187,10 +188,11 @@ const rutube = {
         break;
 
       case 'player:error':
-        player.media.error = {
-          code: (data && data.type) ? data.type : 1,
-          message: (data && data.message) || 'Rutube playback error',
-        };
+        player.media.error = createProviderError(
+          'rutube',
+          mapProviderErrorCode('rutube', (data && data.type) || 0),
+          (data && data.message) || undefined,
+        );
         triggerEvent.call(player, player.media, 'error');
         break;
 

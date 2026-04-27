@@ -3,6 +3,7 @@
 // ==========================================================================
 
 import ui from '../ui';
+import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
 import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
@@ -21,19 +22,10 @@ function parseId(url) {
 
   const regex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regex);
-  return match && match[2] ? match[2] : url;
+  return match && match[2] ? match[2] : null;
 }
 
-// Set playback state and trigger change (only on actual change)
-function assurePlaybackState(play) {
-  if (play && !this.embed.hasPlayed) {
-    this.embed.hasPlayed = true;
-  }
-  if (this.media.paused === play) {
-    this.media.paused = !play;
-    triggerEvent.call(this, this.media, play ? 'play' : 'pause');
-  }
-}
+// assurePlaybackState is now imported from utils/assure-playback-state
 
 function getHost(config) {
   if (config.noCookie) {

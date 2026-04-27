@@ -6,6 +6,7 @@ import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, errorCodes } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -29,7 +30,7 @@ function parseId(url) {
   }
   const regex = /(?:video\.cloud\.yandex\.net\/player\/|cloud\.yandex\.ru.*video\/)([a-f0-9-]+)/i;
   const match = url.match(regex);
-  return match && match[1] ? match[1] : url;
+  return match && match[1] ? match[1] : null;
 }
 
 const yandex = {
@@ -148,10 +149,11 @@ const yandex = {
         break;
 
       case 'player:error':
-        player.media.error = {
-          code: data && data.type ? data.type : 1,
-          message: (data && data.message) || 'Yandex Cloud Video playback error',
-        };
+        player.media.error = createProviderError(
+          'yandex',
+          errorCodes.API_ERROR,
+          (data && data.message) || undefined,
+        );
         triggerEvent.call(player, player.media, 'error');
         break;
 

@@ -335,7 +335,7 @@ class Plyr {
   }
 
   get isEmbed() {
-    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink || this.isMTSLink;
+    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink;
   }
 
   get isYouTube() {
@@ -730,6 +730,19 @@ class Plyr {
       return 0.25;
     }
 
+    if (this.isYandexCloud) {
+      return 0.25;
+    }
+
+    if (this.isMTSLink) {
+      return 0.5;
+    }
+
+    if (this.isVK || this.isMailRu) {
+      // VK and Mail.ru don't support speed control via API
+      return 1;
+    }
+
     // https://stackoverflow.com/a/32320020/1191319
     return 0.0625;
   }
@@ -751,6 +764,19 @@ class Plyr {
     if (this.isRutube) {
       // Rutube supports up to 2x
       return 2;
+    }
+
+    if (this.isYandexCloud) {
+      return 2;
+    }
+
+    if (this.isMTSLink) {
+      return 2;
+    }
+
+    if (this.isVK || this.isMailRu) {
+      // VK and Mail.ru don't support speed control via API
+      return 1;
     }
 
     // https://stackoverflow.com/a/32320020/1191319
