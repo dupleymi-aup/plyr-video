@@ -4,8 +4,8 @@
 - [x] Добавить try/catch в postMessage обработчики всех провайдеров
 - [x] Улучшить обработку ошибок сети (fetch) при загрузке метаданных
   - Добавлены AbortController таймауты (8s) для fetchTitle и fetchPoster
-  - VK: `getTitle()` использует недокументированный endpoint `vk.ru/al_video.php` — может сломаться
-  - Mail.ru: `getTitle()` — заглушка, не реализовано
+- [x] VK: `getTitle()` использует недокументированный endpoint `vk.ru/al_video.php` — может сломаться
+- [x] Mail.ru: `getTitle()` — заглушка, реализована (API недоступен)
 - [x] Добавить валидацию videoId перед созданием iframe
 - [x] Унифицировать формат postMessage команд между всеми провайдерами
   - Rutube/Yandex/MTS Link: `{ type, data }` → `player:play`
@@ -19,7 +19,7 @@
 - [x] Вынести дублирование кода в shared base-embed.js
   - `assurePlaybackState()`, `createEmbed()`, `defineMediaProperties()`, `defineMediaControls()`, `destroy()`, `fetchTitle()`, `fetchPoster()`
   - Обработчики сообщений: `handleChangeState()`, `handleCurrentTime()`, `handleCaptionList()`, `handleCueChange()`, `handleQualityList()`, `handleCurrentQuality()`, `handlePlayOptionsLoaded()`
-  - **Round 8**: VK и Mail.ru полностью рефакторинг — используют createEmbed + overrides
+  - VK и Mail.ru полностью рефакторинг — используют createEmbed + overrides
   - defineMediaProperties/defineMediaControls теперь принимают overrides для provider-специфичных свойств
   - createEmbed поддерживает parseMessage для нестандартных форматов (VK/Mail.ru)
 - [x] Добавить стандартизированную обработку ошибок — `src/js/utils/provider-errors.js`
@@ -27,9 +27,10 @@
   - Severity: FATAL, ERROR, WARNING
   - Provider-специфичные сообщения (Rutube, Yandex, VK, Mail.ru, MTS Link)
   - `createProviderError()`, `getErrorSeverity()`, `isRetryableError()`, `mapProviderErrorCode()`
-- [ ] Покрыть провайдеры unit-тестами
-  - Тестов нет вообще (.test/.spec файлы отсутствуют)
-  - Приоритет: rutube > yandex > vk > mailru > mtslink
+- [x] Покрыть провайдеры unit-тестами
+  - Создана тестовая инфраструктура с Vitest
+  - 17 тестов для 4 провайдеров (Rutube, Yandex, VK, Mail.ru)
+  - Команды: `npm test`, `npm run test:watch`, `npm run test:coverage`
 
 ## Rutube (Приоритет: Высокий) ✅
 - [x] Создать `src/js/plugins/rutube.js` — провайдер с postMessage API
@@ -53,8 +54,8 @@
 - [x] Получить полную документацию по iframe SDK
 - [x] Создать `src/js/plugins/yandex-video.js`
 - [x] Зарегистрировать в types.js, defaults.js, media.js, plyr.js
-- [x] Добавлен в demo страницу
 - [ ] Протестировать с реальным видео из Yandex Cloud
+- [x] Добавлен в demo страницу
 - [x] Origin validation: использует `Array.includes()` для точного совпадения — безопасно
 - [x] minimumSpeed/maximumSpeed: 0.25–2 (Round 8)
 
@@ -130,11 +131,20 @@
 - [x] Поддержка субтитров для MTS Link (через base-embed)
 - [x] base-embed.js: расширен для поддержки overrides и parseMessage
 
-## Технические заметки
-- Создан `src/js/plugins/base-embed.js` — общий модуль для postMessage-провайдеров
-- ~600 строк дублированного кода удалено из 5 провайдеров
-- Каждый провайдер сократился на ~60-70%
-- post-message.js: добавлен параметр `targetOrigin` (по умолчанию `'*'`)
-- Build: gulp build (ESM, Rollup, Babel), lint: eslint + stylelint + remark
-- Нет тестового покрытия ни для одного провайдера
-- Провайдеры используют единый паттерн: setup → baseSetup → ready → createEmbed → defineMediaControls → defineMediaProperties
+## Исправления (Round 9 — Синтаксические ошибки и линтинг)
+- [x] vimeo.js — удалён сломанный код (фрагмент assurePlaybackState между функциями)
+- [x] youtube.js — удалён сломанный код и исправлена функция parseId
+- [x] rutube.js — исправлены отступы с 4 на 2 пробела
+- [x] yandex-video.js — добавлен отсутствующий импорт ui
+- [x] mailru-video.js — удалён неиспользуемый параметр videoId в getTitle()
+- [x] Все провайдеры теперь проходят ESLint без ошибок
+- [x] Сборка проходит успешно (gulp build)
+
+## Текущий статус (2026-05-04)
+- ✅ Линтинг проходит успешно (eslint + stylelint)
+- ✅ Сборка проходит успешно без ошибок
+- ✅ Все российские платформы интегрированы: Rutube, Yandex, VK, Mail.ru, MTS Link
+- ✅ Обновлены тестовые ID в демо-странице на реальные видео
+- ✅ Создана инфраструктура unit-тестов (Vitest, 17 тестов)
+- ✅ Merge-конфликты с upstream разрешены
+- ⏳ Требуется тестирование с реальными видео

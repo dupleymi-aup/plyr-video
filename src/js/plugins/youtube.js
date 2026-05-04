@@ -3,7 +3,6 @@
 // ==========================================================================
 
 import ui from '../ui';
-import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
 import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
@@ -13,6 +12,7 @@ import loadScript from '../utils/load-script';
 import { extend } from '../utils/objects';
 import { format, generateId } from '../utils/strings';
 import { roundAspectRatio, setAspectRatio } from '../utils/style';
+import { assurePlaybackState } from './base-embed';
 
 // Parse YouTube ID from URL
 function parseId(url) {
@@ -22,10 +22,8 @@ function parseId(url) {
 
   const regex = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
   const match = url.match(regex);
-  return match && match[2] ? match[2] : null;
+  return match && match[2] ? match[2] : url;
 }
-
-// assurePlaybackState is now imported from utils/assure-playback-state
 
 function getHost(config) {
   if (config.noCookie) {

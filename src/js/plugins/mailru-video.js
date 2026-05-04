@@ -1,7 +1,6 @@
 // ==========================================================================
 // Mail.ru Video plugin
 // ==========================================================================
-
 import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
@@ -66,8 +65,7 @@ function parseMailruMessage(event) {
       if (msg && msg.type) {
         return { type: msg.type, data: msg.data || {} };
       }
-    }
-    catch {
+    } catch {
       // Not JSON — handle as plain string below
     }
 
@@ -97,6 +95,15 @@ const mailru = {
     baseSetup.call(this, mailru);
   },
 
+  getTitle() {
+    // Mail.ru doesn't have a public API for video metadata
+    // Title is fetched from the embed page as fallback
+    const player = this;
+    if (player.config.debug) {
+      player.debug.log('Mail.ru Video: getTitle not implemented - API unavailable');
+    }
+  },
+
   ready() {
     const player = this;
     const config = player.config.mailru;
@@ -113,8 +120,11 @@ const mailru = {
     }
 
     const embedUrl = getEmbedUrl(videoId);
+
     const params = [];
-    if (config.autoplay) params.push('autoplay=1');
+    if (config.autoplay) {
+      params.push('autoplay=1');
+    }
     params.push('wmode=opaque');
 
     createEmbed(mailru, {

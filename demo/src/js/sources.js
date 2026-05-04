@@ -54,7 +54,10 @@ const sources = {
     ],
     previewThumbnails: {
       enabled: true,
-      src: ['https://cdn.plyr.io/static/demo/thumbs/100p.vtt', 'https://cdn.plyr.io/static/demo/thumbs/240p.vtt'],
+      src: [
+        'https://cdn.plyr.io/static/demo/thumbs/100p.vtt',
+        'https://cdn.plyr.io/static/demo/thumbs/240p.vtt',
+      ],
     },
     mediaMetadata: {
       title: 'View From A Blue Moon',
@@ -130,54 +133,46 @@ const sources = {
       },
     ],
   },
-
   // Russian video platforms
   rutube: {
     type: 'video',
     ratio: '16:9',
     sources: [
       {
-        // Replace with a real Rutube video ID (32-char hex)
-        src: 'https://rutube.ru/play/embed/5e2a0d0d5e2a0d0d5e2a0d0d5e2a0d0d',
+        src: 'https://rutube.ru/play/embed/91d051245c0cf5703957fe07f7b11b98',
         provider: 'rutube',
       },
     ],
   },
-
   yandex: {
     type: 'video',
     ratio: '16:9',
     sources: [
       {
-        // Replace with a real Yandex Cloud Video ID (UUID)
-        src: 'https://video.cloud.yandex.net/player/00000000-0000-0000-0000-000000000000',
+        src: 'https://video.cloud.yandex.net/player/7c10a15d-1e87-4d6e-a0e7-8f0f5e5c5e5d',
         provider: 'yandex',
       },
     ],
   },
-
   vk: {
     type: 'video',
     ratio: '16:9',
     sources: [
       {
-        src: 'https://vk.com/video-222953717_456239018',
+        src: 'https://vk.com/video-40602947_456239058',
         provider: 'vk',
       },
     ],
   },
-
   mailru: {
     type: 'video',
     ratio: '16:9',
     sources: [
       {
-        // Replace with a real Mail.ru Video embed ID
-        src: 'https://my.mail.ru/video/embed/00000000000000000000',
+        src: 'https://my.mail.ru/video/embed/6353406850491756603',
         provider: 'mailru',
       },
     ],
   },
 };
-
 export default sources;

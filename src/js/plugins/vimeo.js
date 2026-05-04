@@ -5,7 +5,6 @@
 import captions from '../captions';
 import controls from '../controls';
 import ui from '../ui';
-import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
 import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
@@ -14,6 +13,7 @@ import loadScript from '../utils/load-script';
 import { format, stripHTML } from '../utils/strings';
 import { roundAspectRatio, setAspectRatio } from '../utils/style';
 import { buildUrlParams } from '../utils/urls';
+import { assurePlaybackState } from './base-embed';
 
 // Parse Vimeo ID from URL
 function parseId(url) {
@@ -45,8 +45,6 @@ function parseHash(url) {
 
   return found && found.length === 5 ? found[4] : null;
 }
-
-// assurePlaybackState is now imported from utils/assure-playback-state
 
 const vimeo = {
   setup() {

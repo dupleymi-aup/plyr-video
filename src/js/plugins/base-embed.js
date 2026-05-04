@@ -1,7 +1,6 @@
 // ==========================================================================
 // Base embed provider — shared boilerplate for postMessage-based providers
 // ==========================================================================
-
 import captions from '../captions';
 import ui from '../ui';
 import { assurePlaybackState } from '../utils/assure-playback-state';
@@ -24,11 +23,9 @@ export function isOriginAllowed(origin, allowed) {
 // Shared setup: add embed class, set speed options, set aspect ratio
 export function baseSetup(provider) {
   const player = this;
-
   toggleClass(player.elements.wrapper, player.config.classNames.embed, true);
   player.options.speed = player.config.speed.options;
   setAspectRatio.call(player);
-
   provider.ready.call(player);
 }
 
@@ -45,14 +42,16 @@ export function createEmbed(provider, options) {
     initTimeoutMs = 15000,
     label = 'Embed',
   } = options;
-
   const config = player.config[provider] || {};
-  const id = generateId(player.provider);
 
+  const id = generateId(player.provider);
   const iframe = createElement('iframe');
   iframe.setAttribute('id', id);
   iframe.setAttribute('allowfullscreen', '');
-  iframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer');
+  iframe.setAttribute(
+    'allow',
+    'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer',
+  );
   iframe.setAttribute('src', `${embedUrl}?${params.join('&')}`);
 
   const wrapper = createElement('div', {
@@ -60,7 +59,6 @@ export function createEmbed(provider, options) {
     'data-poster': player.poster,
   });
   wrapper.appendChild(iframe);
-
   player.media = replaceElement(wrapper, player.media);
 
   player.embed = {
@@ -89,23 +87,19 @@ export function createEmbed(provider, options) {
     }
 
     let msg;
-
     // Custom parser for providers with non-standard message formats
     if (parseMessage) {
       msg = parseMessage(event);
       if (!msg) {
         return;
       }
-    }
-    else {
+    } else {
       // Default: parse JSON and expect { type, data } format
       try {
         msg = JSON.parse(event.data);
-      }
-      catch {
+      } catch {
         return;
       }
-
       if (!msg || !msg.type) {
         return;
       }
@@ -118,8 +112,7 @@ export function createEmbed(provider, options) {
 
     try {
       handleMessage.call(player, msg, event);
-    }
-    catch (err) {
+    } catch (err) {
       player.debug.error(`${label}: Error handling message:`, err);
     }
   };
@@ -228,12 +221,10 @@ export function defineMediaControls(player, overrides = {}) {
     assurePlaybackState.call(player, true);
     sendCommand(player, 'player:play');
   });
-
   player.media.pause = overrides.pause || (() => {
     assurePlaybackState.call(player, false);
     sendCommand(player, 'player:pause');
   });
-
   player.media.stop = overrides.stop || (() => {
     player.pause();
     player.currentTime = 0;
@@ -244,7 +235,6 @@ export function defineMediaControls(player, overrides = {}) {
 // Shared destroy
 export function destroy() {
   const player = this;
-
   if (player.embed) {
     clearTimeout(player.embed.initTimeout);
     clearTimeout(player.embed.optionsTimeout);
@@ -287,36 +277,29 @@ export function handleChangeState(player, data) {
   if (!data || !data.state) {
     return;
   }
-
   switch (data.state) {
     case 'playing':
       assurePlaybackState.call(player, true);
       triggerEvent.call(player, player.media, 'playing');
       break;
-
     case 'pause':
       assurePlaybackState.call(player, false);
       break;
-
     case 'seeking':
       player.media.seeking = true;
       triggerEvent.call(player, player.media, 'seeking');
       break;
-
     case 'seeked':
       player.media.seeking = false;
       triggerEvent.call(player, player.media, 'seeked');
       break;
-
     case 'buffering':
       triggerEvent.call(player, player.media, 'waiting');
       break;
-
     case 'completed':
       player.media.paused = true;
       triggerEvent.call(player, player.media, 'ended');
       break;
-
     default:
       break;
   }
@@ -326,12 +309,10 @@ export function handleChangeState(player, data) {
 export function handleCurrentTime(player, data) {
   if (data && is.number(data.time)) {
     player.embed.currentTime = data.time;
-
     if (is.number(data.duration) && player.media.duration !== data.duration) {
       player.media.duration = data.duration;
       triggerEvent.call(player, player.media, 'durationchange');
     }
-
     triggerEvent.call(player, player.media, 'timeupdate');
   }
 }
@@ -345,10 +326,8 @@ export function handleCaptionList(player, data) {
       label: track.label || track.name || track.language || 'Unknown',
       kind: track.kind || 'captions',
     }));
-
     player.media.textTracks = player.embed.captionTracks;
     player.debug.log('Available caption tracks:', player.embed.captionTracks.length);
-
     if (player.embed.captionTracks.length > 0) {
       captions.setup.call(player);
     }
@@ -399,7 +378,80 @@ export function handleCurrentQuality(player, data) {
     const quality = Number(data.quality || data);
     if (!Number.isNaN(quality)) {
       player.embed.currentQuality = quality;
-      triggerEvent.call(player, player.media, 'qualitychange', false, { quality });
+      triggerEvent.call(player, player.media, 'qualitychange', false, {
+        quality,
+      });
     }
+  }
+}
+
+// Shared default message handler for Rutube/Yandex-like providers
+export function handleDefaultMessage(msg, label) {
+  const player = this;
+  const { type, data } = msg;
+
+  switch (type) {
+    case 'player:ready':
+      player.debug.log(`${label} player ready`);
+      triggerEvent.call(player, player.media, 'timeupdate');
+      break;
+    case 'player:changeState':
+      handleChangeState(player, data);
+      break;
+    case 'player:durationChange':
+      if (data && is.number(data.duration)) {
+        player.media.duration = data.duration;
+        triggerEvent.call(player, player.media, 'durationchange');
+      }
+      break;
+    case 'player:currentTime':
+      handleCurrentTime(player, data);
+      break;
+    case 'player:volumeChange':
+      if (data && is.number(data.volume)) {
+        player.media.volume = data.volume;
+        triggerEvent.call(player, player.media, 'volumechange');
+      }
+      break;
+    case 'player:playbackSpeedChanged':
+      if (data && is.number(data.speed)) {
+        player.media.playbackRate = data.speed;
+        triggerEvent.call(player, player.media, 'ratechange');
+      }
+      break;
+    case 'player:qualityList':
+      handleQualityList(player, data);
+      break;
+    case 'player:currentQuality':
+      handleCurrentQuality(player, data);
+      break;
+    case 'player:playOptionsLoaded':
+      handlePlayOptionsLoaded(player, data);
+      break;
+    case 'player:captionList':
+      handleCaptionList(player, data);
+      break;
+    case 'player:cueChange':
+      handleCueChange(player, data);
+      break;
+    case 'player:captionChange':
+      player.debug.log(`${label} caption track changed`);
+      break;
+    case 'player:error':
+      player.media.error = {
+        code: (data && data.type) || 1,
+        message: (data && data.message) || `${label} playback error`,
+      };
+      triggerEvent.call(player, player.media, 'error');
+      break;
+    case 'player:playComplete':
+      player.media.paused = true;
+      triggerEvent.call(player, player.media, 'ended');
+      break;
+    default:
+      if (player.config.debug) {
+        player.debug.log(`${label} unknown event:`, type, data);
+      }
+      break;
   }
 }

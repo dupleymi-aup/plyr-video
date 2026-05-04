@@ -1,7 +1,6 @@
 // ==========================================================================
 // VK Video plugin
 // ==========================================================================
-
 import ui from '../ui';
 import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
@@ -85,19 +84,16 @@ const vk = {
   },
 
   getTitle(oid, videoId) {
-    // VK al_video.php returns HTML, not JSON — parse title from <meta og:title> or <title>
     const player = this;
     fetch(`https://vk.ru/al_video.php?act=show&al=1&video=${oid}_${videoId}`, 'text', false, 8000)
       .then((html) => {
         if (is.string(html)) {
-          // Try og:title meta tag first
           const ogMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
           if (ogMatch && ogMatch[1]) {
             player.config.title = ogMatch[1];
             ui.setTitle.call(player);
             return;
           }
-          // Fallback: extract from JSON payload embedded in HTML
           const jsonMatch = html.match(/"title"\s*:\s*"([^"]+)"/);
           if (jsonMatch && jsonMatch[1]) {
             player.config.title = jsonMatch[1].replace(/\\u([0-9a-fA-F]{4})/g, (_, code) =>
@@ -136,9 +132,6 @@ const vk = {
 
     const embedUrl = `https://vk.ru/video_ext.php?${videoParams}&js_api=1`;
     const params = [];
-    if (config.autoplay) params.push('autoplay=1');
-    if (config.hd) params.push(`hd=${config.hd}`);
-    if (config.startTime) params.push(`t=${config.startTime}`);
 
     createEmbed(vk, {
       player,
@@ -190,7 +183,6 @@ const vk = {
           return speed;
         },
         set(input) {
-          // VK doesn't support speed control via API
           speed = input;
           triggerEvent.call(player, player.media, 'ratechange');
         },
