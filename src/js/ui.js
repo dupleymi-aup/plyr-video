@@ -30,7 +30,6 @@ const ui = {
   // Setup the UI
   build() {
     // Re-attach media element listeners
-    // TODO: Use event bubbling?
     this.listeners.media();
 
     // Don't setup interface if no support
