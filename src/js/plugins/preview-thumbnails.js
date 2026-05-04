@@ -361,6 +361,21 @@ class PreviewThumbnails {
   };
 
   showImageAtCurrentTime = () => {
+    // Find the desired thumbnail index
+    const thumbNum = this.thumbnails[0].frames.findIndex(
+      frame => this.seekTime >= frame.startTime && this.seekTime <= frame.endTime,
+    );
+    const hasThumb = thumbNum >= 0;
+
+    // No matching thumb found
+    if (!hasThumb) {
+      this.toggleThumbContainer(false);
+      if (this.mouseDown) {
+        this.toggleScrubbingContainer(false);
+      }
+      return;
+    }
+
     if (this.mouseDown) {
       this.setScrubbingContainerSize();
     }
@@ -368,22 +383,11 @@ class PreviewThumbnails {
       this.setThumbContainerSizeAndPos();
     }
 
-    // Find the desired thumbnail index
-    // TODO: Handle a video longer than the thumbs where thumbNum is null
-    const thumbNum = this.thumbnails[0].frames.findIndex(
-      frame => this.seekTime >= frame.startTime && this.seekTime <= frame.endTime,
-    );
-    const hasThumb = thumbNum >= 0;
     let qualityIndex = 0;
 
     // Show the thumb container if we're not scrubbing
     if (!this.mouseDown) {
       this.toggleThumbContainer(hasThumb);
-    }
-
-    // No matching thumb found
-    if (!hasThumb) {
-      return;
     }
 
     // Check to see if we've already downloaded higher quality versions of this image
