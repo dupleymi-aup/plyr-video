@@ -25,10 +25,9 @@
   "exports": {
     ".": {
       "types": "./src/js/plyr.d.ts",
-      "import": "./dist/plyr.mjs",
-      "require": "./dist/plyr.js",
       "browser": "./dist/plyr.min.js",
-      "default": "./dist/plyr.js"
+      "import": "./dist/plyr.mjs",
+      "require": "./dist/plyr.js"
     },
     "./dist/plyr.css": "./dist/plyr.css",
     "./css": "./dist/plyr.css",
@@ -39,9 +38,9 @@
   "browserslist": "> 1%",
   "scripts": {
     "build": "gulp build",
-    "lint": "stylelint **/*.scss && eslint src demo && pnpm remark",
-    "lint:fix": "stylelint **/*.scss --fix && eslint src demo --fix",
-    "remark": "remark -f --use 'validate-links=repository:\"QuadDarv1ne/plyr-video\"' '{,!(node_modules),.?**/}*.md'",
+    "lint": "stylelint **/*.scss && eslint src demo && npm run remark",
+    "lint:fix": "stylelint **/*.scss --fix && eslint src demo --fix && npm run remark -- --fix",
+    "remark": "remark '{,!(node_modules),.?**/}*.md'",
     "deploy": "pnpm run lint && gulp prepare && gulp build && gulp deploy",
     "spellcheck": "cspell \"**/*.{js,md,scss,json}\" --no-must-find-files",
     "start": "gulp",
