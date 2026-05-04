@@ -36,9 +36,11 @@ class Fullscreen {
       this.player,
       document,
       this.prefix === 'ms' ? 'MSFullscreenChange' : `${this.prefix}fullscreenchange`,
-      () => {
-        // TODO: Filter for target??
-        this.onChange();
+      (event) => {
+        // Filter for target: check if the fullscreen change is for our player's container
+        if (this.player.elements.container.contains(event.target)) {
+          this.onChange();
+        }
       },
     );
 
