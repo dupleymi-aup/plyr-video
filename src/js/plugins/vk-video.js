@@ -3,6 +3,7 @@
 // ==========================================================================
 import ui from '../ui';
 import { triggerEvent } from '../utils/events';
+import fetch from '../utils/fetch';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
 import { createProviderError, mapProviderErrorCode } from '../utils/provider-errors';
@@ -17,7 +18,6 @@ import {
   handleCueChange,
   handleCurrentTime,
 } from './base-embed';
-import fetch from '../utils/fetch';
 
 // VK quality HD values mapping
 const VK_HD_TO_RESOLUTION = { 1: 360, 2: 480, 3: 720, 4: 1080 };
@@ -97,8 +97,7 @@ const vk = {
           const jsonMatch = html.match(/"title"\s*:\s*"([^"]+)"/);
           if (jsonMatch && jsonMatch[1]) {
             player.config.title = jsonMatch[1].replace(/\\u([0-9a-fA-F]{4})/g, (_, code) =>
-              String.fromCharCode(Number.parseInt(code, 16)),
-            );
+              String.fromCharCode(Number.parseInt(code, 16)));
             ui.setTitle.call(player);
           }
         }

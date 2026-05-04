@@ -4,7 +4,6 @@
 import ui from '../ui';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
-import { createProviderError, mapProviderErrorCode } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -132,7 +131,7 @@ const rutube = {
   },
 
   handleMessage(msg) {
-    handleDefaultMessage.call(this, msg, 'Rutube');
+    handleDefaultMessage.call(this, msg, 'Rutube', 'rutube');
   },
 
   destroy() {

@@ -9,6 +9,7 @@ import { triggerEvent } from '../utils/events';
 import fetch from '../utils/fetch';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
+import { createProviderError, mapProviderErrorCode } from '../utils/provider-errors';
 import { generateId } from '../utils/strings';
 import { setAspectRatio } from '../utils/style';
 
@@ -93,11 +94,13 @@ export function createEmbed(provider, options) {
       if (!msg) {
         return;
       }
-    } else {
+    }
+    else {
       // Default: parse JSON and expect { type, data } format
       try {
         msg = JSON.parse(event.data);
-      } catch {
+      }
+      catch {
         return;
       }
       if (!msg || !msg.type) {
@@ -112,7 +115,8 @@ export function createEmbed(provider, options) {
 
     try {
       handleMessage.call(player, msg, event);
-    } catch (err) {
+    }
+    catch (err) {
       player.debug.error(`${label}: Error handling message:`, err);
     }
   };
@@ -386,7 +390,7 @@ export function handleCurrentQuality(player, data) {
 }
 
 // Shared default message handler for Rutube/Yandex-like providers
-export function handleDefaultMessage(msg, label) {
+export function handleDefaultMessage(msg, label, providerName) {
   const player = this;
   const { type, data } = msg;
 
@@ -438,10 +442,19 @@ export function handleDefaultMessage(msg, label) {
       player.debug.log(`${label} caption track changed`);
       break;
     case 'player:error':
-      player.media.error = {
-        code: (data && data.type) || 1,
-        message: (data && data.message) || `${label} playback error`,
-      };
+      if (providerName) {
+        player.media.error = createProviderError(
+          providerName,
+          mapProviderErrorCode(providerName, (data && data.type) || 0),
+          (data && data.message) || undefined,
+        );
+      }
+      else {
+        player.media.error = {
+          code: (data && data.type) || 1,
+          message: (data && data.message) || `${label} playback error`,
+        };
+      }
       triggerEvent.call(player, player.media, 'error');
       break;
     case 'player:playComplete':

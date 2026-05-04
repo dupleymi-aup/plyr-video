@@ -15,9 +15,9 @@ const isWebKit = 'WebkitAppearance' in document.documentElement.style && !isEdge
 const isIPhone = /iPhone|iPod/i.test(navigator.userAgent);
 
 // iPadOS 13+ reports as MacIntel with multitouch — detect iPad and iPadOS
-const isIPadOS =
-  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
-  /iPad/i.test(navigator.userAgent);
+const isIPadOS
+  = (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+    || /iPad/i.test(navigator.userAgent);
 
 const isIos = isIPhone || isIPadOS;
 

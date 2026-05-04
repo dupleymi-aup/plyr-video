@@ -4,7 +4,6 @@
 import ui from '../ui';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
-import { createProviderError, errorCodes } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -96,7 +95,7 @@ const yandex = {
   },
 
   handleMessage(msg) {
-    handleDefaultMessage.call(this, msg, 'Yandex Cloud Video');
+    handleDefaultMessage.call(this, msg, 'Yandex Cloud Video', 'yandex');
   },
 
   destroy() {

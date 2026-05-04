@@ -5,12 +5,9 @@
 // Video player embed: https://player.mts-link.ru/player/{videoId}
 // Uses postMessage API with { type, data } format (similar to Rutube/Yandex)
 // ==========================================================================
-
 import ui from '../ui';
-import { triggerEvent } from '../utils/events';
 import is from '../utils/is';
 import sendCommand from '../utils/post-message';
-import { createProviderError, errorCodes } from '../utils/provider-errors';
 import {
   baseSetup,
   createEmbed,
@@ -18,13 +15,7 @@ import {
   defineMediaProperties,
   destroy,
   fetchTitle,
-  handleCaptionList,
-  handleChangeState,
-  handleCueChange,
-  handleCurrentQuality,
-  handleCurrentTime,
-  handlePlayOptionsLoaded,
-  handleQualityList,
+  handleDefaultMessage,
 } from './base-embed';
 
 // Parse MTS Link Video ID from URL
@@ -83,8 +74,8 @@ const mtslink = {
     }
 
     const embedUrl = `https://player.mts-link.ru/player/${videoId}`;
-    const params = [];
 
+    const params = [];
     if (config.autoplay) params.push('autoplay=true');
     if (config.muted) params.push('muted=true');
     if (config.loop) params.push('loop=true');
@@ -119,84 +110,7 @@ const mtslink = {
   },
 
   handleMessage(msg) {
-    const player = this;
-    const { type, data } = msg;
-
-    switch (type) {
-      case 'player:ready':
-        player.debug.log('MTS Link player ready');
-        triggerEvent.call(player, player.media, 'timeupdate');
-        break;
-
-      case 'player:changeState':
-        handleChangeState(player, data);
-        break;
-
-      case 'player:durationChange':
-        if (data && is.number(data.duration)) {
-          player.media.duration = data.duration;
-          triggerEvent.call(player, player.media, 'durationchange');
-        }
-        break;
-
-      case 'player:currentTime':
-        handleCurrentTime(player, data);
-        break;
-
-      case 'player:volumeChange':
-        if (data && is.number(data.volume)) {
-          player.media.volume = data.volume;
-          triggerEvent.call(player, player.media, 'volumechange');
-        }
-        break;
-
-      case 'player:playbackSpeedChanged':
-        if (data && is.number(data.speed)) {
-          player.media.playbackRate = data.speed;
-          triggerEvent.call(player, player.media, 'ratechange');
-        }
-        break;
-
-      case 'player:qualityList':
-        handleQualityList(player, data);
-        break;
-
-      case 'player:currentQuality':
-        handleCurrentQuality(player, data);
-        break;
-
-      case 'player:playOptionsLoaded':
-        handlePlayOptionsLoaded(player, data);
-        break;
-
-      case 'player:captionList':
-        handleCaptionList(player, data);
-        break;
-
-      case 'player:cueChange':
-        handleCueChange(player, data);
-        break;
-
-      case 'player:error':
-        player.media.error = createProviderError(
-          'mtslink',
-          errorCodes.API_ERROR,
-          (data && data.message) || undefined,
-        );
-        triggerEvent.call(player, player.media, 'error');
-        break;
-
-      case 'player:playComplete':
-        player.media.paused = true;
-        triggerEvent.call(player, player.media, 'ended');
-        break;
-
-      default:
-        if (player.config.debug) {
-          player.debug.log('MTS Link unknown event:', type, data);
-        }
-        break;
-    }
+    handleDefaultMessage.call(this, msg, 'MTS Link', 'mtslink');
   },
 
   destroy() {

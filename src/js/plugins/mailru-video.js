@@ -65,7 +65,8 @@ function parseMailruMessage(event) {
       if (msg && msg.type) {
         return { type: msg.type, data: msg.data || {} };
       }
-    } catch {
+    }
+    catch {
       // Not JSON — handle as plain string below
     }
 

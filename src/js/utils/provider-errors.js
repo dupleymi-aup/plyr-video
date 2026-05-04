@@ -186,6 +186,40 @@ export function mapProviderErrorCode(provider, providerCode) {
     }
   }
 
+  // Mail.ru error codes
+  if (provider === 'mailru') {
+    switch (providerCode) {
+      case 1:
+      case 'not_found':
+        return errorCodes.MEDIA_NOT_FOUND;
+      case 2:
+      case 'removed':
+        return errorCodes.MEDIA_REMOVED;
+      case 3:
+      case 'private':
+        return errorCodes.MEDIA_PRIVATE;
+      default:
+        return errorCodes.UNKNOWN;
+    }
+  }
+
+  // MTS Link error codes
+  if (provider === 'mtslink') {
+    switch (providerCode) {
+      case 1:
+      case 'not_found':
+        return errorCodes.MEDIA_NOT_FOUND;
+      case 2:
+      case 'private':
+        return errorCodes.MEDIA_PRIVATE;
+      case 3:
+      case 'init_failed':
+        return errorCodes.PLAYER_INIT_FAILED;
+      default:
+        return errorCodes.UNKNOWN;
+    }
+  }
+
   return errorCodes.UNKNOWN;
 }
 
