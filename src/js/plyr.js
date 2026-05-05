@@ -96,11 +96,7 @@ class Plyr {
     };
 
     // Captions
-    this.captions = {
-      active: null,
-      currentTrack: -1,
-      meta: new WeakMap(),
-    };
+    this.captions = new Captions(this);
 
     // Fullscreen
     this.fullscreen = {
@@ -977,7 +973,7 @@ class Plyr {
    * @param {boolean} input - Whether to enable captions
    */
   toggleCaptions(input) {
-    captions.toggle.call(this, input, false);
+    this.captions.toggle(input, false);
   }
 
   /**
@@ -985,8 +981,8 @@ class Plyr {
    * @param {number} input - Caption index
    */
   set currentTrack(input) {
-    captions.set.call(this, input, false);
-    captions.setup.call(this);
+    this.captions.set(input, false);
+    this.captions.setup();
   }
 
   /**
@@ -1003,14 +999,15 @@ class Plyr {
    * @param {string} input - Two character ISO language code (e.g. EN, FR, PT, etc)
    */
   set language(input) {
-    captions.setLanguage.call(this, input, false);
+    this.captions.setLanguage(input, false);
   }
 
   /**
    * Get the current track's language
    */
   get language() {
-    return (captions.getCurrentTrack.call(this) || {}).language;
+    const track = this.captions.getCurrentTrack();
+    return track ? track.language : '';
   }
 
   /**
