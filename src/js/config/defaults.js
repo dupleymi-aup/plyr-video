@@ -217,6 +217,9 @@ const defaults = {
     mailru: {
       embed: 'https://my.mail.ru/video/embed/{0}?wmode=opaque',
     },
+    mtslink: {
+      embed: 'https://player.mts-link.ru/player/{0}',
+    },
     googleIMA: {
       sdk: 'https://imasdk.googleapis.com/js/sdkloader/ima3.js',
     },
@@ -486,6 +489,18 @@ const defaults = {
     // Custom settings from Plyr
     customControls: true,
     autoplay: false,
+  },
+
+  // MTS Link plugin
+  mtslink: {
+    // Custom settings from Plyr
+    customControls: true,
+    autoplay: false,
+    muted: false,
+    loop: false,
+    startTime: null,
+    skinColor: null,
+    token: null,
   },
 
   // Media Metadata

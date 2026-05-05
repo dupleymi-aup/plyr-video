@@ -27,7 +27,8 @@
       "types": "./src/js/plyr.d.ts",
       "browser": "./dist/plyr.min.js",
       "import": "./dist/plyr.mjs",
-      "require": "./dist/plyr.js"
+      "require": "./dist/plyr.js",
+      "default": "./dist/plyr.js"
     },
     "./dist/plyr.css": "./dist/plyr.css",
     "./css": "./dist/plyr.css",
@@ -38,9 +39,9 @@
   "browserslist": "> 1%",
   "scripts": {
     "build": "gulp build",
-    "lint": "stylelint **/*.scss && eslint src demo && npm run remark",
-    "lint:fix": "stylelint **/*.scss --fix && eslint src demo --fix && npm run remark -- --fix",
-    "remark": "remark '{,!(node_modules),.?**/}*.md'",
+    "lint": "stylelint **/*.scss && eslint src demo && pnpm remark",
+    "lint:fix": "stylelint **/*.scss --fix && eslint src demo --fix",
+    "remark": "remark -f '{,!(node_modules),.?**/}*.md'",
     "deploy": "pnpm run lint && gulp prepare && gulp build && gulp deploy",
     "spellcheck": "cspell \"**/*.{js,md,scss,json}\" --no-must-find-files",
     "start": "gulp",
@@ -68,7 +69,7 @@
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
-    "@vitest/coverage-v8": "^4.1.5",
+    "@vitest/coverage-v8": "^3.2.4",
     "autoprefixer": "^10.4.21",
     "aws-sdk": "^2.1692.0",
     "babel-eslint": "^10.1.0",

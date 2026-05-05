@@ -54,7 +54,10 @@ const sources = {
     ],
     previewThumbnails: {
       enabled: true,
-      src: ['https://cdn.plyr.io/static/demo/thumbs/100p.vtt', 'https://cdn.plyr.io/static/demo/thumbs/240p.vtt'],
+      src: [
+        'https://cdn.plyr.io/static/demo/thumbs/100p.vtt',
+        'https://cdn.plyr.io/static/demo/thumbs/240p.vtt',
+      ],
     },
     mediaMetadata: {
       title: 'View From A Blue Moon',
@@ -172,5 +175,4 @@ const sources = {
     ],
   },
 };
-
 export default sources;

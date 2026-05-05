@@ -10,6 +10,7 @@ export const providers = {
   yandex: 'yandex',
   vk: 'vk',
   mailru: 'mailru',
+  mtslink: 'mtslink',
 };
 
 export const types = {
@@ -32,8 +33,13 @@ export function getProviderByUrl(url) {
     return providers.vimeo;
   }
 
-  // Rutube
-  if (/^https?:\/\/(?:www\.)?rutube\.ru\/(?:play\/embed\/|video\/|embed\/)/.test(url)) {
+  // Rutube — supports: rutube.ru/video/, rutube.ru/play/embed/, rutube.ru/embed/,
+  // rutube.ru/channel/{id}/video/, rutube.ru/r/{id}, play.rutube.ru/
+  if (
+    /^https?:\/\/(?:www\.)?(?:rutube\.ru\/(?:play\/embed\/|video\/|embed\/|channel\/\d+\/video\/|r\/)|play\.rutube\.ru\/)/.test(
+      url,
+    )
+  ) {
     return providers.rutube;
   }
 
@@ -42,14 +48,21 @@ export function getProviderByUrl(url) {
     return providers.yandex;
   }
 
-  // VK Video
-  if (/^https?:\/\/(?:vk\.com\/video|vk\.ru\/video)/.test(url)) {
+  // VK Video — supports: vk.com/video, vk.ru/video, vk.com/clip, vk.ru/clip,
+  // vk.com/video_ext.php, vk.ru/video_ext.php
+  // Note: 'video' alternative covers 'video_ext.php' prefix as well
+  if (/^https?:\/\/(?:vk\.com|vk\.ru)\/(?:video|clip)/.test(url)) {
     return providers.vk;
   }
 
   // Mail.ru Video
   if (/^https?:\/\/(?:my\.mail\.ru\/video|api\.video\.mail\.ru\/videos)/.test(url)) {
     return providers.mailru;
+  }
+
+  // MTS Link
+  if (/^https?:\/\/(?:player\.mts-link\.ru|mts-link\.ru\/(?:video|recordings)|player\.mts\.ru)/.test(url)) {
+    return providers.mtslink;
   }
 
   return null;

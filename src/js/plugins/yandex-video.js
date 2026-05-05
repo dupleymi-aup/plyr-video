@@ -22,7 +22,7 @@ function parseId(url) {
 
   const regex = /(?:video\.cloud\.yandex\.net\/player\/|cloud\.yandex\.ru.*video\/)([a-f0-9-]+)/i;
   const match = url.match(regex);
-  return match && match[1] ? match[1] : url;
+  return match && match[1] ? match[1] : null;
 }
 
 const yandex = {
@@ -37,30 +37,27 @@ const yandex = {
   ready() {
     const player = this;
     const config = player.config.yandex;
-    let source = player.media.getAttribute('src');
 
+    let source = player.media.getAttribute('src');
     if (is.empty(source)) {
       source = player.media.getAttribute(player.config.attributes.embed.id);
     }
 
     const videoId = parseId(source);
-
     if (is.empty(videoId)) {
       player.debug.error('Yandex Cloud Video: No valid video ID found');
       return;
     }
 
     const embedUrl = `https://video.cloud.yandex.net/player/${videoId}`;
-    const params = [];
 
+    const params = [];
     if (config.autoplay) {
       params.push('autoplay=true');
     }
-
     if (config.muted) {
       params.push('muted=true');
     }
-
     if (config.loop) {
       params.push('loop=true');
     }
@@ -98,7 +95,7 @@ const yandex = {
   },
 
   handleMessage(msg) {
-    handleDefaultMessage.call(this, msg, 'Yandex Cloud Video');
+    handleDefaultMessage.call(this, msg, 'Yandex Cloud Video', 'yandex');
   },
 
   destroy() {

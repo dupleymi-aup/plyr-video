@@ -331,7 +331,7 @@ class Plyr {
   }
 
   get isEmbed() {
-    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu;
+    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink;
   }
 
   get isYouTube() {
@@ -356,6 +356,10 @@ class Plyr {
 
   get isMailRu() {
     return this.provider === providers.mailru;
+  }
+
+  get isMTSLink() {
+    return this.provider === providers.mtslink;
   }
 
   get isVideo() {
@@ -722,6 +726,19 @@ class Plyr {
       return 0.25;
     }
 
+    if (this.isYandexCloud) {
+      return 0.25;
+    }
+
+    if (this.isMTSLink) {
+      return 0.5;
+    }
+
+    if (this.isVK || this.isMailRu) {
+      // VK and Mail.ru don't support speed control via API
+      return 1;
+    }
+
     // https://stackoverflow.com/a/32320020/1191319
     return 0.0625;
   }
@@ -743,6 +760,19 @@ class Plyr {
     if (this.isRutube) {
       // Rutube supports up to 2x
       return 2;
+    }
+
+    if (this.isYandexCloud) {
+      return 2;
+    }
+
+    if (this.isMTSLink) {
+      return 2;
+    }
+
+    if (this.isVK || this.isMailRu) {
+      // VK and Mail.ru don't support speed control via API
+      return 1;
     }
 
     // https://stackoverflow.com/a/32320020/1191319
@@ -1301,7 +1331,7 @@ class Plyr {
       // Vimeo does not always return
       setTimeout(doneOnce, 200);
     }
-    else if (this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu) {
+    else if (this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink) {
       // Destroy postMessage-based embed providers
       if (this.embed !== null && is.function(this.embed.destroy)) {
         this.embed.destroy();

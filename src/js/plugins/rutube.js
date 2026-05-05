@@ -21,9 +21,36 @@ function parseId(url) {
     return null;
   }
 
+  // Standard embed/video URLs: rutube.ru/play/embed/{id}, rutube.ru/video/{id}
   const regex = /rutube\.ru\/(?:play\/embed\/|video\/|embed\/)([a-f0-9]+)\/?/i;
   const match = url.match(regex);
-  return match && match[1] ? match[1] : url;
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  // Channel/video format: rutube.ru/channel/{channelId}/video/{videoId}
+  const channelRegex = /rutube\.ru\/channel\/\d+\/video\/([a-f0-9]+)\/?/i;
+  const channelMatch = url.match(channelRegex);
+  if (channelMatch && channelMatch[1]) {
+    return channelMatch[1];
+  }
+
+  // Short links: rutube.ru/r/{videoId}
+  const shortRegex = /rutube\.ru\/r\/([a-f0-9]+)\/?/i;
+  const shortMatch = url.match(shortRegex);
+  if (shortMatch && shortMatch[1]) {
+    return shortMatch[1];
+  }
+
+  // Alternative domain: play.rutube.ru/embed/{id}
+  const altRegex = /play\.rutube\.ru\/(?:embed|video)\/([a-f0-9]+)\/?/i;
+  const altMatch = url.match(altRegex);
+  if (altMatch && altMatch[1]) {
+    return altMatch[1];
+  }
+
+  // Fallback: treat the URL itself as video ID
+  return url;
 }
 
 const rutube = {
@@ -38,34 +65,30 @@ const rutube = {
   ready() {
     const player = this;
     const config = player.config.rutube;
-    let source = player.media.getAttribute('src');
 
+    let source = player.media.getAttribute('src');
     if (is.empty(source)) {
       source = player.media.getAttribute(player.config.attributes.embed.id);
     }
 
     const videoId = parseId(source);
-
     if (is.empty(videoId)) {
       player.debug.error('Rutube: No valid video ID found');
       return;
     }
 
     const embedUrl = `https://rutube.ru/play/embed/${videoId}/`;
-    const params = [];
 
+    const params = [];
     if (config.autoplay) {
       params.push('autoplay=true');
     }
-
     if (config.quality) {
       params.push(`q=${config.quality}`);
     }
-
     if (config.skinColor) {
       params.push(`skinColor=${config.skinColor}`);
     }
-
     if (config.stopTime) {
       params.push(`stopTime=${config.stopTime}`);
     }
@@ -75,7 +98,7 @@ const rutube = {
       videoId,
       embedUrl,
       params,
-      allowedOrigins: ['https://rutube.ru', 'https://www.rutube.ru'],
+      allowedOrigins: ['https://rutube.ru', 'https://www.rutube.ru', 'https://play.rutube.ru'],
       handleMessage: rutube.handleMessage,
       label: 'Rutube',
     });
@@ -108,7 +131,7 @@ const rutube = {
   },
 
   handleMessage(msg) {
-    handleDefaultMessage.call(this, msg, 'Rutube');
+    handleDefaultMessage.call(this, msg, 'Rutube', 'rutube');
   },
 
   destroy() {
