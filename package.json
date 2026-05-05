@@ -41,7 +41,7 @@
     "build": "gulp build",
     "lint": "stylelint **/*.scss && eslint src demo && pnpm remark",
     "lint:fix": "stylelint **/*.scss --fix && eslint src demo --fix",
-    "remark": "remark -f --use 'validate-links=repository:\"QuadDarv1ne/plyr-video\"' '{,!(node_modules),.?**/}*.md'",
+    "remark": "remark -f '{,!(node_modules),.?**/}*.md'",
     "deploy": "pnpm run lint && gulp prepare && gulp build && gulp deploy",
     "spellcheck": "cspell \"**/*.{js,md,scss,json}\" --no-must-find-files",
     "start": "gulp",
