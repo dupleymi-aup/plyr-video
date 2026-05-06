@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестирование российских видеохостингов</title>
+    <link rel="stylesheet" href="dist/plyr.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .video-container {
+            margin: 20px 0;
+        }
+        h1, h2 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Тестирование российских видеохостингов</h1>
+    
+    <div class="video-container">
+        <h2>Rutube</h2>
+        <div id="player-rutube" data-plyr-provider="rutube" data-plyr-embed-id="1e5c8c87e8d0d8d8e8d0d8d8e8d0d8d8"></div>
+    </div>
+    
+    <div class="video-container">
+        <h2>Yandex Cloud Video</h2>
+        <div id="player-yandex" data-plyr-provider="yandex" data-plyr-embed-id="your-video-id"></div>
+    </div>
+    
+    <div class="video-container">
+        <h2>VK Video</h2>
+        <div id="player-vk" data-plyr-provider="vk" data-plyr-embed-id="video-161895864_456241478"></div>
+    </div>
+    
+    <div class="video-container">
+        <h2>Mail.ru Video</h2>
+        <div id="player-mailru" data-plyr-provider="mailru" data-plyr-embed-id="1234567890"></div>
+    </div>
+    
+    <div class="video-container">
+        <h2>MTS Link</h2>
+        <div id="player-mts" data-plyr-provider="mts" data-plyr-embed-id="your-mts-video-id"></div>
+    </div>
+
+    <script src="dist/plyr.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const players = document.querySelectorAll('[id^="player-"]');
+            players.forEach(playerElement => {
+                new Plyr(playerElement);
+            });
+        });
+    </script>
+</body>
+</html>
