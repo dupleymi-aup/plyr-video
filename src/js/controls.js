@@ -905,6 +905,12 @@ const controls = {
       case 'captions':
         return captions.getLabel.call(this);
 
+      case 'translation':
+        return this.captions.translation.active ? i18n.get('translateEnabled', this.config) : i18n.get('translateDisabled', this.config);
+
+      case 'transcription':
+        return this.transcription.active ? i18n.get('transcriptionEnabled', this.config) : i18n.get('transcriptionDisabled', this.config);
+
       default:
         return null;
     }
@@ -1110,6 +1116,123 @@ const controls = {
     controls.updateSetting.call(this, type, list);
   },
 
+  // Set a list of available translation languages
+  setTranslationMenu() {
+    // Menu required
+    if (!is.element(this.elements.settings.panels.translation)) {
+      return;
+    }
+
+    const type = 'translation';
+    const list = this.elements.settings.panels.translation.querySelector('[role="menu"]');
+    const languages = this.config.translation.languages;
+
+    // Toggle the pane and tab
+    const toggle = !is.empty(languages) && languages.length > 0;
+    controls.toggleMenuButton.call(this, type, toggle);
+
+    // Empty the menu
+    emptyElement(list);
+
+    // Check if we need to toggle the parent
+    controls.checkMenu.call(this);
+
+    // If we're hiding, nothing more to do
+    if (!toggle) {
+      return;
+    }
+
+    // Generate options data
+    const options = languages.map((language, _value) => ({
+      value: language,
+      checked: this.captions.translation.active && this.captions.translation.language === language,
+      title: language.toUpperCase(),
+      badge: language.toUpperCase() && controls.createBadge.call(this, language.toUpperCase()),
+      list,
+      type: 'language',
+    }));
+
+    // Add the "Off" option to turn off translation
+    options.unshift({
+      value: 'off',
+      checked: !this.captions.translation.active,
+      title: i18n.get('disabled', this.config),
+      list,
+      type: 'language',
+    });
+
+    // Generate options
+    options.forEach(controls.createMenuItem.bind(this));
+
+    controls.updateSetting.call(this, type, list);
+  },
+
+  // Set a list of available transcription languages
+  setTranscriptionMenu() {
+    // Menu required
+    if (!is.element(this.elements.settings.panels.transcription)) {
+      return;
+    }
+
+    const type = 'transcription';
+    const list = this.elements.settings.panels.transcription.querySelector('[role="menu"]');
+    // For transcription, we can use the same list as translation or a subset? We'll use the same for simplicity.
+    const languages = this.config.translation.languages;
+
+    // Toggle the pane and tab
+    const toggle = !is.empty(languages) && languages.length > 0;
+    controls.toggleMenuButton.call(this, type, toggle);
+
+    // Empty the menu
+    emptyElement(list);
+
+    // Check if we need to toggle the parent
+    controls.checkMenu.call(this);
+
+    // If we're hiding, nothing more to do
+    if (!toggle) {
+      return;
+    }
+
+    // Generate options data
+    const options = languages.map((language, _value) => ({
+      value: language,
+      checked: this.transcription.active && this.transcription.language === language,
+      title: language.toUpperCase(),
+      badge: language.toUpperCase() && controls.createBadge.call(this, language.toUpperCase()),
+      list,
+      type: 'language',
+    }));
+
+    // Add the "Off" option to turn off transcription
+    options.unshift({
+      value: 'off',
+      checked: !this.transcription.active,
+      title: i18n.get('disabled', this.config),
+      list,
+      type: 'language',
+    });
+
+    // Generate options
+    options.forEach(controls.createMenuItem.bind(this));
+
+    controls.updateSetting.call(this, type, list);
+  },
+
+  // Update transcription menu when language changes
+  updateTranscriptionMenu() {
+    if (is.element(this.elements.settings.panels.transcription)) {
+      this.setTranscriptionMenu();
+    }
+  },
+
+  // Update translation menu when language changes
+  updateTranslationMenu() {
+    if (is.element(this.elements.settings.panels.translation)) {
+      this.setTranslationMenu();
+    }
+  },
+
   // Check if we need to hide/show the settings menu
   checkMenu() {
     const { buttons } = this.elements.settings;
@@ -1289,6 +1412,8 @@ const controls = {
       createTime,
       setQualityMenu,
       setSpeedMenu,
+      setTranscriptionMenu,
+      setTranslationMenu,
       showMenuPanel,
     } = controls;
     this.elements.controls = null;
@@ -1426,6 +1551,16 @@ const controls = {
       // Toggle captions button
       if (control === 'captions') {
         container.appendChild(createButton.call(this, 'captions', defaultAttributes));
+      }
+
+      // Toggle translation button
+      if (control === 'translation') {
+        container.appendChild(createButton.call(this, 'translation', defaultAttributes));
+      }
+
+      // Toggle transcription button
+      if (control === 'transcription') {
+        container.appendChild(createButton.call(this, 'transcription', defaultAttributes));
       }
 
       // Settings button / menu
@@ -1630,6 +1765,8 @@ const controls = {
     }
 
     setSpeedMenu.call(this);
+    setTranslationMenu.call(this);
+    setTranscriptionMenu.call(this);
 
     return container;
   },

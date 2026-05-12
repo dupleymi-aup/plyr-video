@@ -3,7 +3,6 @@
 // ==========================================================================
 
 import controls from './controls';
-import support from './support';
 import { dedupe } from './utils/arrays';
 import browser from './utils/browser';
 import {
@@ -20,6 +19,7 @@ import i18n from './utils/i18n';
 import is from './utils/is';
 import sendCommand from './utils/post-message';
 import { getHTML } from './utils/strings';
+import { translate } from './utils/translate';
 import { parseUrl } from './utils/urls';
 
 /**
@@ -38,6 +38,10 @@ class Captions {
     this.active = false;
     this.language = '';
     this.languages = [];
+    this.translation = {
+      active: false,
+      language: 'en',
+    };
     this.meta = new WeakMap();
     this.currentTrack = -1;
     this.currentTrackNode = null;
@@ -91,6 +95,13 @@ class Captions {
       insertAfter(this.elements.captions, this.elements.wrapper);
     }
 
+    // Inject the translation container
+    if (!is.element(this.elements.translation)) {
+      this.elements.translation = createElement('div', getAttributesFromSelector(this.config.selectors.translation));
+      this.elements.translation.setAttribute('dir', 'auto');
+      insertAfter(this.elements.translation, this.elements.wrapper);
+    }
+
     // Fix IE captions if CORS is used
     // Fetch captions and inject as blobs instead (data URIs not supported!)
     if (browser.isIE && window.URL) {
@@ -137,11 +148,25 @@ class Captions {
       ({ active } = this.config.captions);
     }
 
+    // Translation state
+    let translationActive = this.storage.get('translationActive') || this.config.translation.active;
+    if (!is.boolean(translationActive)) {
+      translationActive = this.config.translation.active;
+    }
+    let translationLanguage = this.storage.get('translationLanguage') || this.config.translation.language;
+    if (!is.string(translationLanguage)) {
+      translationLanguage = this.config.translation.language;
+    }
+
     Object.assign(this, {
       toggled: false,
       active,
       language,
       languages,
+      translation: {
+        active: translationActive,
+        language: translationLanguage,
+      },
     });
 
     // Watch changes to textTracks and update captions menu
@@ -266,6 +291,64 @@ class Captions {
         this.currentTrackNode.mode = 'hidden';
       }
     });
+  }
+
+  // Toggle translation display
+  toggleTranslation(input, passive = true) {
+    // If there's no full support
+    if (!this.supported.ui) {
+      return;
+    }
+
+    const { active } = this.translation; // Current state
+    const activeClass = this.config.classNames.translation.active;
+    // Get the next state
+    // If the method is called without parameter, toggle based on current value
+    const translationActive = is.nullOrUndefined(input) ? !active : input;
+
+    // Update state and trigger event
+    if (translationActive !== active) {
+      // When passive, don't override user preferences
+      if (!passive) {
+        this.translation.active = translationActive;
+        this.storage.set({ translationActive });
+      }
+
+      // Toggle button if it's enabled
+      if (this.elements.buttons.translation) {
+        this.elements.buttons.translation.pressed = translationActive;
+      }
+
+      // Add class hook
+      toggleClass(this.elements.container, activeClass, translationActive);
+
+      // Update settings menu
+      controls.updateSetting.call(this.plyr, 'translation');
+
+      // Trigger event (not used internally)
+      triggerEvent.call(this.plyr, this.media, translationActive ? 'translationenabled' : 'translationdisabled');
+    }
+
+    // Update translation container immediately
+    if (translationActive && this.elements.translation && this.elements.captions.innerHTML) {
+      // Translate current captions
+      translate(this.elements.captions.innerHTML, this.translation.language)
+        .then((translated) => {
+          if (this.elements.translation) {
+            this.elements.translation.innerHTML = translated;
+          }
+        })
+        .catch((error) => {
+          console.warn('Translation failed:', error);
+          if (this.elements.translation) {
+            this.elements.translation.innerHTML = '';
+          }
+        });
+    }
+    else if (this.elements.translation) {
+      // Clear translation container if not active
+      this.elements.translation.innerHTML = '';
+    }
   }
 
   // Set captions by track index
@@ -458,6 +541,26 @@ class Captions {
       const caption = createElement('span', getAttributesFromSelector(this.config.selectors.caption));
       caption.innerHTML = content;
       this.elements.captions.appendChild(caption);
+
+      // Update translation container if translation is active and transcription is not active
+      if (this.translation.active && !(this.plyr.transcription && this.plyr.transcription.active)) {
+        translate(content, this.translation.language)
+          .then((translated) => {
+            if (this.elements.translation) {
+              this.elements.translation.innerHTML = translated;
+            }
+          })
+          .catch((error) => {
+            console.warn('Translation failed:', error);
+            if (this.elements.translation) {
+              this.elements.translation.innerHTML = ''; // Clear on error
+            }
+          });
+      }
+      else if (this.elements.translation && !(this.plyr.transcription && this.plyr.transcription.active)) {
+        // Clear translation container if not active (and transcription is not active)
+        this.elements.translation.innerHTML = '';
+      }
 
       // Trigger event
       triggerEvent.call(this.plyr, this.media, 'cuechange');

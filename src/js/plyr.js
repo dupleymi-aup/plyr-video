@@ -5,7 +5,7 @@
 // License: The MIT License (MIT)
 // ==========================================================================
 
-import captions from './captions';
+import Captions from './captions';
 import defaults from './config/defaults';
 import { pip } from './config/states';
 import { getProviderByUrl, providers, types } from './config/types';
@@ -20,6 +20,7 @@ import PreviewThumbnails from './plugins/preview-thumbnails';
 import source from './source';
 import Storage from './storage';
 import support from './support';
+import transcription from './transcription';
 import ui from './ui';
 import { closest } from './utils/arrays';
 import { createElement, hasClass, removeElement, replaceElement, toggleClass, wrap } from './utils/elements';
@@ -30,6 +31,7 @@ import { clamp } from './utils/numbers';
 import { cloneDeep, extend } from './utils/objects';
 import { silencePromise } from './utils/promise';
 import { getAspectRatio, reduceAspectRatio, setAspectRatio, validateAspectRatio } from './utils/style';
+import { translate } from './utils/translate';
 import { parseUrl } from './utils/urls';
 
 // Private properties
@@ -97,6 +99,14 @@ class Plyr {
 
     // Captions
     this.captions = new Captions(this);
+
+    // Transcription
+    this.transcription = {
+      active: null,
+      language: null,
+      recognition: null,
+      transcript: '',
+    };
 
     // Fullscreen
     this.fullscreen = {
@@ -1007,6 +1017,14 @@ class Plyr {
   }
 
   /**
+   * Toggle translation
+   * @param {boolean} input - Whether to enable translation
+   */
+  toggleTranslation(input) {
+    this.captions.toggleTranslation(input, false);
+  }
+
+  /**
    * Set the caption track by index
    * @param {number} input - Caption index
    */
@@ -1038,6 +1056,67 @@ class Plyr {
   get language() {
     const track = this.captions.getCurrentTrack();
     return track ? track.language : '';
+  }
+
+  /**
+   * Set the wanted language for translation
+   * @param {string} input - Two character ISO language code (e.g. EN, FR, PT, etc)
+   */
+  set translationLanguage(input) {
+    // Set the translation language in captions object
+    if (this.captions) {
+      this.captions.translation.language = input;
+      // Update storage
+      this.storage.set({ translationLanguage: input });
+      // If translation is active, re-translate current captions
+      if (this.captions.translation.active && this.elements.captions) {
+        const content = this.elements.captions.innerHTML;
+        if (content) {
+          translate(content, input)
+            .then((translated) => {
+              if (this.elements.translation) {
+                this.elements.translation.innerHTML = translated;
+              }
+            })
+            .catch((error) => {
+              console.warn('Translation failed:', error);
+              if (this.elements.translation) {
+                this.elements.translation.innerHTML = '';
+              }
+            });
+        }
+      }
+    }
+  }
+
+  /**
+   * Get the current translation language
+   */
+  get translationLanguage() {
+    return this.captions ? this.captions.translation.language : this.config.translation.language;
+  }
+
+  /**
+   * Toggle transcription
+   * @param {boolean} input - Whether to enable transcription
+   */
+  toggleTranscription(input) {
+    transcription.toggle.call(this, input, false);
+  }
+
+  /**
+   * Set the wanted language for transcription
+   * @param {string} input - Two character ISO language code (e.g. EN, FR, PT, etc)
+   */
+  set transcriptionLanguage(input) {
+    transcription.setLanguage.call(this, input, false);
+  }
+
+  /**
+   * Get the current transcription language
+   */
+  get transcriptionLanguage() {
+    return this.transcription ? this.transcription.language : this.config.transcription.language;
   }
 
   /**

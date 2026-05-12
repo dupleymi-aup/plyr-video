@@ -139,7 +139,7 @@ const sources = {
     ratio: '16:9',
     sources: [
       {
-        src: 'https://rutube.ru/play/embed/91d051245c0cf5703957fe07f7b11b98',
+        src: 'https://rutube.ru/video/f553aa769c9cd088b33d356f5fd84abd/?r=plwd',
         provider: 'rutube',
       },
     ],
