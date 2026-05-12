@@ -8,7 +8,7 @@ import * as Sentry from '@sentry/browser';
 import Shr from 'shr-buttons';
 
 import Plyr from '../../../src/js/plyr';
-import sources from './sources';
+import sources, { gallery } from './sources';
 
 import 'custom-event-polyfill';
 import 'url-polyfill';
@@ -35,6 +35,9 @@ const commonConfig = {
   },
 };
 
+// SVG play icon for gallery items
+const playIconSvg = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+
 (() => {
   const production = 'plyr.io';
   const isProduction = window.location.host.includes(production);
@@ -52,6 +55,10 @@ const commonConfig = {
 
   document.addEventListener('DOMContentLoaded', () => {
     const selector = '#player';
+    const galleryView = document.getElementById('gallery-view');
+    const playerView = document.getElementById('player-view');
+    const backBtn = document.getElementById('back-to-gallery');
+    const galleryContainer = document.getElementById('video-gallery');
 
     // Setup share buttons
     Shr.setup('.js-shr', {
@@ -63,24 +70,59 @@ const commonConfig = {
       },
     });
 
-    // Setup type toggle
-    const buttons = document.querySelectorAll('[data-source]');
-    const types = Object.keys(sources);
-    const historySupport = Boolean(window.history && window.history.pushState);
-    let currentType = window.location.hash.substring(1);
-    const hasInitialType = Boolean(currentType);
-    // If there's no current type set, assume video
-    if (!hasInitialType) currentType = 'video';
+    // Render gallery items
+    function renderGallery() {
+      if (!galleryContainer) return;
 
-    // Setup the player as video by default
-    const player = new Plyr(selector, {
-      ...commonConfig,
-      ...sources[currentType],
-    });
+      galleryContainer.innerHTML = gallery.map(item => `
+        <li class="video-gallery__item" data-id="${item.id}">
+          <div class="video-gallery__poster">
+            <img src="${item.poster}" alt="${item.title}" loading="lazy" />
+            <div class="video-gallery__play-icon">${playIconSvg}</div>
+            <span class="video-gallery__duration">${item.duration}</span>
+            <span class="video-gallery__provider video-gallery__provider--${item.provider}">${item.providerLabel}</span>
+          </div>
+          <div class="video-gallery__info">
+            <h3 class="video-gallery__title">${item.title}</h3>
+            <p class="video-gallery__subtitle">${item.subtitle}</p>
+          </div>
+        </li>
+      `).join('');
 
-    // Expose for tinkering in the console
-    window.player = player;
+      // Bind click handlers
+      galleryContainer.querySelectorAll('.video-gallery__item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.getAttribute('data-id');
+          selectVideo(id);
+        });
+      });
+    }
 
+    // Show gallery view
+    function showGallery() {
+      // Stop playback
+      try {
+        window.player?.pause();
+        window.playerHls?.pause();
+      } catch {}
+
+      togglePlayerVisibility(window.player, false);
+      togglePlayerVisibility(window.playerHls, false);
+
+      galleryView.classList.remove('hidden');
+      playerView.classList.add('hidden');
+
+      // Show default cite
+      Array.from(document.querySelectorAll('.plyr__cite')).forEach(cite => cite.hidden = true);
+    }
+
+    // Show player view
+    function showPlayer() {
+      galleryView.classList.add('hidden');
+      playerView.classList.remove('hidden');
+    }
+
+    // Toggle player visibility
     function togglePlayerVisibility(player, show) {
       if (player?.elements?.container) {
         player.elements.container.hidden = !show;
@@ -90,98 +132,72 @@ const commonConfig = {
         }
       }
     }
-    function showHlsPlayer() {
-      togglePlayerVisibility(window.player, false);
-      togglePlayerVisibility(window.playerHls, true);
-    }
-    function showMainPlayer() {
-      togglePlayerVisibility(window.player, true);
-      togglePlayerVisibility(window.playerHls, false);
-    }
 
-    function render(type) {
-      // Remove active classes
-      Array.from(buttons).forEach(button => button.classList.toggle('active', false));
+    // Select and play a video
+    function selectVideo(id) {
+      const sourceConfig = sources[id];
+      if (!sourceConfig) return;
 
-      // Set active on parent
-      document.querySelector(`[data-source="${type}"]`).classList.toggle('active', true);
+      showPlayer();
 
-      // Show cite
-      Array.from(document.querySelectorAll('.plyr__cite')).forEach((cite) => {
-        cite.hidden = true;
-      });
+      // Destroy HLS player if exists
+      window.playerHls?.destroy();
 
-      document.querySelector(`.plyr__cite--${type}`).hidden = false;
-
-      if (type === 'mux') {
-        showHlsPlayer();
-      }
-      else {
-        showMainPlayer();
-      }
-    }
-
-    // Set a new source
-    function setSource(type, init) {
-      // Bail if new type isn't known, it's the current type, or current type is empty (video is default) and new type is video
-      if (!types.includes(type) || (!init && type === currentType) || (!currentType.length && type === 'video')) {
-        return;
-      }
-
-      const sourceConfig = sources[type];
+      // Check if this is an HLS source
       const hlsSource = sourceConfig.hlsSource;
       if (hlsSource) {
+        // Create HLS player
+        togglePlayerVisibility(window.player, false);
+
         const playerHls = new Plyr('#player-hls', { ...commonConfig, ...sourceConfig });
         window.playerHls = playerHls;
+
         const video = playerHls.media;
-        if (Hls.isSupported()) {
+        if (window.Hls && Hls.isSupported()) {
           const hls = new Hls();
           hls.loadSource(hlsSource);
           hls.attachMedia(video);
         }
         else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-          // eslint-disable-next-line no-undef
-          video.src = videoSrc;
+          video.src = hlsSource;
         }
+
+        togglePlayerVisibility(playerHls, true);
       }
       else {
-        window.playerHls?.destroy();
-        player.source = sourceConfig;
+        // Use main player
+        togglePlayerVisibility(window.playerHls, false);
+        togglePlayerVisibility(window.player, true);
+
+        window.player.source = sourceConfig;
       }
-      // Set the current type for next time
-      currentType = type;
-      render(type);
+
+      // Update cite
+      Array.from(document.querySelectorAll('.plyr__cite')).forEach(cite => cite.hidden = true);
+      const cite = document.querySelector(`.plyr__cite--${id}`);
+      if (cite) cite.hidden = false;
     }
 
-    // Bind to each button
-    Array.from(buttons).forEach((button) => {
-      button.addEventListener('click', () => {
-        const type = button.getAttribute('data-source');
-        setSource(type);
-
-        if (historySupport) {
-          window.history.pushState({ type }, '', `#${type}`);
-        }
-      });
+    // Setup the player as video by default
+    const player = new Plyr(selector, {
+      ...commonConfig,
+      ...sources.video,
     });
 
-    // List for backwards/forwards
-    window.addEventListener('popstate', (event) => {
-      if (event.state && Object.keys(event.state).includes('type')) {
-        setSource(event.state.type);
-      }
-    });
+    // Expose for tinkering in the console
+    window.player = player;
 
-    // Replace current history state
-    if (historySupport && types.includes(currentType)) {
-      window.history.replaceState({ type: currentType }, '', hasInitialType ? `#${currentType}` : '');
+    // Start with gallery visible
+    renderGallery();
+    showGallery();
+
+    // Back button handler
+    backBtn.addEventListener('click', showGallery);
+
+    // Handle URL hash for direct linking
+    const hash = window.location.hash.substring(1);
+    if (hash && sources[hash]) {
+      selectVideo(hash);
     }
-
-    // If it's not video, load the source
-    if (currentType !== 'video') {
-      setSource(currentType, true);
-    }
-
-    render(currentType);
   });
 })();

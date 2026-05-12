@@ -85,6 +85,7 @@ class Plyr {
       container: null,
       fullscreen: null,
       captions: null,
+      preloader: null,
       buttons: {},
       display: {},
       progress: {},

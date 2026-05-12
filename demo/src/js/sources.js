@@ -175,4 +175,82 @@ const sources = {
     ],
   },
 };
+
+// Gallery data for the video selection view
+const gallery = [
+  {
+    id: 'video',
+    title: 'View From A Blue Moon',
+    subtitle: 'Brainfarm • Sports',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '2:30',
+    provider: 'html5',
+    providerLabel: 'HTML5',
+  },
+  {
+    id: 'youtube',
+    title: 'View From A Blue Moon (YouTube)',
+    subtitle: 'Brainfarm',
+    poster: 'https://img.youtube.com/vi/bTqVqk7FSmY/maxresdefault.jpg',
+    duration: '2:30',
+    provider: 'youtube',
+    providerLabel: 'YouTube',
+  },
+  {
+    id: 'vimeo',
+    title: 'Toob "Wavaphon" Music Video',
+    subtitle: 'Vimeo Staff Pick',
+    poster: 'https://vumbnail.com/40648169.jpg',
+    duration: '3:15',
+    provider: 'vimeo',
+    providerLabel: 'Vimeo',
+  },
+  {
+    id: 'mux',
+    title: 'View From A Blue Moon (HLS)',
+    subtitle: 'Streaming via Mux',
+    poster: 'https://image.mux.com/lyrKpPcGfqyzeI00jZAfW6MvP6GNPrkML/thumbnail.jpg',
+    duration: '2:30',
+    provider: 'mux',
+    providerLabel: 'Mux',
+  },
+  {
+    id: 'rutube',
+    title: 'Rutube Video Demo',
+    subtitle: 'Rutube Platform',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '5:00',
+    provider: 'rutube',
+    providerLabel: 'Rutube',
+  },
+  {
+    id: 'vk',
+    title: 'VK Video Demo',
+    subtitle: 'VK Platform',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '3:45',
+    provider: 'vk',
+    providerLabel: 'VK',
+  },
+  {
+    id: 'yandex',
+    title: 'Yandex Cloud Video',
+    subtitle: 'Yandex Platform',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '4:20',
+    provider: 'yandex',
+    providerLabel: 'Yandex',
+  },
+  {
+    id: 'mailru',
+    title: 'Mail.ru Video',
+    subtitle: 'Mail.ru Platform',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '2:10',
+    provider: 'mailru',
+    providerLabel: 'Mail.ru',
+  },
+];
+
+export { gallery };
 export default sources;

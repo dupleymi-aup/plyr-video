@@ -64,6 +64,8 @@
 | **Yandex Cloud Video** | ✓ | ✓ (при наличии) | ✓ | ✓ |
 | **Mail.ru Video** | ✓ | ⚠️ | ⚠️ | ✓ |
 | **HLS.js** | ✓ (адаптивное) | ✓ | ✓ | ✓ |
+| **Shaka Player** | ✓ (адаптивное) | ✓ | ✓ | ✓ |
+| **Dash.js** | ✓ (адаптивное) | ✓ | ✓ | ✓ |
 
 ## Технологии
 
@@ -109,6 +111,51 @@ npm run build
 
 # Запуск тестов
 npm test
+
+# Запуск тестов в режиме наблюдения
+npm run test:watch
+```
+
+## Структура проекта
+
+```
+plyr-video/
+├── src/
+│   ├── js/                      # JavaScript логика плеера
+│   │   ├── config/              # Конфигурация по умолчанию
+│   │   ├── providers/           # Провайдеры (HTML5, YouTube, Vimeo, Rutube, VK, Yandex, Mail.ru)
+│   │   ├── utils/               # Утилиты (DOM, события, браузеры, промисы)
+│   │   ├── controls.js          # Управление контролами
+│   │   ├── listeners.js         # Обработчики событий
+│   │   ├── plyr.js              # Основной класс Plyr
+│   │   ├── ui.js                # UI компоненты (прелоадер, полноэкранный режим)
+│   │   └── ...                  # Другие модули
+│   └── sass/                    # Sass стили
+│       ├── components/          # Компоненты (control, controls, menus, preloader, и др.)
+│       ├── plugins/             # Плагины (ads, preview-thumbnails)
+│       ├── states/              # Состояния (fullscreen)
+│       ├── types/               # Типы (audio, video)
+│       ├── utils/               # Утилиты (animation, hidden)
+│       └── plyr.scss            # Главный файл стилей
+├── demo/                        # Демо-страница
+│   ├── index.html               # HTML демо-страницы
+│   ├── src/
+│   │   ├── js/
+│   │   │   ├── demo.js          # Логика демо (галерея, выбор видео)
+│   │   │   └── sources.js       # Источники видео для демо
+│   │   └── sass/
+│   │       ├── components/      # Компоненты демо (video-gallery, и др.)
+│   │       └── bundles/         # Точки входа Sass
+│   └── dist/                    # Скомпилированные файлы
+├── docs/                        # Документация
+│   ├── plyr-api.md              # Полное API-документация
+│   ├── browsersync-ui.md        # Руководство по Browsersync UI
+│   └── russian-video-hosts.md   # Интеграция с российскими хостингами
+├── package.json                 # Зависимости и скрипты
+├── gulpfile.js                  # Конфигурация Gulp
+├── README_RU.md                 # Документация на русском
+├── README_EN.md                 # Документация на английском
+└── LICENSE                      # Лицензия (двуязычная)
 ```
 
 ## Документация

@@ -1,0 +1,70 @@
+// ==========================================================================
+// Plyr preloader
+// ==========================================================================
+
+.plyr__preloader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 50;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+
+  .plyr--loading & {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  &__spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: var(--plyr-color-main, #00b3ff);
+    border-radius: 50%;
+    animation: plyr-spin 1s linear infinite;
+  }
+
+  &__text {
+    margin-top: 12px;
+    color: #fff;
+    font-size: var(--plyr-font-size-small, 13px);
+    font-family: var(--plyr-font-family, inherit);
+    opacity: 0.8;
+  }
+
+  &__progress {
+    position: absolute;
+    bottom: 20px;
+    left: 10%;
+    width: 80%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    overflow: hidden;
+
+    &-bar {
+      height: 100%;
+      width: 0;
+      background: var(--plyr-color-main, #00b3ff);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+  }
+}
+
+@keyframes plyr-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

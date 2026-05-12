@@ -256,6 +256,54 @@ const ui = {
     );
   },
 
+  // Show the preloader
+  showPreloader() {
+    // Bail if no support for UI
+    if (!this.supported.ui) {
+      return;
+    }
+
+    // Create preloader element if it doesn't exist
+    if (!is.element(this.elements.preloader)) {
+      const preloader = document.createElement('div');
+      preloader.className = 'plyr__preloader';
+      preloader.innerHTML = `
+        <div class="plyr__preloader__spinner"></div>
+        <div class="plyr__preloader__text">Загрузка...</div>
+        <div class="plyr__preloader__progress">
+          <div class="plyr__preloader__progress-bar"></div>
+        </div>
+      `;
+      this.elements.container.appendChild(preloader);
+      this.elements.preloader = preloader;
+    }
+
+    // Add loading class
+    toggleClass(this.elements.container, this.config.classNames.loading, true);
+  },
+
+  // Hide the preloader
+  hidePreloader() {
+    if (!this.supported.ui || !is.element(this.elements.preloader)) {
+      return;
+    }
+
+    // Remove loading class
+    toggleClass(this.elements.container, this.config.classNames.loading, false);
+  },
+
+  // Update preloader progress bar
+  updatePreloaderProgress(buffered) {
+    if (!this.supported.ui || !is.element(this.elements.preloader)) {
+      return;
+    }
+
+    const progressBar = this.elements.preloader.querySelector('.plyr__preloader__progress-bar');
+    if (progressBar && is.number(buffered) && buffered > 0 && buffered <= 1) {
+      progressBar.style.width = `${buffered * 100}%`;
+    }
+  },
+
   // Toggle controls based on state and `force` argument
   toggleControls(force) {
     const { controls: controlsElement } = this.elements;

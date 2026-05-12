@@ -355,6 +355,20 @@ class Listeners {
     // Loading state
     on.call(player, player.media, 'waiting canplay seeked playing', event => ui.checkLoading.call(player, event));
 
+    // Preloader: show on loadstart/waiting, hide on canplay/playing
+    on.call(player, player.media, 'loadstart waiting', () => {
+      ui.showPreloader.call(player);
+    });
+
+    on.call(player, player.media, 'canplay playing', () => {
+      ui.hidePreloader.call(player);
+    });
+
+    // Update preloader progress on buffered change
+    on.call(player, player.media, 'progress', () => {
+      ui.updatePreloaderProgress.call(player, player.buffered);
+    });
+
     // Click video
     if (player.supported.ui && player.config.clickToPlay && !player.isAudio) {
       // Re-fetch the wrapper
