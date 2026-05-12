@@ -1,7 +1,6 @@
 // ==========================================================================
 // Base embed provider — shared boilerplate for postMessage-based providers
 // ==========================================================================
-import captions from '../captions';
 import ui from '../ui';
 import { assurePlaybackState } from '../utils/assure-playback-state';
 import { createElement, replaceElement, toggleClass } from '../utils/elements';
@@ -333,7 +332,7 @@ export function handleCaptionList(player, data) {
     player.media.textTracks = player.embed.captionTracks;
     player.debug.log('Available caption tracks:', player.embed.captionTracks.length);
     if (player.embed.captionTracks.length > 0) {
-      captions.setup.call(player);
+      player.captions.setup();
     }
   }
 }
@@ -350,7 +349,7 @@ export function handleCueChange(player, data) {
       }
       return cue;
     });
-    captions.updateCues.call(player, strippedCues);
+    player.captions.updateCues(strippedCues);
   }
 }
 
