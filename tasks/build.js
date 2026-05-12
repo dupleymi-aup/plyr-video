@@ -1,3 +1,4 @@
+import { createServer } from 'node:net';
 import { readFileSync } from 'node:fs';
 import path, { join } from 'node:path';
 import babel from '@rollup/plugin-babel';
@@ -30,6 +31,27 @@ const jobs = JSON.parse(readFileSync(join(path.resolve(), 'build.json'), 'utf-8'
 const bs = browserSync.create();
 const sassCompiler = sass(dartSass);
 const minSuffix = '.min';
+
+// Find a free port starting from the given port
+async function findFreePort(startPort = 3000) {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.unref();
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        server.close();
+        resolve(findFreePort(startPort + 1));
+      } else {
+        reject(err);
+      }
+    });
+    server.listen(startPort, () => {
+      const { port } = server.address();
+      server.close();
+      resolve(port);
+    });
+  });
+}
 
 // Paths
 const root = path.resolve();
@@ -198,11 +220,14 @@ export function watch() {
 }
 
 // Serve task
-export function serve() {
+export async function serve() {
+  const port = await findFreePort(3000);
+  console.log(`Server running at http://localhost:${port}`);
   return bs.init({
     server: {
       baseDir: paths.demo.root,
     },
+    port,
     notify: false,
     watch: true,
     ghostMode: false,

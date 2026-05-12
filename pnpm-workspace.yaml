@@ -1,0 +1,9 @@
+allowBuilds:
+  '@parcel/watcher': true
+  aws-sdk: true
+  core-js: true
+  es5-ext: true
+  esbuild: true
+  gifsicle: true
+  mozjpeg: true
+  optipng-bin: true
