@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Playlist Demo</title>
+    <link rel="stylesheet" href="../dist/plyr.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d0d0d;
+            color: #fff;
+            min-height: 100vh;
+        }
+
+        .layout {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            gap: 20px;
+            min-height: 100vh;
+        }
+
+        .player-section {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .player-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        #player {
+            width: 100%;
+            height: 100%;
+        }
+
+        .error-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.85);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .error-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            margin-bottom: 16px;
+            max-width: 400px;
+        }
+
+        .error-retry {
+            padding: 8px 20px;
+            background: #00b3ff;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .error-retry:hover {
+            background: #33c8ff;
+        }
+
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .loading-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #00b3ff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .current-info {
+            margin-top: 16px;
+        }
+
+        .current-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar-container {
+            height: 4px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #00b3ff;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+        }
+
+        .sidebar h2 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #333;
+        }
+
+        .autoplay-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #aaa;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .autoplay-toggle input {
+            accent-color: #00b3ff;
+            cursor: pointer;
+        }
+
+        .playlist {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .playlist-item {
+            display: flex;
+            gap: 12px;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            background: #1a1a1a;
+            position: relative;
+        }
+
+        .playlist-item:hover {
+            background: #2a2a2a;
+            transform: translateX(4px);
+        }
+
+        .playlist-item.active {
+            background: #2d2d5e;
+            border: 1px solid #4a4a8a;
+        }
+
+        .playlist-item:focus-visible {
+            outline: 2px solid #00b3ff;
+            outline-offset: 2px;
+        }
+
+        .playlist-thumb {
+            width: 120px;
+            height: 68px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+            background: #333;
+            transition: transform 0.2s;
+        }
+
+        .playlist-item:hover .playlist-thumb {
+            transform: scale(1.05);
+        }
+
+        .playlist-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 0;
+            position: relative;
+        }
+
+        .playlist-title {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .playlist-duration {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .playlist-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #333;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .playlist-progress-bar {
+            height: 100%;
+            background: #00b3ff;
+            width: 0%;
+        }
+
+        .now-playing-badge {
+            font-size: 11px;
+            color: #00b3ff;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .history-section {
+            margin-top: 24px;
+            padding-top: 16px;
+            border-top: 1px solid #333;
+        }
+
+        .history-section h3 {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            font-size: 13px;
+            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .history-item:hover {
+            background: #1a1a1a;
+            color: #aaa;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #555;
+            margin-left: auto;
+        }
+
+        .keyboard-hint {
+            margin-top: 24px;
+            padding: 12px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .keyboard-hint kbd {
+            display: inline-block;
+            padding: 2px 6px;
+            background: #333;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #ccc;
+        }
+
+        @media (max-width: 900px) {
+            .layout {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="player-section">
+            <div class="player-wrapper">
+                <video id="player" crossorigin playsinline></video>
+                <div class="loading-overlay" id="loadingOverlay">
+                    <div class="spinner"></div>
+                </div>
+                <div class="error-overlay" id="errorOverlay">
+                    <div class="error-icon">⚠</div>
+                    <div class="error-message" id="errorMessage">Ошибка воспроизведения</div>
+                    <button class="error-retry" id="errorRetry">Повторить</button>
+                </div>
+            </div>
+            <div class="current-info">
+                <div class="current-title" id="currentTitle">Выберите видео</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <h2>Плейлист</h2>
+            <label class="autoplay-toggle">
+                <input type="checkbox" id="autoplayToggle" checked>
+                Автопереход к следующему видео
+            </label>
+            <ul class="playlist" id="playlist"></ul>
+
+            <div class="history-section" id="historySection" hidden>
+                <h3>История просмотра</h3>
+                <div id="historyList"></div>
+            </div>
+
+            <div class="keyboard-hint">
+                <kbd>J</kbd> / <kbd>L</kbd> — перемотка ±10с<br>
+                <kbd>K</kbd> / <kbd>Space</kbd> — пауза<br>
+                <kbd>N</kbd> — следующее видео<br>
+                <kbd>P</kbd> — предыдущее видео<br>
+                <kbd>R</kbd> — повтор при ошибке<br>
+                <kbd>→</kbd> / <kbd>↑</kbd> / <kbd>↓</kbd> — навигация по плейлисту
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+    <script src="../dist/plyr.js"></script>
+    <script>
+        const STORAGE_KEY = 'plyr-playlist-progress';
+        const HISTORY_KEY = 'plyr-playlist-history';
+
+        const videos = [
+            {
+                id: 1,
+                title: 'View From A Blue Moon',
+                poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+                sources: [
+                    { src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-576p.mp4', type: 'video/mp4', size: 576 },
+                    { src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-720p.mp4', type: 'video/mp4', size: 720 },
+                    { src: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-1080p.mp4', type: 'video/mp4', size: 1080 },
+                ],
+                duration: '~2 мин'
+            },
+            {
+                id: 2,
+                title: 'Blink - Kishi Bashi',
+                poster: 'https://cdn.plyr.io/static/demo/Kishi_Bashi_-_It_All_Began_With_a_Burst.jpg',
+                sources: [
+                    { src: 'https://cdn.plyr.io/static/demo/Kishi_Bashi_-_It_All_Began_With_a_Burst.mp4', type: 'video/mp4' },
+                ],
+                duration: '~3 мин'
+            },
+            {
+                id: 3,
+                title: 'Big Buck Bunny',
+                poster: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/images/BigBuckBunny.jpg',
+                sources: [
+                    { src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4', type: 'video/mp4' },
+                ],
+                duration: '~10 мин'
+            },
+            {
+                id: 4,
+                title: 'Sintel (HLS Stream)',
+                poster: 'https://test-streams.mux.dev/x36xhzz/poster.jpg',
+                sources: [
+                    { src: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', type: 'application/x-mpegurl' },
+                ],
+                duration: '~12 мин',
+                isHls: true
+            }
+        ];
+
+        let player = null;
+        let hls = null;
+        let currentIndex = -1;
+        let focusIndex = 0;
+        let errorRetryCount = 0;
+        const MAX_RETRY = 3;
+
+        // Progress storage
+        function getProgress() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+            } catch { return {}; }
+        }
+
+        function saveProgress(videoId, currentTime, duration) {
+            const progress = getProgress();
+            progress[videoId] = { time: currentTime, duration, timestamp: Date.now() };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+            updatePlaylistProgress();
+        }
+
+        function getSavedProgress(videoId) {
+            const progress = getProgress();
+            return progress[videoId] || null;
+        }
+
+        // History
+        function addToHistory(videoId) {
+            const history = getHistory();
+            const existing = history.findIndex(h => h.id === videoId);
+            if (existing !== -1) history.splice(existing, 1);
+            history.unshift({ id: videoId, timestamp: Date.now() });
+            if (history.length > 10) history.pop();
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+            renderHistory();
+        }
+
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+            } catch { return []; }
+        }
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            return `${m}:${String(s).padStart(2, '0')}`;
+        }
+
+        function formatTimestamp(ts) {
+            const diff = Date.now() - ts;
+            const mins = Math.floor(diff / 60000);
+            if (mins < 1) return 'только что';
+            if (mins < 60) return `${mins} мин назад`;
+            const hours = Math.floor(mins / 60);
+            if (hours < 24) return `${hours} ч назад`;
+            return new Date(ts).toLocaleDateString('ru-RU');
+        }
+
+        // Error handling
+        function showError(message = 'Ошибка воспроизведения') {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorOverlay').classList.add('visible');
+            document.getElementById('loadingOverlay').classList.remove('visible');
+        }
+
+        function hideError() {
+            document.getElementById('errorOverlay').classList.remove('visible');
+            errorRetryCount = 0;
+        }
+
+        function retryVideo() {
+            if (currentIndex >= 0) {
+                errorRetryCount++;
+                if (errorRetryCount <= MAX_RETRY) {
+                    hideError();
+                    switchVideo(currentIndex, true, true);
+                } else {
+                    showError('Не удалось воспроизнить видео. Попробуйте позже.');
+                }
+            }
+        }
+
+        // HLS setup
+        function setupHls(videoElement, src) {
+            if (Hls.isSupported()) {
+                const hlsInstance = new Hls({
+                    maxBufferLength: 30,
+                    maxMaxBufferLength: 60,
+                });
+                hlsInstance.loadSource(src);
+                hlsInstance.attachMedia(videoElement);
+                hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+                    if (data.fatal) {
+                        switch (data.type) {
+                            case Hls.ErrorTypes.NETWORK_ERROR:
+                                showError('Ошибка сети. Проверьте подключение.');
+                                break;
+                            case Hls.ErrorTypes.MEDIA_ERROR:
+                                showError('Ошибка медиа. Попытка восстановления...');
+                                hlsInstance.recoverMediaError();
+                                break;
+                            default:
+                                showError('Невозможно воспроизнить этот поток.');
+                                hlsInstance.destroy();
+                                break;
+                        }
+                    }
+                });
+                return hlsInstance;
+            } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+                videoElement.src = src;
+                return null;
+            }
+            return null;
+        }
+
+        function destroyHls() {
+            if (hls) {
+                hls.destroy();
+                hls = null;
+            }
+        }
+
+        function updatePlaylistProgress() {
+            videos.forEach((video, index) => {
+                const saved = getSavedProgress(video.id);
+                const bar = document.querySelector(`.playlist-item[data-index="${index}"] .playlist-progress-bar`);
+                if (bar && saved && saved.duration) {
+                    bar.style.width = `${(saved.time / saved.duration) * 100}%`;
+                }
+            });
+        }
+
+        function renderPlaylist() {
+            const list = document.getElementById('playlist');
+            list.innerHTML = '';
+
+            videos.forEach((video, index) => {
+                const li = document.createElement('li');
+                li.className = 'playlist-item' + (index === currentIndex ? ' active' : '');
+                li.dataset.index = index;
+                li.tabIndex = 0;
+
+                const saved = getSavedProgress(video.id);
+                const progressPercent = (saved && saved.duration) ? (saved.time / saved.duration) * 100 : 0;
+
+                li.innerHTML = `
+                    <img class="playlist-thumb" src="${video.poster}" alt="${video.title}" loading="lazy" onerror="this.style.background='#333'">
+                    <div class="playlist-info">
+                        ${index === currentIndex ? '<div class="now-playing-badge">Сейчас играет</div>' : ''}
+                        <div class="playlist-title">${video.title}</div>
+                        <div class="playlist-duration">${video.duration}</div>
+                        <div class="playlist-progress"><div class="playlist-progress-bar" style="width: ${progressPercent}%"></div></div>
+                    </div>
+                `;
+                li.addEventListener('click', () => switchVideo(index));
+                li.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        switchVideo(index);
+                    }
+                });
+                list.appendChild(li);
+            });
+
+            focusIndex = Math.min(focusIndex, videos.length - 1);
+            const focusedItem = list.querySelector(`[data-index="${focusIndex}"]`);
+            if (focusedItem) focusedItem.focus();
+        }
+
+        function renderHistory() {
+            const history = getHistory();
+            const section = document.getElementById('historySection');
+            const list = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                section.hidden = true;
+                return;
+            }
+
+            section.hidden = false;
+            list.innerHTML = '';
+
+            history.forEach(item => {
+                const video = videos.find(v => v.id === item.id);
+                if (!video) return;
+
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <span>${video.title}</span>
+                    <span class="history-time">${formatTimestamp(item.timestamp)}</span>
+                `;
+                div.addEventListener('click', () => {
+                    const idx = videos.indexOf(video);
+                    if (idx !== -1) switchVideo(idx);
+                });
+                list.appendChild(div);
+            });
+        }
+
+        function switchVideo(index, restoreProgress = true, isRetry = false) {
+            if (index < 0 || index >= videos.length) return;
+            currentIndex = index;
+            const video = videos[index];
+
+            if (!isRetry) {
+                hideError();
+                destroyHls();
+            }
+
+            document.getElementById('currentTitle').textContent = video.title;
+
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.add('visible');
+
+            const sourceConfig = {
+                type: 'video',
+                title: video.title,
+                poster: video.poster,
+                sources: video.sources,
+            };
+
+            if (player) {
+                player.source = sourceConfig;
+            } else {
+                player = new Plyr('#player', {
+                    title: video.title,
+                    poster: video.poster,
+                    keyboard: { global: true },
+                    tooltips: { controls: true },
+                });
+
+                player.on('loadeddata', () => {
+                    loading.classList.remove('visible');
+                    hideError();
+                    if (restoreProgress) {
+                        const saved = getSavedProgress(video.id);
+                        if (saved && saved.time > 10) {
+                            player.currentTime = saved.time;
+                        }
+                    }
+                });
+
+                player.on('waiting', () => loading.classList.add('visible'));
+                player.on('canplay', () => loading.classList.remove('visible'));
+                player.on('ended', () => {
+                    addToHistory(video.id);
+                    const autoplay = document.getElementById('autoplayToggle').checked;
+                    if (autoplay && currentIndex < videos.length - 1) {
+                        setTimeout(() => switchVideo(currentIndex + 1), 1500);
+                    }
+                });
+
+                player.on('timeupdate', () => {
+                    const time = player.currentTime;
+                    const duration = player.duration;
+                    if (duration) {
+                        document.getElementById('progressBar').style.width = `${(time / duration) * 100}%`;
+                        document.getElementById('progressText').textContent = `${formatTime(time)} / ${formatTime(duration)}`;
+                        saveProgress(video.id, time, duration);
+                    }
+                });
+
+                player.on('error', (event) => {
+                    loading.classList.remove('visible');
+                    const mediaError = player.media.error;
+                    const message = mediaError?.message || 'Ошибка воспроизведения';
+                    showError(message);
+                });
+
+                player.source = sourceConfig;
+            }
+
+            // Handle HLS sources
+            if (video.isHls && video.sources.length > 0) {
+                const videoEl = player.media;
+                const hlsSrc = video.sources[0].src;
+                destroyHls();
+                hls = setupHls(videoEl, hlsSrc);
+            }
+
+            addToHistory(video.id);
+            renderPlaylist();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            switch (e.key.toLowerCase()) {
+                case 'n':
+                    e.preventDefault();
+                    if (currentIndex < videos.length - 1) switchVideo(currentIndex + 1);
+                    break;
+                case 'p':
+                    e.preventDefault();
+                    if (currentIndex > 0) switchVideo(currentIndex - 1);
+                    break;
+                case 'arrowdown':
+                    e.preventDefault();
+                    focusIndex = Math.min(focusIndex + 1, videos.length - 1);
+                    const itemDown = document.querySelector(`.playlist-item[data-index="${focusIndex}"]`);
+                    itemDown?.focus();
+                    break;
+                case 'arrowup':
+                    e.preventDefault();
+                    focusIndex = Math.max(focusIndex - 1, 0);
+                    const itemUp = document.querySelector(`.playlist-item[data-index="${focusIndex}"]`);
+                    itemUp?.focus();
+                    break;
+                case 'r':
+                    if (document.getElementById('errorOverlay').classList.contains('visible')) {
+                        e.preventDefault();
+                        retryVideo();
+                    }
+                    break;
+            }
+        });
+
+        // Retry button
+        document.getElementById('errorRetry').addEventListener('click', retryVideo);
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlaylist();
+            renderHistory();
+            switchVideo(0);
+        });
+    </script>
+</body>
+</html>

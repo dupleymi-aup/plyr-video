@@ -1,16 +1,16 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { translate, translateText } from '../../src/js/utils/translate';
 
 describe('translate', () => {
-  const originalFetch = global.fetch;
+  const originalFetch = globalThis.fetch;
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    globalThis.fetch = originalFetch;
     vi.restoreAllMocks();
   });
 
   it('should return translated text on success', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ translatedText: 'Hola' }),
@@ -19,9 +19,9 @@ describe('translate', () => {
 
     const result = await translate('Hello', 'es', 'en');
     expect(result).toBe('Hola');
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 
-    const [url, options] = global.fetch.mock.calls[0];
+    const [url, options] = globalThis.fetch.mock.calls[0];
     expect(url).toBe('https://libretranslate.de/translate');
     expect(options.method).toBe('POST');
     expect(options.body.get('q')).toBe('Hello');
@@ -30,7 +30,7 @@ describe('translate', () => {
   });
 
   it('should include api_key when provided', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ translatedText: 'Bonjour' }),
@@ -39,12 +39,12 @@ describe('translate', () => {
 
     await translate('Hello', 'fr', 'en', { apiUrl: 'https://example.com/translate', key: 'secret123' });
 
-    const [, options] = global.fetch.mock.calls[0];
+    const [, options] = globalThis.fetch.mock.calls[0];
     expect(options.body.get('api_key')).toBe('secret123');
   });
 
   it('should fallback to original text when response is not ok', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: false,
         status: 500,
@@ -58,7 +58,7 @@ describe('translate', () => {
   });
 
   it('should fallback to original text on invalid JSON response', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({}),
@@ -72,7 +72,7 @@ describe('translate', () => {
   });
 
   it('should fallback to original text on network error', async () => {
-    global.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
+    globalThis.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
 
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await translate('Hello', 'pt');
@@ -81,7 +81,7 @@ describe('translate', () => {
   });
 
   it('should use default target language "en"', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ translatedText: 'Hello' }),
@@ -90,14 +90,14 @@ describe('translate', () => {
 
     await translate('Hola');
 
-    const [, options] = global.fetch.mock.calls[0];
+    const [, options] = globalThis.fetch.mock.calls[0];
     expect(options.body.get('to')).toBe('en');
   });
 });
 
 describe('translateText', () => {
   it('should delegate to translate for libretranslate service', async () => {
-    global.fetch = vi.fn(() =>
+    globalThis.fetch = vi.fn(() =>
       Promise.resolve({
         ok: true,
         json: () => Promise.resolve({ translatedText: 'Ciao' }),

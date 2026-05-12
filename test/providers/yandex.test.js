@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Parse Yandex Cloud Video ID from URL
 function parseId(url) {
@@ -10,7 +10,7 @@ function parseId(url) {
   return match && match[1] ? match[1] : url;
 }
 
-describe('Yandex Provider', () => {
+describe('yandex Provider', () => {
   describe('parseId', () => {
     it('should extract video ID from Yandex Cloud Video URL', () => {
       expect(parseId('https://video.cloud.yandex.net/player/7c10a15d-1e87-4d6e-a0e7-8f0f5e5c5e5d')).toBe('7c10a15d-1e87-4d6e-a0e7-8f0f5e5c5e5d');

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Parse Rutube ID from URL
 function parseId(url) {
@@ -10,7 +10,7 @@ function parseId(url) {
   return match && match[1] ? match[1] : url;
 }
 
-describe('Rutube Provider', () => {
+describe('rutube Provider', () => {
   describe('parseId', () => {
     it('should extract video ID from Rutube URL', () => {
       expect(parseId('https://rutube.ru/video/91d051245c0cf5703957fe07f7b11b98/')).toBe('91d051245c0cf5703957fe07f7b11b98');

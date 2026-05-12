@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Parse VK Video ID from URL
 function parseId(url) {
@@ -10,7 +10,7 @@ function parseId(url) {
   return match && match[0] ? match[0].split('/').pop().replace('video', '') : url;
 }
 
-describe('VK Provider', () => {
+describe('vK Provider', () => {
   describe('parseId', () => {
     it('should extract video ID from VK URL', () => {
       expect(parseId('https://vk.com/video-40602947_456239058')).toBe('-40602947_456239058');

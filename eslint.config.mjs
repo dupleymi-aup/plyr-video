@@ -18,7 +18,7 @@ export default antfu({
     indent: 2,
     quotes: 'single',
   },
-  ignores: ['node_modules', 'dist', 'src/js/plyr.d.ts'],
+  ignores: ['node_modules', 'dist', 'src/js/plyr.d.ts', 'demo/playlist.html'],
   languageOptions: {
     globals: {
       ...globals.browser,

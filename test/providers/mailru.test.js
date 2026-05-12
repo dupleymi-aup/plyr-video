@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 // Parse Mail.ru Video ID from URL
 function parseId(url) {
@@ -10,7 +10,7 @@ function parseId(url) {
   return match && match[1] ? match[1] : url;
 }
 
-describe('Mail.ru Provider', () => {
+describe('mail.ru Provider', () => {
   describe('parseId', () => {
     it('should extract video ID from Mail.ru embed URL', () => {
       expect(parseId('https://my.mail.ru/video/embed/6353406850491756603')).toBe('6353406850491756603');
