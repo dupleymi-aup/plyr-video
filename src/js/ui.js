@@ -2,9 +2,9 @@
 // Plyr UI
 // ==========================================================================
 
-import captions from './captions';
 import controls from './controls';
 import support from './support';
+import transcription from './transcription';
 import { getElement, toggleClass } from './utils/elements';
 import { ready, triggerEvent } from './utils/events';
 import i18n from './utils/i18n';
@@ -57,8 +57,8 @@ const ui = {
 
     // Setup captions and transcription for HTML5
     if (this.isHTML5) {
-      captions.setup.call(this);
-      this.transcription.setup.call(this);
+      this.captions.setup();
+      transcription.setup.call(this);
     }
 
     // Reset volume
