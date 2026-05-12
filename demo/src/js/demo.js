@@ -90,7 +90,7 @@ const playIconSvg = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
       `).join('');
 
       // Bind click handlers
-      galleryContainer.querySelectorAll('.video-gallery__item').forEach(item => {
+      galleryContainer.querySelectorAll('.video-gallery__item').forEach((item) => {
         item.addEventListener('click', () => {
           const id = item.getAttribute('data-id');
           selectVideo(id);
@@ -104,7 +104,8 @@ const playIconSvg = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
       try {
         window.player?.pause();
         window.playerHls?.pause();
-      } catch {}
+      }
+      catch {}
 
       togglePlayerVisibility(window.player, false);
       togglePlayerVisibility(window.playerHls, false);
