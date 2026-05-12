@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path, { join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -21,29 +21,42 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const pkg = JSON.parse(readFileSync(join(path.resolve(), 'package.json'), 'utf-8'));
-const config = JSON.parse(readFileSync(join(path.resolve(), 'deploy.json'), 'utf-8'));
+const deployConfigPath = join(path.resolve(), 'deploy.json');
 
 // Info from package
 const { version } = pkg;
 const minSuffix = '.min';
 
-// Get AWS config
-const jobs = Object.fromEntries(Object.entries(config).map(([name, options]) => [name, {
-  ...options,
-  client: options.type === 'r2'
-    ? new S3Client({
-      region: 'auto',
-      credentials: {
-        accessKeyId: process.env.R2_ACCESS_KEY_ID,
-        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
-      },
-      endpoint: `https://${process.env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    })
-    : new S3Client({
-      region: options.region,
-      credentials: new aws.SharedIniFileCredentials({ profile: 'plyr' }),
-    }),
-}]));
+// Lazy load deploy config to avoid failing when deploy.json is not present
+let jobs;
+function getJobs() {
+  if (jobs) return jobs;
+
+  if (!existsSync(deployConfigPath)) {
+    throw new Error('deploy.json not found. Copy deploy.json.example to deploy.json and configure it, or restore from version control.');
+  }
+
+  const config = JSON.parse(readFileSync(deployConfigPath, 'utf-8'));
+
+  jobs = Object.fromEntries(Object.entries(config).map(([name, options]) => [name, {
+    ...options,
+    client: options.type === 'r2'
+      ? new S3Client({
+        region: 'auto',
+        credentials: {
+          accessKeyId: process.env.R2_ACCESS_KEY_ID,
+          secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
+        },
+        endpoint: `https://${process.env.CF_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+      })
+      : new S3Client({
+        region: options.region,
+        credentials: new aws.SharedIniFileCredentials({ profile: 'plyr' }),
+      }),
+  }]));
+
+  return jobs;
+}
 
 // Paths
 const root = path.join(__dirname, '..');
@@ -96,8 +109,14 @@ const sizeOptions = { showFiles: true, gzip: true };
 const regex = '(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*)?(?:\\+[\\da-z\\-]+(?:\\.[\\da-z\\-]+)*)?';
 const semver = new RegExp(`v${regex}`, 'gi');
 const localPath = /(..\/)?dist\//gi;
-const versionPath = `https://${jobs.cdn.domain}/${version}/`;
-const cdnPath = new RegExp(`${jobs.cdn.domain}/${regex}/`, 'gi');
+
+// Lazy version path helpers (avoid accessing jobs at module load time)
+function getVersionPath() {
+  return `https://${getJobs().cdn.domain}/${version}/`;
+}
+function getCdnPath() {
+  return new RegExp(`${getJobs().cdn.domain}/${regex}/`, 'gi');
+}
 
 const renameFile = rename((p) => {
   p.basename = p.basename.replace(minSuffix, '');
@@ -120,7 +139,7 @@ export function prepare(done) {
     return null;
   }
 
-  const { domain } = jobs.cdn;
+  const { domain } = getJobs().cdn;
 
   log(`Updating version in files to ${green(bold(version))}...`);
 
@@ -133,7 +152,7 @@ export function prepare(done) {
       { base: '.' },
     )
     .pipe(replace(semver, `v${version}`))
-    .pipe(replace(cdnPath, `${domain}/${version}/`))
+    .pipe(replace(getCdnPath(), `${domain}/${version}/`))
     .pipe(gulp.dest('./'));
 }
 
@@ -143,7 +162,7 @@ function cdn(done) {
     return null;
   }
 
-  const { domain, client, bucket } = jobs.cdn;
+  const { domain, client, bucket } = getJobs().cdn;
 
   log(`Uploading ${green(bold(pkg.version))} to ${cyan(domain)}...`);
 
@@ -158,7 +177,7 @@ function cdn(done) {
       ),
     )
     .pipe(size(sizeOptions))
-    .pipe(replace(localPath, versionPath))
+    .pipe(replace(localPath, getVersionPath()))
     .pipe(publish(client, bucket, options.cdn.headers));
 }
 
@@ -168,13 +187,13 @@ function demo(done) {
     return null;
   }
 
-  const { client, bucket, domain } = jobs.demo;
+  const { client, bucket, domain } = getJobs().demo;
   log(`Uploading ${green(bold(pkg.version))} to ${cyan(domain)}...`);
 
   // Replace versioned files in README.md
   gulp
     .src([`${root}/README.md`])
-    .pipe(replace(cdnPath, `${jobs.cdn.domain}/${version}/`))
+    .pipe(replace(getCdnPath(), `${getJobs().cdn.domain}/${version}/`))
     .pipe(gulp.dest(root));
 
   // Replace local file paths with remote paths in demo HTML
@@ -200,7 +219,7 @@ function demo(done) {
 }
 
 function preview() {
-  const { domain } = jobs.demo;
+  const { domain } = getJobs().demo;
 
   return gulp.src(__filename).pipe(
     open({
