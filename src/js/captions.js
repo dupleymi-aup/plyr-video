@@ -328,7 +328,7 @@ class Captions {
     }
 
     // Update translation container immediately
-    if (translationActive && this.elements.translation && this.elements.captions.innerHTML) {
+    if (translationActive && this.elements.translation && this.elements.captions && this.elements.captions.innerHTML) {
       // Translate current captions
       translate(this.elements.captions.innerHTML, this.translation.language)
         .then((translated) => {

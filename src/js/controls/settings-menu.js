@@ -63,7 +63,9 @@ class SettingsMenu {
 
     // Update the label
     const label = this.player.elements.settings.buttons[setting].querySelector(`.${this.player.config.classNames.menu.value}`);
-    label.innerHTML = this.getLabel(setting, value);
+    if (is.element(label)) {
+      label.innerHTML = this.getLabel(setting, value);
+    }
 
     // Find the radio option and check it
     const target = list && list.querySelector(`[value="${value}"]`);
@@ -83,7 +85,7 @@ class SettingsMenu {
         if (is.number(value)) {
           const label = i18n.get(`qualityLabel.${value}`, this.player.config);
 
-          if (!label.length) {
+          if (is.empty(label)) {
             return `${value}p`;
           }
 
