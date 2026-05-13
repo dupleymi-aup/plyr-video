@@ -1,6 +1,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { commentSchema } from "@/lib/validation";
+import { validateBody } from "@/lib/middleware";
+import { z } from "zod";
+
+const commentWithVideoSchema = commentSchema.extend({
+  videoId: z.string().min(1, "videoId is required"),
+});
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -9,8 +16,7 @@ export async function GET(request: NextRequest) {
   const limit = parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
 
-  const where: any = { parentId: null };
-  if (videoId) where.videoId = videoId;
+  const where = { parentId: null, ...(videoId ? { videoId } : {}) };
 
   const comments = await prisma.comment.findMany({
     where,
@@ -36,15 +42,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
-  const { content, videoId, parentId } = body;
+  const validation = await validateBody(commentWithVideoSchema)(request);
+  if (validation.error) return validation.error;
 
-  if (!content || !videoId) {
-    return NextResponse.json(
-      { error: "Content and videoId are required" },
-      { status: 400 }
-    );
-  }
+  const { content, videoId, parentId } = validation.data;
 
   const comment = await prisma.comment.create({
     data: {

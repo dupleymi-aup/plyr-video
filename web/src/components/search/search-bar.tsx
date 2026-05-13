@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export function SearchBar() {
-  const [query, setQuery] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [query, setQuery] = useState(searchParams.get("q") || "");
+
+  useEffect(() => {
+    setQuery(searchParams.get("q") || "");
+  }, [searchParams]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +30,6 @@ export function SearchBar() {
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="pl-10"
-        defaultValue={searchParams.get("q") || ""}
       />
     </form>
   );

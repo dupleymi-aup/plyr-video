@@ -36,8 +36,23 @@ export default function RegisterPage() {
     }
 
     try {
+      // First register the user
+      const registerRes = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, confirmPassword }),
+      });
+
+      const registerData = await registerRes.json();
+
+      if (!registerRes.ok) {
+        setError(registerData.error || "Registration failed");
+        setLoading(false);
+        return;
+      }
+
+      // Then sign in
       const result = await signIn("credentials", {
-        name,
         email,
         password,
         redirect: false,
