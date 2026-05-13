@@ -281,7 +281,7 @@ class Fullscreen {
         this.player.embed.exitFullscreen();
       }
       else {
-        this.target.webkitEnterFullscreen();
+        this.target.webkitExitFullscreen();
       }
       silencePromise(this.player.play());
     }
