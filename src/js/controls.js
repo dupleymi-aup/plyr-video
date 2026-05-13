@@ -744,9 +744,15 @@ const controls = {
     // Get marker point for time
     const point = this.config.markers?.points?.find(({ time: t }) => t === Math.round(time));
 
-    // Append the point label to the tooltip
+    // Append the point label to the tooltip (escape HTML to prevent XSS)
     if (point) {
-      text = `${point.label}<br>${text}`;
+      const escapedLabel = point.label
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+      text = `${escapedLabel}<br>${text}`;
     }
 
     tipElement.innerHTML = text;
@@ -1964,7 +1970,14 @@ const controls = {
         markerElement.addEventListener('mouseenter', () => {
           if (!point.label) return;
           tipElement.style.left = left;
-          tipElement.innerHTML = point.label;
+          // Escape HTML to prevent XSS
+          const escapedLabel = point.label
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+          tipElement.innerHTML = escapedLabel;
           toggleTip(true);
         });
 

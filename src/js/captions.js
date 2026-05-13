@@ -533,13 +533,14 @@ class Captions {
 
     // Set new caption text
     const content = cues.map(cueText => cueText.trim()).join('\n');
-    const changed = content !== this.elements.captions.innerHTML;
+    const changed = content !== this.elements.captions.textContent;
 
     if (changed) {
       // Empty the container and create a new child element
       emptyElement(this.elements.captions);
       const caption = createElement('span', getAttributesFromSelector(this.config.selectors.caption));
-      caption.innerHTML = content;
+      // Use textContent to prevent XSS attacks
+      caption.textContent = content;
       this.elements.captions.appendChild(caption);
 
       // Update translation container if translation is active and transcription is not active

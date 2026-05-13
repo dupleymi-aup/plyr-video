@@ -70,6 +70,8 @@ export function createEmbed(provider, options) {
         player.debug.warn(`${label}: Player did not initialize within ${initTimeoutMs / 1000}s`);
       }
     }, initTimeoutMs),
+    optionsTimeout: null,
+    captionTimeout: null,
   };
 
   // Initialize media properties
@@ -240,11 +242,12 @@ export function destroy() {
   const player = this;
   if (player.embed) {
     clearTimeout(player.embed.initTimeout);
-    clearTimeout(player.embed.optionsTimeout);
-    clearTimeout(player.embed.captionTimeout);
+    clearTimeout(player.embed.optionsTimeout || 0);
+    clearTimeout(player.embed.captionTimeout || 0);
     if (player.embed.messageHandler) {
       window.removeEventListener('message', player.embed.messageHandler);
     }
+    player.embed = null;
   }
 }
 

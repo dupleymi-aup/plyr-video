@@ -2,6 +2,8 @@
 // Provider error codes and standardized error handling
 // ==========================================================================
 
+import { providers } from '../config/types';
+
 // Standard error codes for embed providers
 export const errorCodes = {
   // Network errors (1-10)
@@ -151,7 +153,7 @@ export function isRetryableError(code) {
  */
 export function mapProviderErrorCode(provider, providerCode) {
   // Rutube error types
-  if (provider === 'rutube') {
+  if (provider === providers.rutube) {
     switch (providerCode) {
       case 1:
       case 'not_found':
@@ -171,7 +173,7 @@ export function mapProviderErrorCode(provider, providerCode) {
   }
 
   // VK error codes
-  if (provider === 'vk') {
+  if (provider === providers.vk) {
     switch (providerCode) {
       case 1:
         return errorCodes.MEDIA_NOT_FOUND;
@@ -187,7 +189,7 @@ export function mapProviderErrorCode(provider, providerCode) {
   }
 
   // Mail.ru error codes
-  if (provider === 'mailru') {
+  if (provider === providers.mailru) {
     switch (providerCode) {
       case 1:
       case 'not_found':
@@ -204,7 +206,7 @@ export function mapProviderErrorCode(provider, providerCode) {
   }
 
   // MTS Link error codes
-  if (provider === 'mtslink') {
+  if (provider === providers.mtslink) {
     switch (providerCode) {
       case 1:
       case 'not_found':
