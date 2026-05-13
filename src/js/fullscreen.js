@@ -283,7 +283,6 @@ class Fullscreen {
       else {
         this.target.webkitExitFullscreen();
       }
-      silencePromise(this.player.play());
     }
     else if (!Fullscreen.nativeSupported || this.forceFallback) {
       this.toggleFallback(false);

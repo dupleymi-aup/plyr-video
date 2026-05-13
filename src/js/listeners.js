@@ -165,7 +165,7 @@ class Listeners {
 
       // Escape is handle natively when in full screen
       // So we only need to worry about non native
-      if (key === 'Escape' && !player.fullscreen.usingNative && player.fullscreen.active) {
+      if (key === 'Escape' && !player.fullscreen.useNative && player.fullscreen.active) {
         player.fullscreen.toggle();
       }
 
