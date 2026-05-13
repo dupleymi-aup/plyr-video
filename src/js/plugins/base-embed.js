@@ -52,7 +52,8 @@ export function createEmbed(provider, options) {
     'allow',
     'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer',
   );
-  iframe.setAttribute('src', `${embedUrl}?${params.join('&')}`);
+  const query = params.length ? `?${params.join('&')}` : '';
+  iframe.setAttribute('src', `${embedUrl}${query}`);
 
   const wrapper = createElement('div', {
     'className': player.config.classNames.embedContainer,
