@@ -1789,8 +1789,9 @@ const controls = {
       }
     }
 
-    // Create a unique ID
-    this.id = Math.floor(Math.random() * 10000);
+    // Create a unique ID using incrementing counter to avoid collisions
+    controls.idCounter = (controls.idCounter || 0) + 1;
+    this.id = controls.idCounter;
 
     // Null by default
     let container = null;

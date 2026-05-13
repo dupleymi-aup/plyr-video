@@ -541,7 +541,7 @@ class Listeners {
       'rewind',
     );
 
-    // Rewind
+    // Fast forward
     this.bind(
       elements.buttons.fastForward,
       'click',

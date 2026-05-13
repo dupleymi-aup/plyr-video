@@ -5,6 +5,11 @@
 
 import is from './is';
 
+// Uses native fetch (required for POST requests)
+// Custom XHR-based fetch only supports GET
+// eslint-disable-next-line no-restricted-globals
+const nativeFetch = fetch;
+
 /**
  * Translate text using LibreTranslate API
  * @param {string} text - The text to translate
@@ -30,7 +35,7 @@ export function translate(text, to = 'en', from = 'auto', config = {}) {
     ...(settings.key && { api_key: settings.key }),
   });
 
-  return fetch(settings.apiUrl, {
+  return nativeFetch(settings.apiUrl, {
     method: 'POST',
     body,
     headers: {
