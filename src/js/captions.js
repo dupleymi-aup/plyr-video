@@ -57,7 +57,11 @@ class Captions {
     this.isRutube = plyr.isRutube;
     this.isYandexCloud = plyr.isYandexCloud;
     this.isYouTube = plyr.isYouTube;
-    this.embed = plyr.embed;
+  }
+
+  // Get embed reference dynamically (embed is set up after Captions constructor runs)
+  get embed() {
+    return this.plyr.embed;
   }
 
   // Setup captions
