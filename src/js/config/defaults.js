@@ -442,6 +442,7 @@ const defaults = {
     transcriptionEnabled: 'Transcription enabled',
     transcriptionDisabled: 'Transcription disabled',
     transcriptionLanguage: 'Transcription language',
+    loading: 'Loading...',
   },
 
   // URLs

@@ -265,11 +265,12 @@ const ui = {
 
     // Create preloader element if it doesn't exist
     if (!is.element(this.elements.preloader)) {
+      const loadingText = i18n.get('loading', this.config) || 'Loading...';
       const preloader = document.createElement('div');
       preloader.className = 'plyr__preloader';
       preloader.innerHTML = `
         <div class="plyr__preloader__spinner"></div>
-        <div class="plyr__preloader__text">Загрузка...</div>
+        <div class="plyr__preloader__text">${loadingText}</div>
         <div class="plyr__preloader__progress">
           <div class="plyr__preloader__progress-bar"></div>
         </div>
