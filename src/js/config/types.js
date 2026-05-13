@@ -34,9 +34,9 @@ export function getProviderByUrl(url) {
   }
 
   // Rutube — supports: rutube.ru/video/, rutube.ru/play/embed/, rutube.ru/embed/,
-  // rutube.ru/channel/{id}/video/, rutube.ru/r/{id}, play.rutube.ru/
+  // rutube.ru/channel/{id}/video/, rutube.ru/r/{id}, rutube.ru/plst/{id}, play.rutube.ru/
   if (
-    /^https?:\/\/(?:www\.)?(?:rutube\.ru\/(?:play\/embed\/|video\/|embed\/|channel\/\d+\/video\/|r\/)|play\.rutube\.ru\/)/.test(
+    /^https?:\/\/(?:www\.)?(?:rutube\.ru\/(?:play\/embed\/|video\/|embed\/|channel\/\d+\/video\/|r\/|plst\/)|play\.rutube\.ru\/)/.test(
       url,
     )
   ) {

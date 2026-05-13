@@ -728,6 +728,7 @@ const defaults = {
     quality: null, // Initial quality (e.g. 360, 480, 720, 1080)
     skinColor: null, // Interface color in HEX (e.g. 'e53935')
     stopTime: null, // Stop playback at this time (seconds)
+    playlistId: null, // Rutube playlist ID (e.g. '1167014')
   },
 
   // Yandex Cloud Video plugin

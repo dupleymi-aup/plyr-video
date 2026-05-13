@@ -53,6 +53,29 @@ function parseId(url) {
   return url;
 }
 
+// Parse Rutube playlist ID from URL
+function parsePlaylistId(url) {
+  if (is.empty(url)) {
+    return null;
+  }
+
+  // Playlist URLs: rutube.ru/plst/{playlistId}/ or rutube.ru/play/embed/{videoId}?playlist={playlistId}
+  const playlistRegex = /rutube\.ru\/plst\/([a-f0-9]+)\/?/i;
+  const match = url.match(playlistRegex);
+  if (match && match[1]) {
+    return match[1];
+  }
+
+  // Check for playlist query parameter
+  const queryRegex = /[?&]playlist=([a-f0-9]+)/i;
+  const queryMatch = url.match(queryRegex);
+  if (queryMatch && queryMatch[1]) {
+    return queryMatch[1];
+  }
+
+  return null;
+}
+
 const rutube = {
   setup() {
     baseSetup.call(this, rutube);
@@ -72,14 +95,23 @@ const rutube = {
     }
 
     const videoId = parseId(source);
-    if (is.empty(videoId)) {
-      player.debug.error('Rutube: No valid video ID found');
+    const playlistId = parsePlaylistId(source) || config.playlistId;
+
+    if (is.empty(videoId) && is.empty(playlistId)) {
+      player.debug.error('Rutube: No valid video ID or playlist ID found');
       return;
     }
 
-    const embedUrl = `https://rutube.ru/play/embed/${videoId}/`;
+    // Build embed URL - for playlists, use playlist embed format
+    const embedUrl = playlistId
+      ? `https://rutube.ru/play/embed/${playlistId}/`
+      : `https://rutube.ru/play/embed/${videoId}/`;
 
     const params = [];
+    // If we have both videoId and playlistId, pass videoId as a parameter
+    if (playlistId && videoId) {
+      params.push(`p=${videoId}`);
+    }
     if (config.autoplay) {
       params.push('autoplay=true');
     }
@@ -95,7 +127,7 @@ const rutube = {
 
     createEmbed(rutube, {
       player,
-      videoId,
+      videoId: playlistId || videoId,
       embedUrl,
       params,
       allowedOrigins: ['https://rutube.ru', 'https://www.rutube.ru', 'https://play.rutube.ru'],
@@ -104,13 +136,15 @@ const rutube = {
     });
 
     defineMediaControls(player);
-    defineMediaProperties(player, videoId, embedUrl);
+    defineMediaProperties(player, playlistId || videoId, embedUrl);
 
     // Get title
-    rutube.getTitle.call(player, videoId);
+    if (videoId && !playlistId) {
+      rutube.getTitle.call(player, videoId);
+    }
 
     // Fetch poster if custom controls
-    if (config.customControls && player.poster) {
+    if (config.customControls && player.poster && videoId) {
       fetchPoster(`https://rutube.ru/api/video/${videoId}/`, player);
     }
 
