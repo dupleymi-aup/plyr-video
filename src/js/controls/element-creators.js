@@ -243,9 +243,10 @@ class ElementCreators {
       ),
     );
 
-    // Create the label inside
+    // Create the label inside: <span>0</span>% played
     if (type !== 'volume') {
-      progress.appendChild(createElement('span', null, '0'));
+      const span = createElement('span', null, '0');
+      progress.appendChild(span);
 
       const suffixKey = {
         played: 'played',
@@ -253,7 +254,7 @@ class ElementCreators {
       }[type];
       const suffix = suffixKey ? i18n.get(suffixKey, this.player.config) : '';
 
-      progress.textContent = `% ${suffix.toLowerCase()}`;
+      progress.appendChild(document.createTextNode(`% ${suffix.toLowerCase()}`));
     }
 
     this.player.elements.display[type] = progress;

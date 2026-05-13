@@ -153,14 +153,8 @@ class Captions {
     }
 
     // Translation state
-    let translationActive = this.storage.get('translationActive') || this.config.translation.active;
-    if (!is.boolean(translationActive)) {
-      translationActive = this.config.translation.active;
-    }
-    let translationLanguage = this.storage.get('translationLanguage') || this.config.translation.language;
-    if (!is.string(translationLanguage)) {
-      translationLanguage = this.config.translation.language;
-    }
+    const translationActive = this.storage.get('translationActive') || this.config.translation.active;
+    const translationLanguage = this.storage.get('translationLanguage') || this.config.translation.language;
 
     Object.assign(this, {
       toggled: false,

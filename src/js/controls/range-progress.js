@@ -62,7 +62,7 @@ class RangeProgress {
         // Update text label inside
         const label = progress.getElementsByTagName('span')[0];
         if (is.element(label)) {
-          label.childNodes[0].nodeValue = val;
+          label.childNodes[0].nodeValue = String(val);
         }
       }
     };

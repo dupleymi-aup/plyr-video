@@ -710,7 +710,7 @@ class Listeners {
 
         seek.removeAttribute('seek-value');
 
-        player.currentTime = (seekTo / seek.max) * player.duration;
+        player.currentTime = (Number(seekTo) / Number(seek.max)) * player.duration;
       },
       'seek',
     );
