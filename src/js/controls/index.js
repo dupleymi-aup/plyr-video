@@ -56,15 +56,21 @@ const controls = {
   idCounter: 0,
 };
 
-// For each method, create a wrapper that instantiates Controls with the player
-// context (this from .call()) and delegates
+// Cache one Controls instance per player to avoid re-instantiating sub-modules on every call
+const controlsCache = new WeakMap();
+
+// For each method, create a wrapper that reuses the cached Controls instance
 for (const name of methodNames) {
   controls[name] = function (...args) {
     // 'this' is the Plyr instance (from .call(this.player, ...))
-    const controlsInstance = new Controls(this);
+    let instance = controlsCache.get(this);
+    if (!instance) {
+      instance = new Controls(this);
+      controlsCache.set(this, instance);
+    }
     // Sync the static idCounter back to the proxy
     controls.idCounter = Controls.idCounter;
-    return controlsInstance[name](...args);
+    return instance[name](...args);
   };
 }
 

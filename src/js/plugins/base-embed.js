@@ -273,10 +273,18 @@ export function fetchPoster(url, player) {
   fetch(url, 'json', false, 8000)
     .then((data) => {
       if (data && data.thumbnail_url) {
-        ui.setPoster.call(player, data.thumbnail_url).catch(() => {});
+        ui.setPoster.call(player, data.thumbnail_url).catch((err) => {
+          if (player.config.debug) {
+            player.debug.warn(`${player.provider}: Failed to set poster:`, err.message);
+          }
+        });
       }
     })
-    .catch(() => {});
+    .catch((err) => {
+      if (player.config.debug) {
+        player.debug.warn(`${player.provider}: Failed to fetch poster:`, err.message);
+      }
+    });
 }
 
 // Shared message handler for player:changeState
