@@ -1027,7 +1027,7 @@ const controls = {
     }, */
 
   // Get current selected caption language
-  // TODO: rework this to user the getter in the API?
+  // TODO: rework this to use the getter in the API?
 
   // Set a list of available captions languages
   setCaptionsMenu() {
