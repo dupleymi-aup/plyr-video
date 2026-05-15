@@ -176,13 +176,23 @@ class MenuItems {
             break;
 
           case 'loop':
-            this.player.loop = value === true || value === 'true';
+            if (value === false || value === 'false') {
+              this.player.loop = false;
+            }
+            else if (value === true || value === 'true') {
+              this.player.loop = true;
+            }
+            else {
+              // Handle 'start', 'end', 'all'
+              this.player.loop = value;
+            }
             break;
 
           case 'translation':
             if (value === 'off') {
               this.player.captions.translation.active = false;
-            } else {
+            }
+            else {
               this.player.captions.translation.active = true;
               this.player.captions.translation.language = value;
             }
@@ -191,7 +201,8 @@ class MenuItems {
           case 'transcription':
             if (value === 'off') {
               this.player.transcription.active = false;
-            } else {
+            }
+            else {
               this.player.transcription.active = true;
               this.player.transcription.language = value;
             }

@@ -10,8 +10,8 @@ import { getElement, getElements, matches, toggleClass } from './utils/elements'
 import { off, on, once, toggleListener, triggerEvent } from './utils/events';
 import is from './utils/is';
 import { silencePromise } from './utils/promise';
-import { getAspectRatio, getViewportSize, supportsCSS } from './utils/style';
 import providerErrors, { errorCodes } from './utils/provider-errors';
+import { getAspectRatio, getViewportSize, supportsCSS } from './utils/style';
 
 class Listeners {
   constructor(player) {
@@ -324,6 +324,22 @@ class Listeners {
 
     // Time change on media
     on.call(player, player.media, 'timeupdate seeking seeked', event => controls.timeUpdate.call(player, event));
+
+    // Enforce loop boundaries
+    on.call(player, player.media, 'timeupdate', () => {
+      // Only enforce with active loop and defined end point
+      if (!player.config.loop.active) {
+        return;
+      }
+
+      const { start, end } = player.config.loop;
+      const currentTime = player.currentTime;
+
+      // If end point is set and we've passed it, seek back to start
+      if (is.number(end) && currentTime >= end) {
+        player.currentTime = is.number(start) ? start : 0;
+      }
+    });
 
     // Display duration
     on.call(player, player.media, 'durationchange loadeddata loadedmetadata', event =>

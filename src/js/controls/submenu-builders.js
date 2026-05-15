@@ -275,19 +275,34 @@ class SubmenuBuilders {
       toggleCondition: true,
       optionsGenerator: () => {
         const list = this.player.elements.settings.panels.loop.querySelector('[role="menu"]');
+        const { loop } = this.player.config;
 
         return [
           {
             value: false,
-            checked: !this.player.loop,
+            checked: !loop.active,
             title: i18n.get('loopOff', this.player.config),
             list,
             type: 'loop',
           },
           {
-            value: true,
-            checked: this.player.loop,
-            title: i18n.get('loopOn', this.player.config),
+            value: 'all',
+            checked: loop.active && loop.start === 0 && !is.number(loop.end),
+            title: i18n.get('loopAll', this.player.config),
+            list,
+            type: 'loop',
+          },
+          {
+            value: 'start',
+            checked: false,
+            title: i18n.get('loopMarkStart', this.player.config),
+            list,
+            type: 'loop',
+          },
+          {
+            value: 'end',
+            checked: false,
+            title: i18n.get('loopMarkEnd', this.player.config),
             list,
             type: 'loop',
           },

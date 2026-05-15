@@ -77,8 +77,8 @@ const defaults = {
   // Set loops
   loop: {
     active: false,
-    // start: null,
-    // end: null,
+    start: null,
+    end: null,
   },
 
   // Speed default and options to display
@@ -418,6 +418,9 @@ const defaults = {
     loop: 'Loop',
     loopOn: 'On',
     loopOff: 'Off',
+    loopAll: 'Loop all',
+    loopMarkStart: 'Mark start',
+    loopMarkEnd: 'Mark end',
     disabled: 'Disabled',
     enabled: 'Enabled',
     advertisement: 'Ad',

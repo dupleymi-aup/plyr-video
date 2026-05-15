@@ -5,7 +5,6 @@
 import captions from '../captions';
 import html5 from '../html5';
 import support from '../support';
-import { repaint } from '../utils/animation';
 import { dedupe } from '../utils/arrays';
 import browser from '../utils/browser';
 import {
@@ -870,11 +869,6 @@ class Controls {
             addProperty(button);
           }
         });
-    }
-
-    // Edge sometimes doesn't finish the paint so force a repaint
-    if (browser.isEdge) {
-      repaint(target);
     }
 
     // Setup tooltips

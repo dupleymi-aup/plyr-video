@@ -5,6 +5,8 @@
 // License: The MIT License (MIT)
 // ==========================================================================
 
+// i18n language packs
+import * as i18n from '../i18n';
 import Captions from './captions';
 import defaults from './config/defaults';
 import { pip } from './config/states';
@@ -32,6 +34,7 @@ import { cloneDeep, extend } from './utils/objects';
 import { silencePromise } from './utils/promise';
 import { getAspectRatio, reduceAspectRatio, setAspectRatio, validateAspectRatio } from './utils/style';
 import { translate } from './utils/translate';
+
 import { parseUrl } from './utils/urls';
 
 // Private properties
@@ -848,56 +851,62 @@ class Plyr {
 
   /**
    * Toggle loop
-   * TODO: Finish fancy new logic. Set the indicator on load as user may pass loop as config
-   * @param {boolean} input - Whether to loop or not
+   * @param {string|boolean} input - 'start' sets loop start point, 'end' sets loop end point,
+   *   'all' loops entire video, 'toggle' toggles loop on/off, or boolean for simple on/off
    */
   set loop(input) {
-    const toggle = is.boolean(input) ? input : this.config.loop.active;
-    this.config.loop.active = toggle;
-    this.media.loop = toggle;
+    // Simple boolean toggle
+    if (is.boolean(input)) {
+      this.config.loop.active = input;
+      this.config.loop.start = input ? 0 : null;
+      this.config.loop.end = null;
+      this.media.loop = input;
+      return;
+    }
 
-    // Set default to be a true toggle
-    /* const type = ['start', 'end', 'all', 'none', 'toggle'].includes(input) ? input : 'toggle';
+    // Advanced mode with start/end/all/toggle
+    const type = ['start', 'end', 'all'].includes(input) ? input : 'toggle';
 
-        switch (type) {
-            case 'start':
-                if (this.config.loop.end && this.config.loop.end <= this.currentTime) {
-                    this.config.loop.end = null;
-                }
-                this.config.loop.start = this.currentTime;
-                // this.config.loop.indicator.start = this.elements.display.played.value;
-                break;
+    switch (type) {
+      case 'start':
+        if (this.config.loop.end && this.config.loop.end <= this.currentTime) {
+          this.config.loop.end = null;
+        }
+        this.config.loop.start = this.currentTime;
+        this.config.loop.active = true;
+        break;
 
-            case 'end':
-                if (this.config.loop.start >= this.currentTime) {
-                    return this;
-                }
-                this.config.loop.end = this.currentTime;
-                // this.config.loop.indicator.end = this.elements.display.played.value;
-                break;
+      case 'end':
+        if (this.config.loop.start === null || this.config.loop.start >= this.currentTime) {
+          return;
+        }
+        this.config.loop.end = this.currentTime;
+        this.config.loop.active = true;
+        break;
 
-            case 'all':
-                this.config.loop.start = 0;
-                this.config.loop.end = this.duration - 2;
-                this.config.loop.indicator.start = 0;
-                this.config.loop.indicator.end = 100;
-                break;
+      case 'all':
+        this.config.loop.start = 0;
+        this.config.loop.end = null;
+        this.config.loop.active = true;
+        this.media.loop = true;
+        break;
 
-            case 'toggle':
-                if (this.config.loop.active) {
-                    this.config.loop.start = 0;
-                    this.config.loop.end = null;
-                } else {
-                    this.config.loop.start = 0;
-                    this.config.loop.end = this.duration - 2;
-                }
-                break;
-
-            default:
-                this.config.loop.start = 0;
-                this.config.loop.end = null;
-                break;
-        } */
+      case 'toggle':
+      default:
+        if (this.config.loop.active) {
+          this.config.loop.start = null;
+          this.config.loop.end = null;
+          this.config.loop.active = false;
+          this.media.loop = false;
+        }
+        else {
+          this.config.loop.start = 0;
+          this.config.loop.end = null;
+          this.config.loop.active = true;
+          this.media.loop = true;
+        }
+        break;
+    }
   }
 
   /**
@@ -1484,5 +1493,6 @@ class Plyr {
 }
 
 Plyr.defaults = cloneDeep(defaults);
+Plyr.i18n = i18n;
 
 export default Plyr;

@@ -32,7 +32,15 @@
     },
     "./dist/plyr.css": "./dist/plyr.css",
     "./css": "./dist/plyr.css",
-    "./plyr.scss": "./src/sass/plyr.scss"
+    "./plyr.scss": "./src/sass/plyr.scss",
+    "./i18n": {
+      "import": "./src/i18n/index.js",
+      "default": "./src/i18n/index.js"
+    },
+    "./i18n/*": {
+      "import": "./src/i18n/*.js",
+      "default": "./src/i18n/*.js"
+    }
   },
   "sass": "./src/sass/plyr.scss",
   "style": "./dist/plyr.css",

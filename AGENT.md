@@ -29,7 +29,7 @@ Plyr is a simple, accessible, and customizable HTML5, YouTube, and Vimeo media p
 - `src/js/plugins/*.js` — Provider integrations (YouTube, Vimeo, Rutube, VK, etc.).
 - `src/js/utils/*.js` — Utility modules (is, elements, events, strings, etc.).
 - `src/js/config/defaults.js` — Default configuration.
-- `src/js/controls.js` — UI controls logic (legacy, TODO: refactor into smaller files).
+- `src/js/controls/` — UI controls (orchestrator + 10 focused sub-modules).
 
 ### SCSS
 - Located in `src/sass/`.
