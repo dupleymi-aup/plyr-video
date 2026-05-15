@@ -4,6 +4,7 @@
 // Please see README.md in the root or github.com/QuadDarv1ne/plyr-video
 // ==========================================================================
 
+/* global Shr */
 import Plyr from '../../../src/js/plyr';
 import sources, { gallery } from './sources';
 
