@@ -143,6 +143,15 @@ class PreviewThumbnails {
 
       // Resolve promise
       const sortAndResolve = () => {
+        // Filter out failed requests (undefined entries)
+        this.thumbnails = this.thumbnails.filter(Boolean);
+
+        if (this.thumbnails.length === 0) {
+          this.player.debug.warn('No preview thumbnails could be loaded');
+          this.destroy();
+          return;
+        }
+
         // Sort smallest to biggest (e.g., [120p, 480p, 1080p])
         this.thumbnails.sort((x, y) => x.height - y.height);
 
@@ -607,12 +616,14 @@ class PreviewThumbnails {
   }
 
   get usingSprites() {
-    return Object.keys(this.thumbnails[0].frames[0]).includes('w');
+    const firstFrame = this.thumbnails[0]?.frames?.[0];
+    return firstFrame && Object.keys(firstFrame).includes('w');
   }
 
   get thumbAspectRatio() {
     if (this.usingSprites) {
-      return this.thumbnails[0].frames[0].w / this.thumbnails[0].frames[0].h;
+      const frame = this.thumbnails[0].frames[0];
+      return frame.w / frame.h;
     }
 
     return this.thumbnails[0].width / this.thumbnails[0].height;

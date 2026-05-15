@@ -56,7 +56,7 @@ export function createEmbed(provider, options) {
   iframe.setAttribute('src', `${embedUrl}${query}`);
 
   const wrapper = createElement('div', {
-    'className': player.config.classNames.embedContainer,
+    'class': player.config.classNames.embedContainer,
     'data-poster': player.poster,
   });
   wrapper.appendChild(iframe);

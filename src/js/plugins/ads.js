@@ -370,29 +370,6 @@ class Ads {
         // All ads for the current videos are done. We can now request new advertisements
         // in case the video is re-played
 
-        // TODO: Example for what happens when a next video in a playlist would be loaded.
-        // So here we load a new video when all ads are done.
-        // Then we load new ads within a new adsManager. When the video
-        // Is started - after - the ads are loaded, then we get ads.
-        // You can also easily test cancelling and reloading by running
-        // player.ads.cancel() and player.ads.play from the console I guess.
-        // this.player.source = {
-        //     type: 'video',
-        //     title: 'View From A Blue Moon',
-        //     sources: [{
-        //         src:
-        // 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.mp4', type:
-        // 'video/mp4', }], poster:
-        // 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg', tracks:
-        // [ { kind: 'captions', label: 'English', srclang: 'en', src:
-        // 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.en.vtt',
-        // default: true, }, { kind: 'captions', label: 'French', srclang: 'fr', src:
-        // 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.fr.vtt', }, ],
-        // };
-
-        // TODO: So there is still this thing where a video should only be allowed to start
-        // playing when the IMA SDK is ready or has failed
-
         if (this.player.ended) {
           this.loadAds();
         }

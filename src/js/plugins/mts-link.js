@@ -14,6 +14,7 @@ import {
   defineMediaControls,
   defineMediaProperties,
   destroy,
+  fetchPoster,
   fetchTitle,
   handleDefaultMessage,
 } from './base-embed';
@@ -98,6 +99,11 @@ const mtslink = {
 
     // Get title
     mtslink.getTitle.call(player, videoId);
+
+    // Fetch poster if custom controls
+    if (config.customControls && player.poster && videoId) {
+      fetchPoster(`https://player.mts-link.ru/api/v1/videos/${videoId}/`, player);
+    }
 
     // Request available qualities and captions
     player.embed.optionsTimeout = setTimeout(() => sendCommand(player, 'player:getQualityList'), 1000);

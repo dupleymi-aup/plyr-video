@@ -182,8 +182,12 @@ const vk = {
           return speed;
         },
         set(input) {
+          // VK Video API does not support playback speed changes
+          // Only update internal state without firing event
+          if (input !== speed && player.config.debug) {
+            player.debug.log('VK Video: playbackRate change not supported by VK API');
+          }
           speed = input;
-          triggerEvent.call(player, player.media, 'ratechange');
         },
       },
       volume: {

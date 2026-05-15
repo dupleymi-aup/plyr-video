@@ -10,6 +10,7 @@ import {
   defineMediaControls,
   defineMediaProperties,
   destroy,
+  fetchPoster,
   fetchTitle,
   handleDefaultMessage,
 } from './base-embed';
@@ -77,6 +78,11 @@ const yandex = {
 
     // Get title
     yandex.getTitle.call(player, videoId);
+
+    // Fetch poster if custom controls
+    if (config.customControls && player.poster && videoId) {
+      fetchPoster(`https://video.cloud.yandex.net/api/v1/videos/${videoId}/`, player);
+    }
 
     // Request available qualities and captions
     player.embed.optionsTimeout = setTimeout(
