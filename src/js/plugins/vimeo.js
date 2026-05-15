@@ -40,7 +40,7 @@ function parseHash(url) {
    *  - video/{id}/{hash}
    * If matched, the hash is available in capture group 4
    */
-  const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*h=|\/)+([\d,a-f]+)/;
+  const regex = /^.*(vimeo.com\/|video\/)(\d+)(\?.*h=|\/)+([\da-f]+)/;
   const found = url.match(regex);
 
   return found && found.length === 5 ? found[4] : null;

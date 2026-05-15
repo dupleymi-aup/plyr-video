@@ -212,6 +212,10 @@ class Fullscreen {
     // Get the current focused element
     const focused = document.activeElement;
     const focusable = getElements.call(this.player, 'a[href], button:not(:disabled), input:not(:disabled), [tabindex]');
+
+    // Bail if no focusable elements
+    if (!focusable.length) return;
+
     const [first] = focusable;
     const last = focusable[focusable.length - 1];
 

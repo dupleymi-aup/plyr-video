@@ -163,7 +163,9 @@ class PreviewThumbnails {
         // If string, convert into single-element list
         const urls = is.string(src) ? [src] : src;
         // Loop through each src URL. Download and process the VTT file, storing the resulting data in this.thumbnails
-        const promises = urls.map(u => this.getThumbnail(u));
+        const promises = urls.map(u => this.getThumbnail(u).catch((error) => {
+          this.player.debug.warn(`Failed to load preview thumbnails: ${error.message}`);
+        }));
         // Resolve
         Promise.all(promises).then(sortAndResolve);
       }
@@ -172,40 +174,51 @@ class PreviewThumbnails {
 
   // Process individual VTT file
   getThumbnail = (url) => {
-    return new Promise((resolve) => {
-      fetch(url, undefined, this.player.config.previewThumbnails.withCredentials).then((response) => {
-        const thumbnail = {
-          frames: parseVtt(response),
-          height: null,
-          urlPrefix: '',
-        };
+    return new Promise((resolve, reject) => {
+      fetch(url, undefined, this.player.config.previewThumbnails.withCredentials)
+        .then((response) => {
+          const thumbnail = {
+            frames: parseVtt(response),
+            height: null,
+            urlPrefix: '',
+          };
 
-        // If the URLs don't start with '/', then we need to set their relative path to be the location of the VTT file
-        // If the URLs do start with '/', then they obviously don't need a prefix, so it will remain blank
-        // If the thumbnail URLs start with with none of '/', 'http://' or 'https://', then we need to set their relative path to be the location of the VTT file
-        if (
-          thumbnail.frames.length
-          && !thumbnail.frames[0].text.startsWith('/')
-          && !thumbnail.frames[0].text.startsWith('http://')
-          && !thumbnail.frames[0].text.startsWith('https://')
-        ) {
-          thumbnail.urlPrefix = url.substring(0, url.lastIndexOf('/') + 1);
-        }
+          // Guard against empty VTT files
+          if (!thumbnail.frames.length) {
+            reject(new Error(`Empty or invalid VTT file: ${url}`));
+            return;
+          }
 
-        // Download the first frame, so that we can determine/set the height of this thumbnailsDef
-        const tempImage = new Image();
+          // If the URLs don't start with '/', then we need to set their relative path to be the location of the VTT file
+          // If the URLs do start with '/', then they obviously don't need a prefix, so it will remain blank
+          // If the thumbnail URLs start with with none of '/', 'http://' or 'https://', then we need to set their relative path to be the location of the VTT file
+          if (
+            !thumbnail.frames[0].text.startsWith('/')
+            && !thumbnail.frames[0].text.startsWith('http://')
+            && !thumbnail.frames[0].text.startsWith('https://')
+          ) {
+            thumbnail.urlPrefix = url.substring(0, url.lastIndexOf('/') + 1);
+          }
 
-        tempImage.onload = () => {
-          thumbnail.height = tempImage.naturalHeight;
-          thumbnail.width = tempImage.naturalWidth;
+          // Download the first frame, so that we can determine/set the height of this thumbnailsDef
+          const tempImage = new Image();
 
-          this.thumbnails.push(thumbnail);
+          tempImage.onload = () => {
+            thumbnail.height = tempImage.naturalHeight;
+            thumbnail.width = tempImage.naturalWidth;
 
-          resolve();
-        };
+            this.thumbnails.push(thumbnail);
 
-        tempImage.src = thumbnail.urlPrefix + thumbnail.frames[0].text;
-      });
+            resolve();
+          };
+
+          tempImage.onerror = () => {
+            reject(new Error(`Failed to load thumbnail image: ${thumbnail.urlPrefix + thumbnail.frames[0].text}`));
+          };
+
+          tempImage.src = thumbnail.urlPrefix + thumbnail.frames[0].text;
+        })
+        .catch(reject);
     });
   };
 
