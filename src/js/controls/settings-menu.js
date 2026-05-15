@@ -98,10 +98,10 @@ class SettingsMenu {
         return captions.getLabel.call(this.player);
 
       case 'translation':
-        return this.player.captions.translation.active ? i18n.get('translateEnabled', this.player.config) : i18n.get('translateDisabled', this.player.config);
+        return this.player.captions?.translation?.active ? i18n.get('translateEnabled', this.player.config) : i18n.get('translateDisabled', this.player.config);
 
       case 'transcription':
-        return this.player.transcription.active ? i18n.get('transcriptionEnabled', this.player.config) : i18n.get('transcriptionDisabled', this.player.config);
+        return this.player.transcription?.active ? i18n.get('transcriptionEnabled', this.player.config) : i18n.get('transcriptionDisabled', this.player.config);
 
       default:
         return null;
