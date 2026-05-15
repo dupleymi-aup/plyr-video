@@ -250,7 +250,7 @@ declare class Plyr {
 
 declare namespace Plyr {
   type MediaType = 'audio' | 'video';
-  type Provider = 'html5' | 'youtube' | 'vimeo';
+  type Provider = 'html5' | 'youtube' | 'vimeo' | 'rutube' | 'yandex' | 'vk' | 'mailru' | 'mtslink';
   type StandardEventMap = {
     progress: PlyrEvent;
     playing: PlyrEvent;
@@ -295,7 +295,9 @@ declare namespace Plyr {
   // For retrocompatibility, we keep YoutubeEvent
   type YoutubeEvent = keyof Plyr.YoutubeEventMap;
 
-  type PlyrEventMap = StandardEventMap & Html5EventMap & YoutubeEventMap;
+  type PlyrEventMap = StandardEventMap & Html5EventMap & YoutubeEventMap & {
+    qualitychange: PlyrEvent;
+  };
 
   interface FullscreenControl {
     /**
@@ -512,6 +514,31 @@ declare namespace Plyr {
      * Youtube Player Options.
      */
     youtube?: object;
+
+    /**
+     * Rutube Player Options.
+     */
+    rutube?: object;
+
+    /**
+     * Yandex Video Player Options.
+     */
+    yandex?: object;
+
+    /**
+     * VK Video Player Options.
+     */
+    vk?: object;
+
+    /**
+     * Mail.ru Video Player Options.
+     */
+    mailru?: object;
+
+    /**
+     * MTS Link Player Options.
+     */
+    mtslink?: object;
 
     /**
      * Preview Thumbnails Options.

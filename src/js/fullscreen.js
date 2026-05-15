@@ -8,7 +8,6 @@ import browser from './utils/browser';
 import { closest, getElements, hasClass, toggleClass } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
 import is from './utils/is';
-import { silencePromise } from './utils/promise';
 
 class Fullscreen {
   constructor(player) {
@@ -281,9 +280,8 @@ class Fullscreen {
         this.player.embed.exitFullscreen();
       }
       else {
-        this.target.webkitEnterFullscreen();
+        this.target.webkitExitFullscreen();
       }
-      silencePromise(this.player.play());
     }
     else if (!Fullscreen.nativeSupported || this.forceFallback) {
       this.toggleFallback(false);

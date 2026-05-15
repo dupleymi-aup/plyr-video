@@ -396,7 +396,7 @@ const vimeo = {
       triggerEvent.call(player, player.media, 'progress');
 
       // Check all loaded
-      if (Number.parseInt(data.percent, 10) === 1) {
+      if (Math.round(data.percent) === 1) {
         triggerEvent.call(player, player.media, 'canplaythrough');
       }
 

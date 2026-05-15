@@ -57,7 +57,11 @@ class Captions {
     this.isRutube = plyr.isRutube;
     this.isYandexCloud = plyr.isYandexCloud;
     this.isYouTube = plyr.isYouTube;
-    this.embed = plyr.embed;
+  }
+
+  // Get embed reference dynamically (embed is set up after Captions constructor runs)
+  get embed() {
+    return this.plyr.embed;
   }
 
   // Setup captions
@@ -136,7 +140,7 @@ class Captions {
 
     const browserLanguages = navigator.languages || [navigator.language || navigator.userLanguage || 'en'];
     const languages = dedupe(browserLanguages.map(language => language.split('-')[0]));
-    let language = (this.storage.get('language') || this.captions.language || this.config.captions.language || 'auto').toLowerCase();
+    let language = (this.storage.get('language') || this.language || this.config.captions.language || 'auto').toLowerCase();
 
     // Use first browser language when language is 'auto'
     if (language === 'auto') {
@@ -149,14 +153,8 @@ class Captions {
     }
 
     // Translation state
-    let translationActive = this.storage.get('translationActive') || this.config.translation.active;
-    if (!is.boolean(translationActive)) {
-      translationActive = this.config.translation.active;
-    }
-    let translationLanguage = this.storage.get('translationLanguage') || this.config.translation.language;
-    if (!is.string(translationLanguage)) {
-      translationLanguage = this.config.translation.language;
-    }
+    const translationActive = this.storage.get('translationActive') || this.config.translation.active;
+    const translationLanguage = this.storage.get('translationLanguage') || this.config.translation.language;
 
     Object.assign(this, {
       toggled: false,
@@ -515,13 +513,14 @@ class Captions {
 
     // Set new caption text
     const content = cues.map(cueText => cueText.trim()).join('\n');
-    const changed = content !== this.elements.captions.innerHTML;
+    const changed = content !== this.elements.captions.textContent;
 
     if (changed) {
       // Empty the container and create a new child element
       emptyElement(this.elements.captions);
       const caption = createElement('span', getAttributesFromSelector(this.config.selectors.caption));
-      caption.innerHTML = content;
+      // Use textContent to prevent XSS attacks
+      caption.textContent = content;
       this.elements.captions.appendChild(caption);
 
       // Update translation container if translation is active and transcription is not active

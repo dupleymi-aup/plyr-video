@@ -16,7 +16,6 @@ class Listeners {
   constructor(player) {
     this.player = player;
     this.lastKey = null;
-    this.lastKeyDown = null;
 
     this.handleKey = this.handleKey.bind(this);
     this.toggleMenu = this.toggleMenu.bind(this);
@@ -165,7 +164,7 @@ class Listeners {
 
       // Escape is handle natively when in full screen
       // So we only need to worry about non native
-      if (key === 'Escape' && !player.fullscreen.usingNative && player.fullscreen.active) {
+      if (key === 'Escape' && !player.fullscreen.useNative && player.fullscreen.active) {
         player.fullscreen.toggle();
       }
 
@@ -542,7 +541,7 @@ class Listeners {
       'rewind',
     );
 
-    // Rewind
+    // Fast forward
     this.bind(
       elements.buttons.fastForward,
       'click',
@@ -711,7 +710,7 @@ class Listeners {
 
         seek.removeAttribute('seek-value');
 
-        player.currentTime = (seekTo / seek.max) * player.duration;
+        player.currentTime = (Number(seekTo) / Number(seek.max)) * player.duration;
       },
       'seek',
     );

@@ -1,0 +1,765 @@
+// ==========================================================================
+// Plyr controls: Orchestrator class
+// ==========================================================================
+
+import captions from '../captions';
+import html5 from '../html5';
+import support from '../support';
+import { repaint } from '../utils/animation';
+import { dedupe } from '../utils/arrays';
+import browser from '../utils/browser';
+import {
+  createElement,
+  getAttributesFromSelector,
+  getElement,
+  getElements,
+  hasClass,
+  toggleClass,
+} from '../utils/elements';
+import { on } from '../utils/events';
+import i18n from '../utils/i18n';
+import is from '../utils/is';
+import loadSprite from '../utils/load-sprite';
+import { extend } from '../utils/objects';
+import { replaceAll } from '../utils/strings';
+
+import DownloadMetadata from './download-metadata';
+import ElementCreators from './element-creators';
+import Icon from './icon';
+import Markers from './markers';
+import MenuItems from './menu-items';
+import RangeProgress from './range-progress';
+import SettingsMenu from './settings-menu';
+import SubmenuBuilders from './submenu-builders';
+import TimeDisplay from './time-display';
+
+class Controls {
+  static idCounter = 0;
+
+  constructor(player) {
+    this.player = player;
+
+    // Compose sub-modules
+    this.icon = new Icon(player);
+    this.elementCreators = new ElementCreators(player);
+    this.menuItems = new MenuItems(player);
+    this.timeDisplay = new TimeDisplay(player);
+    this.rangeProgress = new RangeProgress(player);
+    this.settingsMenu = new SettingsMenu(player);
+    this.submenuBuilders = new SubmenuBuilders(player);
+    this.markers = new Markers(player);
+    this.downloadMetadata = new DownloadMetadata(player);
+  }
+
+  // ===========================================================================
+  // Delegated methods — thin wrappers to sub-modules
+  // ===========================================================================
+
+  getIconUrl() {
+    return this.icon.getIconUrl();
+  }
+
+  createIcon(type, attributes) {
+    return this.icon.createIcon(type, attributes);
+  }
+
+  createLabel(key, attr) {
+    return this.elementCreators.createLabel(key, attr);
+  }
+
+  createBadge(text) {
+    return this.elementCreators.createBadge(text);
+  }
+
+  createButton(buttonType, attr) {
+    return this.elementCreators.createButton(buttonType, attr);
+  }
+
+  createRange(type, attributes) {
+    return this.elementCreators.createRange(type, attributes);
+  }
+
+  createProgress(type, attributes) {
+    return this.elementCreators.createProgress(type, attributes);
+  }
+
+  createTime(type, attrs) {
+    return this.elementCreators.createTime(type, attrs);
+  }
+
+  bindMenuItemShortcuts(menuItem, type) {
+    return this.menuItems.bindMenuItemShortcuts(menuItem, type);
+  }
+
+  createMenuItem(params) {
+    return this.menuItems.createMenuItem(params);
+  }
+
+  formatTime(time, inverted) {
+    return this.timeDisplay.formatTime(time, inverted);
+  }
+
+  updateTimeDisplay(target, time, inverted) {
+    return this.timeDisplay.updateTimeDisplay(target, time, inverted);
+  }
+
+  timeUpdate(event) {
+    return this.timeDisplay.timeUpdate(event);
+  }
+
+  durationUpdate() {
+    return this.timeDisplay.durationUpdate();
+  }
+
+  updateVolume() {
+    return this.rangeProgress.updateVolume();
+  }
+
+  setRange(target, value) {
+    return this.rangeProgress.setRange(target, value);
+  }
+
+  updateProgress(event) {
+    return this.rangeProgress.updateProgress(event);
+  }
+
+  updateRangeFill(target) {
+    return this.rangeProgress.updateRangeFill(target);
+  }
+
+  updateSeekTooltip(event) {
+    return this.rangeProgress.updateSeekTooltip(event);
+  }
+
+  toggleMenuButton(setting, toggle) {
+    return this.settingsMenu.toggleMenuButton(setting, toggle);
+  }
+
+  updateSetting(setting, container, input) {
+    return this.settingsMenu.updateSetting(setting, container, input);
+  }
+
+  getLabel(setting, value) {
+    return this.settingsMenu.getLabel(setting, value);
+  }
+
+  checkMenu() {
+    return this.settingsMenu.checkMenu();
+  }
+
+  focusFirstMenuItem(pane, focusVisible) {
+    return this.settingsMenu.focusFirstMenuItem(pane, focusVisible);
+  }
+
+  toggleMenu(input) {
+    return this.settingsMenu.toggleMenu(input);
+  }
+
+  getMenuSize(tab) {
+    return this.settingsMenu.getMenuSize(tab);
+  }
+
+  showMenuPanel(type, focusVisible) {
+    return this.settingsMenu.showMenuPanel(type, focusVisible);
+  }
+
+  setQualityMenu(options) {
+    return this.submenuBuilders.setQualityMenu(options);
+  }
+
+  setSpeedMenu() {
+    return this.submenuBuilders.setSpeedMenu();
+  }
+
+  setCaptionsMenu() {
+    return this.submenuBuilders.setCaptionsMenu();
+  }
+
+  setTranslationMenu() {
+    return this.submenuBuilders.setTranslationMenu();
+  }
+
+  setTranscriptionMenu() {
+    return this.submenuBuilders.setTranscriptionMenu();
+  }
+
+  updateTranscriptionMenu() {
+    return this.submenuBuilders.updateTranscriptionMenu();
+  }
+
+  updateTranslationMenu() {
+    return this.submenuBuilders.updateTranslationMenu();
+  }
+
+  setMarkers() {
+    return this.markers.setMarkers();
+  }
+
+  setDownloadUrl() {
+    return this.downloadMetadata.setDownloadUrl();
+  }
+
+  setMediaMetadata() {
+    return this.downloadMetadata.setMediaMetadata();
+  }
+
+  // ===========================================================================
+  // Core methods
+  // ===========================================================================
+
+  // Find the UI controls
+  findElements() {
+    try {
+      this.player.elements.controls = getElement.call(this.player, this.player.config.selectors.controls.wrapper);
+
+      // Buttons
+      this.player.elements.buttons = {
+        play: getElements.call(this.player, this.player.config.selectors.buttons.play),
+        pause: getElement.call(this.player, this.player.config.selectors.buttons.pause),
+        restart: getElement.call(this.player, this.player.config.selectors.buttons.restart),
+        rewind: getElement.call(this.player, this.player.config.selectors.buttons.rewind),
+        fastForward: getElement.call(this.player, this.player.config.selectors.buttons.fastForward),
+        mute: getElement.call(this.player, this.player.config.selectors.buttons.mute),
+        pip: getElement.call(this.player, this.player.config.selectors.buttons.pip),
+        airplay: getElement.call(this.player, this.player.config.selectors.buttons.airplay),
+        settings: getElement.call(this.player, this.player.config.selectors.buttons.settings),
+        captions: getElement.call(this.player, this.player.config.selectors.buttons.captions),
+        fullscreen: getElement.call(this.player, this.player.config.selectors.buttons.fullscreen),
+      };
+
+      // Progress
+      this.player.elements.progress = getElement.call(this.player, this.player.config.selectors.progress);
+
+      // Inputs
+      this.player.elements.inputs = {
+        seek: getElement.call(this.player, this.player.config.selectors.inputs.seek),
+        volume: getElement.call(this.player, this.player.config.selectors.inputs.volume),
+      };
+
+      // Display
+      this.player.elements.display = {
+        buffer: getElement.call(this.player, this.player.config.selectors.display.buffer),
+        currentTime: getElement.call(this.player, this.player.config.selectors.display.currentTime),
+        duration: getElement.call(this.player, this.player.config.selectors.display.duration),
+      };
+
+      // Seek tooltip
+      if (is.element(this.player.elements.progress)) {
+        this.player.elements.display.seekTooltip = this.player.elements.progress.querySelector(`.${this.player.config.classNames.tooltip}`);
+      }
+
+      return true;
+    }
+    catch (error) {
+      // Log it
+      this.player.debug.warn('It looks like there is a problem with your custom controls HTML', error);
+
+      // Restore native video controls
+      this.player.toggleNativeControls(true);
+
+      return false;
+    }
+  }
+
+  // Build the default HTML
+  create(data) {
+    this.player.elements.controls = null;
+
+    // Larger overlaid play button
+    if (is.array(this.player.config.controls) && this.player.config.controls.includes('play-large')) {
+      this.player.elements.container.appendChild(this.createButton('play-large'));
+    }
+
+    // Create the container
+    const container = createElement('div', getAttributesFromSelector(this.player.config.selectors.controls.wrapper));
+    this.player.elements.controls = container;
+
+    // Default item attributes
+    const defaultAttributes = { class: 'plyr__controls__item' };
+
+    // Loop through controls in order
+    dedupe(is.array(this.player.config.controls) ? this.player.config.controls : []).forEach((control) => {
+      // Restart button
+      if (control === 'restart') {
+        container.appendChild(this.createButton('restart', defaultAttributes));
+      }
+
+      // Rewind button
+      if (control === 'rewind') {
+        container.appendChild(this.createButton('rewind', defaultAttributes));
+      }
+
+      // Play/Pause button
+      if (control === 'play') {
+        container.appendChild(this.createButton('play', defaultAttributes));
+      }
+
+      // Fast forward button
+      if (control === 'fast-forward') {
+        container.appendChild(this.createButton('fast-forward', defaultAttributes));
+      }
+
+      // Progress
+      if (control === 'progress') {
+        const progressContainer = createElement('div', {
+          class: `${defaultAttributes.class} plyr__progress__container`,
+        });
+
+        const progress = createElement('div', getAttributesFromSelector(this.player.config.selectors.progress));
+
+        // Seek range slider
+        progress.appendChild(
+          this.createRange('seek', {
+            id: `plyr-seek-${data.id}`,
+          }),
+        );
+
+        // Buffer progress
+        progress.appendChild(this.createProgress('buffer'));
+
+        // Seek tooltip
+        if (this.player.config.tooltips.seek) {
+          const tooltip = createElement(
+            'span',
+            {
+              class: this.player.config.classNames.tooltip,
+            },
+            '00:00',
+          );
+
+          progress.appendChild(tooltip);
+          this.player.elements.display.seekTooltip = tooltip;
+        }
+
+        this.player.elements.progress = progress;
+        progressContainer.appendChild(this.player.elements.progress);
+        container.appendChild(progressContainer);
+      }
+
+      // Media current time display
+      if (control === 'current-time') {
+        container.appendChild(this.createTime('currentTime', defaultAttributes));
+      }
+
+      // Media duration display
+      if (control === 'duration') {
+        container.appendChild(this.createTime('duration', defaultAttributes));
+      }
+
+      // Volume controls
+      if (control === 'mute' || control === 'volume') {
+        let { volume } = this.player.elements;
+
+        // Create the volume container if needed
+        if (!is.element(volume) || !container.contains(volume)) {
+          volume = createElement(
+            'div',
+            extend({}, defaultAttributes, {
+              class: `${defaultAttributes.class} plyr__volume`.trim(),
+            }),
+          );
+
+          this.player.elements.volume = volume;
+
+          container.appendChild(volume);
+        }
+
+        // Toggle mute button
+        if (control === 'mute') {
+          volume.appendChild(this.createButton('mute'));
+        }
+
+        // Volume range control
+        // Ignored on iOS as it's handled globally
+        // https://developer.apple.com/library/safari/documentation/AudioVideo/Conceptual/Using_HTML5_Audio_Video/Device-SpecificConsiderations/Device-SpecificConsiderations.html
+        if (control === 'volume' && !browser.isIos && !browser.isIPadOS) {
+          // Set the attributes
+          const attributes = {
+            max: 1,
+            step: 0.05,
+            value: this.player.config.volume,
+          };
+
+          // Create the volume range slider
+          volume.appendChild(
+            this.createRange(
+              'volume',
+              extend(attributes, {
+                id: `plyr-volume-${data.id}`,
+              }),
+            ),
+          );
+        }
+      }
+
+      // Toggle captions button
+      if (control === 'captions') {
+        container.appendChild(this.createButton('captions', defaultAttributes));
+      }
+
+      // Toggle translation button
+      if (control === 'translation') {
+        container.appendChild(this.createButton('translation', defaultAttributes));
+      }
+
+      // Toggle transcription button
+      if (control === 'transcription') {
+        container.appendChild(this.createButton('transcription', defaultAttributes));
+      }
+
+      // Settings button / menu
+      if (control === 'settings' && !is.empty(this.player.config.settings)) {
+        const wrapper = createElement(
+          'div',
+          extend({}, defaultAttributes, {
+            class: `${defaultAttributes.class} plyr__menu`.trim(),
+            hidden: '',
+          }),
+        );
+
+        wrapper.appendChild(
+          this.createButton('settings', {
+            'aria-haspopup': true,
+            'aria-controls': `plyr-settings-${data.id}`,
+            'aria-expanded': false,
+          }),
+        );
+
+        const popup = createElement('div', {
+          class: 'plyr__menu__container',
+          id: `plyr-settings-${data.id}`,
+          hidden: '',
+        });
+
+        const inner = createElement('div');
+
+        const home = createElement('div', {
+          id: `plyr-settings-${data.id}-home`,
+        });
+
+        // Create the menu
+        const menu = createElement('div', {
+          role: 'menu',
+        });
+
+        home.appendChild(menu);
+        inner.appendChild(home);
+        this.player.elements.settings.panels.home = home;
+
+        // Build the menu items
+        this.player.config.settings.forEach((type) => {
+          // TODO: bundle this with the createMenuItem helper and bindings
+          const menuItem = createElement(
+            'button',
+            extend(getAttributesFromSelector(this.player.config.selectors.buttons.settings), {
+              'type': 'button',
+              'class': `${this.player.config.classNames.control} ${this.player.config.classNames.control}--forward`,
+              'role': 'menuitem',
+              'aria-haspopup': true,
+              'hidden': '',
+            }),
+          );
+
+          // Bind menu shortcuts for keyboard users
+          this.bindMenuItemShortcuts(menuItem, type);
+
+          // Show menu on click
+          on.call(this.player, menuItem, 'click', () => {
+            this.showMenuPanel(type, false);
+          });
+
+          const flex = createElement('span', null, i18n.get(type, this.player.config));
+
+          const value = createElement('span', {
+            class: this.player.config.classNames.menu.value,
+          });
+
+          // Speed contains HTML entities
+          value.innerHTML = data[type];
+
+          flex.appendChild(value);
+          menuItem.appendChild(flex);
+          menu.appendChild(menuItem);
+
+          // Build the panes
+          const pane = createElement('div', {
+            id: `plyr-settings-${data.id}-${type}`,
+            hidden: '',
+          });
+
+          // Back button
+          const backButton = createElement('button', {
+            type: 'button',
+            class: `${this.player.config.classNames.control} ${this.player.config.classNames.control}--back`,
+          });
+
+          // Visible label
+          backButton.appendChild(
+            createElement(
+              'span',
+              {
+                'aria-hidden': true,
+              },
+              i18n.get(type, this.player.config),
+            ),
+          );
+
+          // Screen reader label
+          backButton.appendChild(
+            createElement(
+              'span',
+              {
+                class: this.player.config.classNames.hidden,
+              },
+              i18n.get('menuBack', this.player.config),
+            ),
+          );
+
+          // Go back via keyboard
+          on.call(
+            this.player,
+            pane,
+            'keydown',
+            (event) => {
+              if (event.key !== 'ArrowLeft') return;
+
+              // Prevent seek
+              event.preventDefault();
+              event.stopPropagation();
+
+              // Show the respective menu
+              this.showMenuPanel('home', true);
+            },
+            false,
+          );
+
+          // Go back via button click
+          on.call(this.player, backButton, 'click', () => {
+            this.showMenuPanel('home', false);
+          });
+
+          // Add to pane
+          pane.appendChild(backButton);
+
+          // Menu
+          pane.appendChild(
+            createElement('div', {
+              role: 'menu',
+            }),
+          );
+
+          inner.appendChild(pane);
+
+          this.player.elements.settings.buttons[type] = menuItem;
+          this.player.elements.settings.panels[type] = pane;
+        });
+
+        popup.appendChild(inner);
+        wrapper.appendChild(popup);
+        container.appendChild(wrapper);
+
+        this.player.elements.settings.popup = popup;
+        this.player.elements.settings.menu = wrapper;
+      }
+
+      // Picture in picture button
+      if (control === 'pip' && support.pip) {
+        container.appendChild(this.createButton('pip', defaultAttributes));
+      }
+
+      // Airplay button
+      if (control === 'airplay' && support.airplay) {
+        container.appendChild(this.createButton('airplay', defaultAttributes));
+      }
+
+      // Download button
+      if (control === 'download') {
+        const attributes = extend({}, defaultAttributes, {
+          element: 'a',
+          href: this.player.download,
+          target: '_blank',
+        });
+
+        // Set download attribute for HTML5 only
+        if (this.player.isHTML5) {
+          attributes.download = '';
+        }
+
+        const { download } = this.player.config.urls;
+
+        if (!is.url(download) && this.player.isEmbed) {
+          extend(attributes, {
+            icon: `logo-${this.player.provider}`,
+            label: this.player.provider,
+          });
+        }
+
+        container.appendChild(this.createButton('download', attributes));
+      }
+
+      // Toggle fullscreen button
+      if (control === 'fullscreen') {
+        container.appendChild(this.createButton('fullscreen', defaultAttributes));
+      }
+    });
+
+    // Set available quality levels
+    if (this.player.isHTML5) {
+      this.setQualityMenu(html5.getQualityOptions.call(this.player));
+    }
+
+    this.setSpeedMenu();
+    this.setTranslationMenu();
+    this.setTranscriptionMenu();
+
+    return container;
+  }
+
+  // Insert controls
+  inject() {
+    // Sprite
+    if (this.player.config.loadSprite) {
+      const icon = this.getIconUrl();
+
+      // Only load external sprite using AJAX
+      if (icon.cors) {
+        loadSprite(icon.url, 'sprite-plyr');
+      }
+    }
+
+    // Create a unique ID using incrementing counter to avoid collisions
+    Controls.idCounter++;
+    this.player.id = Controls.idCounter;
+
+    // Null by default
+    let container = null;
+    this.player.elements.controls = null;
+
+    // Set template properties
+    const props = {
+      id: this.player.id,
+      seektime: this.player.config.seekTime,
+      title: this.player.config.title,
+    };
+    let update = true;
+
+    // If function, run it and use output
+    if (is.function(this.player.config.controls)) {
+      this.player.config.controls = this.player.config.controls.call(this.player, props);
+    }
+
+    // Convert falsy controls to empty array (primarily for empty strings)
+    if (!this.player.config.controls) {
+      this.player.config.controls = [];
+    }
+
+    if (is.element(this.player.config.controls) || is.string(this.player.config.controls)) {
+      // HTMLElement or Non-empty string passed as the option
+      container = this.player.config.controls;
+    }
+    else {
+      // Create controls
+      container = this.create({
+        id: this.player.id,
+        seektime: this.player.config.seekTime,
+        speed: this.player.speed,
+        quality: this.player.quality,
+        captions: captions.getLabel.call(this.player),
+        // TODO: Looping
+        // loop: 'None',
+      });
+      update = false;
+    }
+
+    // Replace props with their value
+    const replace = (input) => {
+      let result = input;
+
+      Object.entries(props).forEach(([key, value]) => {
+        result = replaceAll(result, `{${key}}`, value);
+      });
+
+      return result;
+    };
+
+    // Update markup
+    if (update) {
+      if (is.string(this.player.config.controls)) {
+        container = replace(container);
+      }
+    }
+
+    // Controls container
+    let target;
+
+    // Inject to custom location
+    if (is.string(this.player.config.selectors.controls.container)) {
+      target = document.querySelector(this.player.config.selectors.controls.container);
+    }
+
+    // Inject into the container by default
+    if (!is.element(target)) {
+      target = this.player.elements.container;
+    }
+
+    // Inject controls HTML (needs to be before captions, hence "afterbegin")
+    const insertMethod = is.element(container) ? 'insertAdjacentElement' : 'insertAdjacentHTML';
+    target[insertMethod]('afterbegin', container);
+
+    // Find the elements if need be
+    if (!is.element(this.player.elements.controls)) {
+      this.findElements();
+    }
+
+    // Add pressed property to buttons
+    if (!is.empty(this.player.elements.buttons)) {
+      const addProperty = (button) => {
+        const className = this.player.config.classNames.controlPressed;
+        button.setAttribute('aria-pressed', 'false');
+
+        Object.defineProperty(button, 'pressed', {
+          configurable: true,
+          enumerable: true,
+          get() {
+            return hasClass(button, className);
+          },
+          set(pressed = false) {
+            toggleClass(button, className, pressed);
+            button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+          },
+        });
+      };
+
+      // Toggle classname when pressed property is set
+      Object.values(this.player.elements.buttons)
+        .filter(Boolean)
+        .forEach((button) => {
+          if (is.array(button) || is.nodeList(button)) {
+            Array.from(button).filter(Boolean).forEach(addProperty);
+          }
+          else {
+            addProperty(button);
+          }
+        });
+    }
+
+    // Edge sometimes doesn't finish the paint so force a repaint
+    if (browser.isEdge) {
+      repaint(target);
+    }
+
+    // Setup tooltips
+    if (this.player.config.tooltips.controls) {
+      const { classNames, selectors } = this.player.config;
+      const selector = `${selectors.controls.wrapper} ${selectors.labels} .${classNames.hidden}`;
+      const labels = getElements.call(this.player, selector);
+
+      Array.from(labels).forEach((label) => {
+        toggleClass(label, this.player.config.classNames.hidden, false);
+        toggleClass(label, this.player.config.classNames.tooltip, true);
+      });
+    }
+  }
+}
+
+export default Controls;

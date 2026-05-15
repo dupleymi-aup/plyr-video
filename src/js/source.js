@@ -55,8 +55,8 @@ const source = {
       // Set the type and provider
       const { sources, type } = input;
       const [{ provider = providers.html5, src }] = sources;
-      const tagName = provider === 'html5' ? type : 'div';
-      const attributes = provider === 'html5' ? {} : { src };
+      const tagName = provider === providers.html5 ? type : 'div';
+      const attributes = provider === providers.html5 ? {} : { src };
 
       Object.assign(this, {
         provider,

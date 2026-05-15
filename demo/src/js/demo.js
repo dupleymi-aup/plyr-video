@@ -4,9 +4,6 @@
 // Please see README.md in the root or github.com/QuadDarv1ne/plyr-video
 // ==========================================================================
 
-import * as Sentry from '@sentry/browser';
-import Shr from 'shr-buttons';
-
 import Plyr from '../../../src/js/plyr';
 import sources, { gallery } from './sources';
 
@@ -39,20 +36,6 @@ const commonConfig = {
 const playIconSvg = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
 
 (() => {
-  const production = 'plyr.io';
-  const isProduction = window.location.host.includes(production);
-
-  // Sentry for demo site (https://plyr.io) only
-  if (isProduction) {
-    try {
-      Sentry.init({
-        dsn: 'https://d4ad9866ad834437a4754e23937071e4@sentry.io/305555',
-        whitelistUrls: [production].map(d => new RegExp(`https://(([a-z0-9])+(.))*${d}`)),
-      });
-    }
-    catch {}
-  }
-
   document.addEventListener('DOMContentLoaded', () => {
     const selector = '#player';
     const galleryView = document.getElementById('gallery-view');
@@ -61,14 +44,16 @@ const playIconSvg = `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
     const galleryContainer = document.getElementById('video-gallery');
 
     // Setup share buttons
-    Shr.setup('.js-shr', {
-      count: {
-        className: 'button__count',
-      },
-      wrapper: {
-        className: 'button--with-count',
-      },
-    });
+    if (typeof Shr !== 'undefined') {
+      Shr.setup('.js-shr', {
+        count: {
+          className: 'button__count',
+        },
+        wrapper: {
+          className: 'button--with-count',
+        },
+      });
+    }
 
     // Render gallery items
     function renderGallery() {

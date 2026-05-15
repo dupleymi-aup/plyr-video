@@ -24,7 +24,7 @@ export default function fetch(url, responseType = 'text', withCredentials = fals
           reject(new Error(`HTTP ${request.status}`));
           return;
         }
-        if (responseType === 'text') {
+        if (responseType === 'json') {
           try {
             resolve(JSON.parse(request.responseText));
           }

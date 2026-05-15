@@ -52,7 +52,8 @@ export function createEmbed(provider, options) {
     'allow',
     'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer',
   );
-  iframe.setAttribute('src', `${embedUrl}?${params.join('&')}`);
+  const query = params.length ? `?${params.join('&')}` : '';
+  iframe.setAttribute('src', `${embedUrl}${query}`);
 
   const wrapper = createElement('div', {
     'className': player.config.classNames.embedContainer,
@@ -70,6 +71,8 @@ export function createEmbed(provider, options) {
         player.debug.warn(`${label}: Player did not initialize within ${initTimeoutMs / 1000}s`);
       }
     }, initTimeoutMs),
+    optionsTimeout: null,
+    captionTimeout: null,
   };
 
   // Initialize media properties
@@ -240,11 +243,12 @@ export function destroy() {
   const player = this;
   if (player.embed) {
     clearTimeout(player.embed.initTimeout);
-    clearTimeout(player.embed.optionsTimeout);
-    clearTimeout(player.embed.captionTimeout);
+    clearTimeout(player.embed.optionsTimeout || 0);
+    clearTimeout(player.embed.captionTimeout || 0);
     if (player.embed.messageHandler) {
       window.removeEventListener('message', player.embed.messageHandler);
     }
+    player.embed = null;
   }
 }
 
@@ -269,10 +273,18 @@ export function fetchPoster(url, player) {
   fetch(url, 'json', false, 8000)
     .then((data) => {
       if (data && data.thumbnail_url) {
-        ui.setPoster.call(player, data.thumbnail_url).catch(() => {});
+        ui.setPoster.call(player, data.thumbnail_url).catch((err) => {
+          if (player.config.debug) {
+            player.debug.warn(`${player.provider}: Failed to set poster:`, err.message);
+          }
+        });
       }
     })
-    .catch(() => {});
+    .catch((err) => {
+      if (player.config.debug) {
+        player.debug.warn(`${player.provider}: Failed to fetch poster:`, err.message);
+      }
+    });
 }
 
 // Shared message handler for player:changeState

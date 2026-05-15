@@ -67,11 +67,16 @@ export default function loadSprite(url, id) {
               }),
             );
           }
-          catch {}
+          catch (e) {
+            // Storage quota exceeded or private browsing
+            console.warn('Plyr: Failed to cache sprite:', e.message);
+          }
         }
 
         update(container, result);
       })
-      .catch(() => {});
+      .catch((e) => {
+        console.warn('Plyr: Failed to load sprite:', e.message);
+      });
   }
 }

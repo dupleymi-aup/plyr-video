@@ -144,6 +144,19 @@ const sources = {
       },
     ],
   },
+  rutubeplaylist: {
+    type: 'video',
+    ratio: '16:9',
+    sources: [
+      {
+        src: 'https://rutube.ru/plst/1167014/',
+        provider: 'rutube',
+      },
+    ],
+    rutube: {
+      playlistId: '1167014',
+    },
+  },
   yandex: {
     type: 'video',
     ratio: '16:9',
@@ -222,6 +235,15 @@ const gallery = [
     duration: '5:00',
     provider: 'rutube',
     providerLabel: 'Rutube',
+  },
+  {
+    id: 'rutubeplaylist',
+    title: 'Rutube Playlist Demo',
+    subtitle: 'Playlist from Rutube',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: 'Playlist',
+    provider: 'rutube',
+    providerLabel: 'Rutube Playlist',
   },
   {
     id: 'vk',

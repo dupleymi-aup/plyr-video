@@ -5,6 +5,9 @@
 
 import is from './is';
 
+// Uses native fetch (required for POST requests)
+// Custom XHR-based fetch only supports GET
+
 /**
  * Translate text using LibreTranslate API
  * @param {string} text - The text to translate
