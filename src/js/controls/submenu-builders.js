@@ -191,7 +191,7 @@ class SubmenuBuilders {
           title: language.toUpperCase(),
           badge: language.toUpperCase() && this.elementCreators.createBadge(language.toUpperCase()),
           list,
-          type: 'language',
+          type: 'translation',
         }));
 
         // Add the "Off" option to turn off translation
@@ -200,7 +200,7 @@ class SubmenuBuilders {
           checked: !this.player.captions.translation.active,
           title: i18n.get('translationOff', this.player.config),
           list,
-          type: 'language',
+          type: 'translation',
         });
 
         return options;
@@ -231,7 +231,7 @@ class SubmenuBuilders {
           title: language.toUpperCase(),
           badge: language.toUpperCase() && this.elementCreators.createBadge(language.toUpperCase()),
           list,
-          type: 'language',
+          type: 'transcription',
         }));
 
         // Add the "Off" option to turn off transcription
@@ -240,7 +240,7 @@ class SubmenuBuilders {
           checked: !this.player.transcription.active,
           title: i18n.get('transcriptionOff', this.player.config),
           list,
-          type: 'language',
+          type: 'transcription',
         });
 
         return options;
@@ -260,6 +260,40 @@ class SubmenuBuilders {
     if (is.element(this.player.elements.settings.panels.translation)) {
       this.setTranslationMenu();
     }
+  }
+
+  // Set loop menu
+  setLoopMenu() {
+    if (!is.element(this.player.elements.settings.panels.loop)) {
+      return;
+    }
+
+    const type = 'loop';
+
+    this.buildMenu({
+      type,
+      toggleCondition: true,
+      optionsGenerator: () => {
+        const list = this.player.elements.settings.panels.loop.querySelector('[role="menu"]');
+
+        return [
+          {
+            value: false,
+            checked: !this.player.loop,
+            title: i18n.get('loopOff', this.player.config),
+            list,
+            type: 'loop',
+          },
+          {
+            value: true,
+            checked: this.player.loop,
+            title: i18n.get('loopOn', this.player.config),
+            list,
+            type: 'loop',
+          },
+        ];
+      },
+    });
   }
 }
 

@@ -191,6 +191,10 @@ class Controls {
     return this.submenuBuilders.updateTranslationMenu();
   }
 
+  setLoopMenu() {
+    return this.submenuBuilders.setLoopMenu();
+  }
+
   setMarkers() {
     return this.markers.setMarkers();
   }
@@ -735,6 +739,7 @@ class Controls {
     this.setSpeedMenu();
     this.setTranslationMenu();
     this.setTranscriptionMenu();
+    this.setLoopMenu();
 
     return container;
   }

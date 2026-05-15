@@ -110,6 +110,9 @@ class SettingsMenu {
       case 'transcription':
         return this.player.transcription.active ? i18n.get('transcriptionEnabled', this.player.config) : i18n.get('transcriptionDisabled', this.player.config);
 
+      case 'loop':
+        return this.player.loop ? i18n.get('loopOn', this.player.config) : i18n.get('loopOff', this.player.config);
+
       default:
         return null;
     }

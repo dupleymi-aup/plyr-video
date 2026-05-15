@@ -39,26 +39,14 @@ const transcription = {
       // Disable transcription in config
       this.config.transcription.active = false;
 
-      // Show user-facing message if UI exists
-      if (this.elements.transcription) {
-        this.elements.transcription.innerHTML = `<div class="plyr__transcription__message">${i18n.get('transcriptionNotSupported', this.config)}</div>`;
+      // Show user-facing message in the translation container (reused for transcription output)
+      if (this.elements.translation) {
+        this.elements.translation.innerHTML = `<div class="plyr__transcription__message">${i18n.get('transcriptionNotSupported', this.config)}</div>`;
       }
       return;
     }
 
-    // Inject the transcription container if not exists (we'll reuse translation container for now)
-    // Actually we want to show transcription in the translation area? The user wants to show transcribed text and its translation.
-    // We'll use the translation container to show either transcribed text (if translation not active) or translated text (if translation active).
-    // But we also have captions container for original captions.
-    // Let's plan:
-    // - Captions area: shows original captions (from tracks)
-    // - Translation area: shows translated captions (if translation active) OR transcribed text (if transcription active and translation not active) OR translated transcribed text (if both active)
-    // However, the user asked: "перевода речи из видео с текст и показывать его справа в телесуфлёре например." meaning show transcribed text on the right in the tooltip? Actually "телесуфлёре" might be a typo for "субтитрах"? They want to show transcribed text and its translation on the right side.
-    // We'll use the translation container to show the transcribed text (original language) and if translation is active, show the translation of that transcribed text.
-    // We'll also need to update the translation container when transcription changes.
-
-    // For now, we'll assume we have a translation container (already created in captions.setup). We'll use it for transcription output.
-    // But we need to make sure it exists. If not, create it.
+    // Create translation container if not exists (reused for transcription output)
     if (!is.element(this.elements.translation)) {
       this.elements.translation = createElement('div', getAttributesFromSelector(this.config.selectors.translation));
       this.elements.translation.setAttribute('dir', 'auto');

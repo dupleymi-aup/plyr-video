@@ -175,6 +175,28 @@ class MenuItems {
             this.player.speed = Number.parseFloat(value);
             break;
 
+          case 'loop':
+            this.player.loop = value === true || value === 'true';
+            break;
+
+          case 'translation':
+            if (value === 'off') {
+              this.player.captions.translation.active = false;
+            } else {
+              this.player.captions.translation.active = true;
+              this.player.captions.translation.language = value;
+            }
+            break;
+
+          case 'transcription':
+            if (value === 'off') {
+              this.player.transcription.active = false;
+            } else {
+              this.player.transcription.active = true;
+              this.player.transcription.language = value;
+            }
+            break;
+
           default:
             break;
         }

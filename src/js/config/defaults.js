@@ -384,7 +384,7 @@ const defaults = {
     // 'download',
     'fullscreen',
   ],
-  settings: ['captions', 'translation', 'transcription', 'quality', 'speed'],
+  settings: ['captions', 'translation', 'transcription', 'quality', 'speed', 'loop'],
 
   // Localisation
   i18n: {
@@ -416,6 +416,8 @@ const defaults = {
     normal: 'Normal',
     quality: 'Quality',
     loop: 'Loop',
+    loopOn: 'On',
+    loopOff: 'Off',
     start: 'Start',
     end: 'End',
     all: 'All',
@@ -430,6 +432,18 @@ const defaults = {
       720: 'HD',
       576: 'SD',
       480: 'SD',
+    },
+    qualityLabel: {
+      4320: '8K Ultra HD',
+      2880: '5K',
+      2160: '4K Ultra HD',
+      1440: 'QHD',
+      1080: 'Full HD',
+      720: 'HD',
+      576: 'SD',
+      480: 'SD',
+      360: 'Low',
+      240: 'Very Low',
     },
     // Translation
     translate: 'Translate',
@@ -463,6 +477,7 @@ const defaults = {
     captionsDescription: 'Display subtitles when available',
     transcriptionDescription: 'Auto-generate speech-to-text',
     translationDescription: 'Translate captions to another language',
+    loopDescription: 'Repeat the video automatically',
     // Quality level descriptions
     qualityDescriptions: {
       4320: '8K Ultra HD - Maximum quality',
@@ -680,7 +695,6 @@ const defaults = {
     progress: '.plyr__progress',
     captions: '.plyr__captions',
     caption: '.plyr__caption',
-    transcriptionContainer: '.plyr__transcription',
   },
 
   // Class hooks added to the player in different states
