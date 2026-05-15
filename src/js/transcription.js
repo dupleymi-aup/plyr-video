@@ -5,6 +5,7 @@
 import controls from './controls';
 import { createElement, getAttributesFromSelector, insertAfter, toggleClass } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
+import i18n from './utils/i18n';
 import is from './utils/is';
 import { translate } from './utils/translate';
 
@@ -37,6 +38,11 @@ const transcription = {
       this.debug.warn('Speech Recognition not supported in this browser');
       // Disable transcription in config
       this.config.transcription.active = false;
+
+      // Show user-facing message if UI exists
+      if (this.elements.transcription) {
+        this.elements.transcription.innerHTML = `<div class="plyr__transcription__message">${i18n.get('transcriptionNotSupported', this.config)}</div>`;
+      }
       return;
     }
 
@@ -56,7 +62,16 @@ const transcription = {
     if (!is.element(this.elements.translation)) {
       this.elements.translation = createElement('div', getAttributesFromSelector(this.config.selectors.translation));
       this.elements.translation.setAttribute('dir', 'auto');
+      this.elements.translation.setAttribute('role', 'log');
+      this.elements.translation.setAttribute('aria-live', 'polite');
+      this.elements.translation.setAttribute('aria-label', i18n.get('transcription', this.config));
       insertAfter(this.elements.translation, this.elements.wrapper);
+    }
+    else if (this.elements.translation) {
+      // Update ARIA attributes for transcription use
+      this.elements.translation.setAttribute('role', 'log');
+      this.elements.translation.setAttribute('aria-live', 'polite');
+      this.elements.translation.setAttribute('aria-label', i18n.get('transcription', this.config));
     }
 
     // Initialize SpeechRecognition
@@ -92,8 +107,12 @@ const transcription = {
       this.debug.warn('Speech recognition error', event.error);
       // Handle specific errors
       if (event.error === 'not-allowed') {
-        // Microphone access denied
+        // Microphone access denied - show user message
         this.transcription.toggle.call(this, false);
+
+        if (this.elements.translation) {
+          this.elements.translation.innerHTML = `<div class="plyr__transcription__message plyr__transcription__message--error">${i18n.get('transcriptionPermissionRequired', this.config)}</div>`;
+        }
       }
     });
 

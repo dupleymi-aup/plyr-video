@@ -202,4 +202,50 @@
       pointer-events: none;
     }
   }
+
+  // Keyboard shortcuts panel
+  .plyr__shortcuts-list {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: $plyr-control-padding;
+  }
+
+  .plyr__shortcuts-item {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    padding: calc(#{$plyr-control-padding} / 1.5) calc(#{$plyr-control-padding} * 1.5);
+    margin-top: 2px;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  .plyr__shortcuts-key {
+    background: rgba(#000, 0.1);
+    border: 1px solid rgba(#000, 0.15);
+    border-radius: 4px;
+    color: $plyr-menu-color;
+    font-family: 'Courier New', Consolas, monospace;
+    font-size: 12px;
+    padding: 4px 8px;
+    white-space: nowrap;
+  }
+
+  .plyr__shortcuts-desc {
+    color: $plyr-menu-color;
+    font-size: $plyr-font-size-menu;
+    margin-left: $plyr-control-spacing;
+    text-align: right;
+  }
+
+  // Help text in menu panels
+  .plyr__menu__help {
+    color: rgba($plyr-menu-color, 0.7);
+    font-size: $plyr-font-size-small;
+    line-height: $plyr-line-height;
+    padding: calc(#{$plyr-control-padding} / 2) $plyr-control-padding;
+    text-align: center;
+  }
 }

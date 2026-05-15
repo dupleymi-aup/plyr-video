@@ -11,6 +11,7 @@ import { off, on, once, toggleListener, triggerEvent } from './utils/events';
 import is from './utils/is';
 import { silencePromise } from './utils/promise';
 import { getAspectRatio, getViewportSize, supportsCSS } from './utils/style';
+import providerErrors, { errorCodes } from './utils/provider-errors';
 
 class Listeners {
   constructor(player) {
@@ -463,9 +464,25 @@ class Listeners {
     on.call(player, player.media, proxyEvents, (event) => {
       let { detail = {} } = event;
 
-      // Get error details from media
+      // Get error details from media and show user-friendly error UI
       if (event.type === 'error') {
         detail = player.media.error;
+
+        // Map HTML5 media error to provider error codes
+        if (player.isHTML5 && detail) {
+          const code = detail.code || errorCodes.UNKNOWN;
+          const severity = providerErrors.getSeverity(code);
+
+          // Only show UI for fatal errors
+          if (severity === providerErrors.severity.FATAL) {
+            const mappedCode = providerErrors.mapCode(player.provider, code);
+            player.ui.showError(mappedCode, detail.message);
+          }
+        }
+        // For embed providers, use provider-specific errors
+        else if (detail && detail.code) {
+          player.ui.showError(detail.code, detail.message);
+        }
       }
 
       triggerEvent.call(player, elements.container, event.type, true, detail);

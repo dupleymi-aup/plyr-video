@@ -4,6 +4,7 @@
 
 import { createElement, getAttributesFromSelector, matches, setFocus } from '../utils/elements';
 import { on } from '../utils/events';
+import i18n from '../utils/i18n';
 import is from '../utils/is';
 import { extend } from '../utils/objects';
 import SettingsMenu from './settings-menu';
@@ -104,6 +105,31 @@ class MenuItems {
     }
 
     menuItem.appendChild(flex);
+
+    // Add educational description for quality and speed options
+    if (type === 'quality' && is.number(value)) {
+      const desc = i18n.get(`qualityDescriptions.${value}`, this.player.config);
+      if (desc) {
+        menuItem.setAttribute('title', desc);
+        menuItem.appendChild(
+          createElement('span', {
+            class: this.player.config.classNames.hidden,
+          }, desc),
+        );
+      }
+    }
+    else if (type === 'speed') {
+      const speedValue = Number.parseFloat(value);
+      const desc = i18n.get(`speedDescriptions.${speedValue}`, this.player.config);
+      if (desc) {
+        menuItem.setAttribute('title', desc);
+        menuItem.appendChild(
+          createElement('span', {
+            class: this.player.config.classNames.hidden,
+          }, desc),
+        );
+      }
+    }
 
     // Replicate radio button behavior
     Object.defineProperty(menuItem, 'checked', {

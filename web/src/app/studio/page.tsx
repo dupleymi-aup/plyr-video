@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Users, Eye, Upload } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 const stats = [
   { label: "Total Views", value: "12.4K", icon: Eye, change: "+12%" },
@@ -15,7 +17,12 @@ const recentVideos = [
   { id: "3", title: "Processing Video...", views: 0, status: "PROCESSING" },
 ];
 
-export default function StudioDashboard() {
+export default async function StudioDashboard() {
+  const session = await auth();
+  if (session?.user?.role === "STUDENT" || !session) {
+    redirect("/");
+  }
+
   return (
     <div className="p-6">
       <div className="mb-8">

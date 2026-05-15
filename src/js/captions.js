@@ -16,6 +16,7 @@ import {
 } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
 import fetch from './utils/fetch';
+import i18n from './utils/i18n';
 import is from './utils/is';
 import sendCommand from './utils/post-message';
 import { getHTML } from './utils/strings';
@@ -101,6 +102,9 @@ class Captions {
     if (!is.element(this.elements.captions)) {
       this.elements.captions = createElement('div', getAttributesFromSelector(this.config.selectors.captions));
       this.elements.captions.setAttribute('dir', 'auto');
+      this.elements.captions.setAttribute('role', 'log');
+      this.elements.captions.setAttribute('aria-live', 'polite');
+      this.elements.captions.setAttribute('aria-label', i18n.get('captions', this.config));
 
       insertAfter(this.elements.captions, this.elements.wrapper);
     }
@@ -109,6 +113,9 @@ class Captions {
     if (!is.element(this.elements.translation)) {
       this.elements.translation = createElement('div', getAttributesFromSelector(this.config.selectors.translation));
       this.elements.translation.setAttribute('dir', 'auto');
+      this.elements.translation.setAttribute('role', 'log');
+      this.elements.translation.setAttribute('aria-live', 'polite');
+      this.elements.translation.setAttribute('aria-label', i18n.get('translate', this.config));
       insertAfter(this.elements.translation, this.elements.wrapper);
     }
 

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRoleAccess, type Role } from "@/lib/permissions";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
@@ -52,6 +53,9 @@ export async function POST(request: NextRequest) {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const roleError = checkRoleAccess(session.user.role as Role, "TEACHER");
+  if (roleError) return roleError;
 
   const body = await request.json();
   const { title, description, channelId, visibility } = body;

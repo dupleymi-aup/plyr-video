@@ -129,6 +129,22 @@ class ElementCreators {
         props.icon = 'play';
         break;
 
+      case 'translation':
+        props.toggle = true;
+        props.label = 'translate';
+        props.labelPressed = 'translate';
+        props.icon = 'translate';
+        props.iconPressed = 'translate';
+        break;
+
+      case 'transcription':
+        props.toggle = true;
+        props.label = 'transcribe';
+        props.labelPressed = 'transcribe';
+        props.icon = 'transcribe';
+        props.iconPressed = 'transcribe';
+        break;
+
       default:
         if (is.empty(props.label)) {
           props.label = type;

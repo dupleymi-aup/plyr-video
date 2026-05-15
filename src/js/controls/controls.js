@@ -479,6 +479,22 @@ class Controls {
 
           flex.appendChild(value);
           menuItem.appendChild(flex);
+
+          // Add educational description via title attribute
+          const descriptionKey = `${type}Description`;
+          const description = i18n.get(descriptionKey, this.player.config);
+          if (description && description.length) {
+            menuItem.setAttribute('title', description);
+            menuItem.setAttribute('aria-describedby', `plyr-settings-desc-${type}`);
+
+            // Add hidden description element for screen readers
+            const descEl = createElement('span', {
+              class: this.player.config.classNames.hidden,
+              id: `plyr-settings-desc-${type}`,
+            }, description);
+            menuItem.appendChild(descEl);
+          }
+
           menu.appendChild(menuItem);
 
           // Build the panes
@@ -538,6 +554,15 @@ class Controls {
             this.showMenuPanel('home', false);
           });
 
+          // Add help text to the panel itself
+          const helpText = i18n.get(`${type}Help`, this.player.config);
+          if (helpText && helpText.length) {
+            const helpElement = createElement('div', {
+              class: 'plyr__menu__help',
+            }, helpText);
+            pane.appendChild(helpElement);
+          }
+
           // Add to pane
           pane.appendChild(backButton);
 
@@ -553,6 +578,105 @@ class Controls {
           this.player.elements.settings.buttons[type] = menuItem;
           this.player.elements.settings.panels[type] = pane;
         });
+
+        // Add keyboard shortcuts menu item
+        const shortcutsMenuItem = createElement(
+          'button',
+          extend(getAttributesFromSelector(this.player.config.selectors.buttons.settings), {
+            'type': 'button',
+            'class': `${this.player.config.classNames.control} ${this.player.config.classNames.control}--forward`,
+            'role': 'menuitem',
+            'aria-haspopup': true,
+          }),
+        );
+
+        const shortcutsFlex = createElement('span', null, i18n.get('keyboardShortcuts', this.player.config));
+        shortcutsMenuItem.appendChild(shortcutsFlex);
+
+        const shortcutsDescription = i18n.get('keyboardShortcutsHelp', this.player.config);
+        if (shortcutsDescription && shortcutsDescription.length) {
+          shortcutsMenuItem.setAttribute('title', shortcutsDescription);
+        }
+
+        // Show shortcuts on click
+        on.call(this.player, shortcutsMenuItem, 'click', () => {
+          this.showMenuPanel('shortcuts', false);
+        });
+
+        menu.appendChild(shortcutsMenuItem);
+
+        // Build the shortcuts panel
+        const shortcutsPane = createElement('div', {
+          id: `plyr-settings-${data.id}-shortcuts`,
+          hidden: '',
+        });
+
+        // Back button
+        const shortcutsBackButton = createElement('button', {
+          type: 'button',
+          class: `${this.player.config.classNames.control} ${this.player.config.classNames.control}--back`,
+        });
+
+        shortcutsBackButton.appendChild(
+          createElement(
+            'span',
+            { 'aria-hidden': true },
+            i18n.get('keyboardShortcuts', this.player.config),
+          ),
+        );
+
+        shortcutsBackButton.appendChild(
+          createElement(
+            'span',
+            { class: this.player.config.classNames.hidden },
+            i18n.get('menuBack', this.player.config),
+          ),
+        );
+
+        on.call(this.player, shortcutsBackButton, 'click', () => {
+          this.showMenuPanel('home', false);
+        });
+
+        shortcutsPane.appendChild(shortcutsBackButton);
+
+        // Shortcuts list
+        const shortcutsList = createElement('div', {
+          role: 'menu',
+          class: 'plyr__shortcuts-list',
+        });
+
+        const shortcuts = [
+          { key: 'Space / k', i18n: 'shortcutPlayPause' },
+          { key: '←', i18n: 'shortcutRewind' },
+          { key: '→', i18n: 'shortcutForward' },
+          { key: '0-9', i18n: 'shortcutSeek' },
+          { key: '↑', i18n: 'shortcutVolumeUp' },
+          { key: '↓', i18n: 'shortcutVolumeDown' },
+          { key: 'm', i18n: 'shortcutMute' },
+          { key: 'f', i18n: 'shortcutFullscreen' },
+          { key: 'c', i18n: 'shortcutCaptions' },
+          { key: 'l', i18n: 'shortcutLoop' },
+          { key: 'Escape', i18n: 'shortcutHideControls' },
+        ];
+
+        shortcuts.forEach(({ key, i18n: i18nKey }) => {
+          const shortcutItem = createElement('div', {
+            class: 'plyr__shortcuts-item',
+            role: 'menuitem',
+          });
+
+          const keyElement = createElement('kbd', { class: 'plyr__shortcuts-key' }, key);
+          const descElement = createElement('span', { class: 'plyr__shortcuts-desc' }, i18n.get(i18nKey, this.player.config));
+
+          shortcutItem.appendChild(keyElement);
+          shortcutItem.appendChild(descElement);
+          shortcutsList.appendChild(shortcutItem);
+        });
+
+        shortcutsPane.appendChild(shortcutsList);
+        inner.appendChild(shortcutsPane);
+
+        this.player.elements.settings.panels.shortcuts = shortcutsPane;
 
         popup.appendChild(inner);
         wrapper.appendChild(popup);

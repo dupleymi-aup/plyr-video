@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { checkRoleAccess, type Role } from "@/lib/permissions";
 
 export async function GET(
   request: NextRequest,
@@ -52,6 +53,9 @@ export async function PATCH(
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const roleError = checkRoleAccess(session.user.role as Role, "TEACHER");
+  if (roleError) return roleError;
+
   const body = await request.json();
 
   const video = await prisma.video.findUnique({
@@ -83,6 +87,9 @@ export async function DELETE(
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const roleError = checkRoleAccess(session.user.role as Role, "TEACHER");
+  if (roleError) return roleError;
 
   const video = await prisma.video.findUnique({
     where: { id: params.videoId },

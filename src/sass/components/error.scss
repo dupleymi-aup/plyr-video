@@ -1,0 +1,68 @@
+// --------------------------------------------------------------
+// Error display
+// --------------------------------------------------------------
+
+.plyr__error {
+  align-items: center;
+  background: $plyr-video-background;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  padding: $plyr-control-spacing;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 50;
+
+  &__icon {
+    font-size: 48px;
+    margin-right: calc(#{$plyr-control-spacing} * 1.5);
+  }
+
+  &__content {
+    color: var(--plyr-video-control-color, #fff);
+    max-width: 400px;
+    text-align: center;
+  }
+
+  &__title {
+    font-size: $plyr-font-size-large;
+    font-weight: $plyr-font-weight-bold;
+    margin: 0 0 calc(#{$plyr-control-spacing} / 2);
+  }
+
+  &__message {
+    font-size: $plyr-font-size-base;
+    line-height: $plyr-line-height;
+    margin: 0 0 $plyr-control-spacing;
+    opacity: 0.9;
+  }
+
+  &__retry {
+    background: var(--plyr-color-main, #00b2ff);
+    border: 0;
+    border-radius: $plyr-control-radius;
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: $plyr-font-size-base;
+    padding: calc(#{$plyr-control-spacing} * 0.7) calc(#{$plyr-control-spacing} * 1.5);
+    transition: all 0.2s ease;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--plyr-color-main-hover, #0099d9);
+      outline: none;
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Error state on player
+.plyr--has-error {
+  .plyr__controls,
+  .plyr__preloader {
+    display: none !important;
+  }
+}

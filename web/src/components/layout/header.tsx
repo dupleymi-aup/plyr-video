@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchBar } from "@/components/search/search-bar";
-import { Menu, Upload, User, LogOut, Settings } from "lucide-react";
+import { Menu, Upload, User, LogOut, Settings, Shield } from "lucide-react";
 
 export function Header() {
   const { data: session, status } = useSession();
@@ -45,11 +45,13 @@ export function Header() {
             <div className="h-8 w-8 animate-pulse rounded-full bg-secondary" />
           ) : session ? (
             <>
+              {session.user?.role !== "STUDENT" && (
               <Link href="/studio/upload">
                 <Button variant="ghost" size="icon">
                   <Upload className="h-5 w-5" />
                 </Button>
               </Link>
+              )}
 
               <div className="relative">
                 <button
@@ -75,12 +77,22 @@ export function Header() {
                         Profile
                       </button>
                     </Link>
+                    {session.user?.role !== "STUDENT" && (
                     <Link href="/studio" onClick={() => setUserMenuOpen(false)}>
                       <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
                         <Settings className="h-4 w-4" />
                         Studio
                       </button>
                     </Link>
+                    )}
+                    {session.user?.role === "ADMIN" && (
+                    <Link href="/admin" onClick={() => setUserMenuOpen(false)}>
+                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
+                        <Shield className="h-4 w-4" />
+                        Admin Panel
+                      </button>
+                    </Link>
+                    )}
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);

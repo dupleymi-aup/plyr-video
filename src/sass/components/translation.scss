@@ -43,3 +43,16 @@
   padding: 0.2em 0.5em;
   margin: 0.2em 0;
 }
+
+// Transcription user messages
+.plyr__transcription__message {
+  background: $plyr-captions-background;
+  border-radius: 4px;
+  font-size: $plyr-font-size-small;
+  padding: calc(#{$plyr-control-spacing} / 2) $plyr-control-spacing;
+  text-align: center;
+
+  &--error {
+    color: #ff6b6b;
+  }
+}

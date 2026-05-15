@@ -126,11 +126,11 @@ class SubmenuBuilders {
           type: 'language',
         }));
 
-        // Add the "Disabled" option to turn off captions
+        // Add the "Off" option to turn off captions
         options.unshift({
           value: -1,
           checked: !this.player.captions.toggled,
-          title: i18n.get('disabled', this.player.config),
+          title: i18n.get('captionsOff', this.player.config),
           list,
           type: 'language',
         });
@@ -198,7 +198,7 @@ class SubmenuBuilders {
         options.unshift({
           value: 'off',
           checked: !this.player.captions.translation.active,
-          title: i18n.get('disabled', this.player.config),
+          title: i18n.get('translationOff', this.player.config),
           list,
           type: 'language',
         });
@@ -238,7 +238,7 @@ class SubmenuBuilders {
         options.unshift({
           value: 'off',
           checked: !this.player.transcription.active,
-          title: i18n.get('disabled', this.player.config),
+          title: i18n.get('transcriptionOff', this.player.config),
           list,
           type: 'language',
         });
