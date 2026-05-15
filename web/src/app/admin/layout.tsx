@@ -1,7 +1,7 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Users, Video, Database, BarChart3, Key } from "lucide-react";
+import { Users, Video, Database, BarChart3, Key, ClipboardList } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: BarChart3 },
@@ -9,6 +9,7 @@ const navItems = [
   { href: "/admin/videos", label: "Videos", icon: Video },
   { href: "/admin/database", label: "Database", icon: Database },
   { href: "/admin/invitation-codes", label: "Invite Codes", icon: Key },
+  { href: "/admin/audit", label: "Audit Log", icon: ClipboardList },
 ];
 
 export default async function AdminLayout({

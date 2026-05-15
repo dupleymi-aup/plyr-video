@@ -23,7 +23,7 @@ export async function DELETE(
   const adminCount = await prisma.user.count({ where: { role: "ADMIN" } });
   const targetUser = await prisma.user.findUnique({
     where: { id: params.userId },
-    select: { role: true },
+    select: { role: true, name: true, email: true },
   });
   if (targetUser?.role === "ADMIN" && adminCount <= 1) {
     return NextResponse.json(
@@ -31,6 +31,18 @@ export async function DELETE(
       { status: 400 }
     );
   }
+
+  // Audit log before deletion
+  const targetName = targetUser?.name || targetUser?.email || params.userId;
+  await prisma.auditLog.create({
+    data: {
+      action: "USER_DELETED",
+      targetId: params.userId,
+      targetType: "User",
+      details: `Deleted user ${targetName} (was ${targetUser?.role})`,
+      adminId: session.user.id,
+    },
+  });
 
   await prisma.user.delete({ where: { id: params.userId } });
 

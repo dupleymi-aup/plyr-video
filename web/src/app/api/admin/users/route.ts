@@ -56,6 +56,12 @@ export async function PATCH(request: NextRequest) {
     }
   }
 
+  // Fetch current values for audit logging
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { role: true, banned: true, name: true, email: true },
+  });
+
   const updateData: Record<string, unknown> = {};
   if (role && ["STUDENT", "TEACHER", "ADMIN"].includes(role)) {
     updateData.role = role;
@@ -75,6 +81,46 @@ export async function PATCH(request: NextRequest) {
     where: { id: userId },
     data: updateData,
   });
+
+  // Audit logging
+  const targetName = currentUser?.name || currentUser?.email || userId;
+  const auditEntries = [];
+
+  if (updateData.role !== undefined && currentUser) {
+    auditEntries.push(
+      prisma.auditLog.create({
+        data: {
+          action: "ROLE_CHANGED",
+          targetId: userId,
+          targetType: "User",
+          oldValue: currentUser.role,
+          newValue: updateData.role as string,
+          details: `Role changed for ${targetName}: ${currentUser.role} → ${updateData.role}`,
+          adminId: session.user.id,
+        },
+      })
+    );
+  }
+
+  if (typeof updateData.banned === "boolean" && currentUser) {
+    auditEntries.push(
+      prisma.auditLog.create({
+        data: {
+          action: updateData.banned ? "USER_BANNED" : "USER_UNBANNED",
+          targetId: userId,
+          targetType: "User",
+          oldValue: String(currentUser.banned),
+          newValue: String(updateData.banned),
+          details: `${updateData.banned ? "Banned" : "Unbanned"} ${targetName}`,
+          adminId: session.user.id,
+        },
+      })
+    );
+  }
+
+  if (auditEntries.length > 0) {
+    await prisma.$transaction(auditEntries);
+  }
 
   return NextResponse.json({ success: true });
 }

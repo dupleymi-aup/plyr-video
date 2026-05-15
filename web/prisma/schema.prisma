@@ -82,6 +82,7 @@ model User {
   commentLikes      CommentLike[]
   registeredWithCode InvitationCode? @relation(fields: [registeredWithCodeId], references: [id])
   registeredWithCodeId String?
+  auditLogs          AuditLog[]     @relation("AuditLogAdmin")
 
   @@index([email])
   @@index([username])
@@ -349,4 +350,33 @@ model InvitationCode {
 
   @@index([code])
   @@index([isActive])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      AuditAction
+  targetId    String
+  targetType  String
+  oldValue    String?
+  newValue    String?
+  details     String?
+  createdAt   DateTime @default(now())
+
+  adminId     String?
+  admin       User?    @relation("AuditLogAdmin", fields: [adminId], references: [id], onDelete: SetNull)
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([targetId])
+}
+
+enum AuditAction {
+  ROLE_CHANGED
+  USER_BANNED
+  USER_UNBANNED
+  USER_DELETED
+  INVITATION_CODE_CREATED
+  INVITATION_CODE_DEACTIVATED
+  ADMIN_CREATED
 }

@@ -61,6 +61,17 @@ export async function POST(req: Request) {
     },
   });
 
+  await prisma.auditLog.create({
+    data: {
+      action: "INVITATION_CODE_CREATED",
+      targetId: code.id,
+      targetType: "InvitationCode",
+      newValue: code.code,
+      details: `Created invitation code ${code.code}${label ? ` (${label})` : ""}`,
+      adminId: session?.user?.id || null,
+    },
+  });
+
   return NextResponse.json(code, { status: 201 });
 }
 
@@ -76,10 +87,28 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Code ID is required" }, { status: 400 });
   }
 
+  const existingCode = await prisma.invitationCode.findUnique({
+    where: { id },
+    select: { code: true, label: true },
+  });
+
   await prisma.invitationCode.update({
     where: { id },
     data: { isActive: false },
   });
+
+  if (existingCode) {
+    await prisma.auditLog.create({
+      data: {
+        action: "INVITATION_CODE_DEACTIVATED",
+        targetId: id,
+        targetType: "InvitationCode",
+        oldValue: existingCode.code,
+        details: `Deactivated invitation code ${existingCode.code}${existingCode.label ? ` (${existingCode.label})` : ""}`,
+        adminId: session?.user?.id || null,
+      },
+    });
+  }
 
   return NextResponse.json({ success: true });
 }
