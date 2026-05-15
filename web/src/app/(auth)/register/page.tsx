@@ -8,12 +8,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { GraduationCap, BookOpen } from "lucide-react";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [selectedRole, setSelectedRole] = useState<"STUDENT" | "TEACHER">("STUDENT");
+  const [invitationCode, setInvitationCode] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -36,11 +39,10 @@ export default function RegisterPage() {
     }
 
     try {
-      // First register the user
       const registerRes = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, confirmPassword }),
+        body: JSON.stringify({ name, email, password, confirmPassword, role: selectedRole, invitationCode: selectedRole === "TEACHER" ? invitationCode : undefined }),
       });
 
       const registerData = await registerRes.json();
@@ -51,7 +53,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Then sign in
       const result = await signIn("credentials", {
         email,
         password,
@@ -99,6 +100,70 @@ export default function RegisterPage() {
                 required
               />
             </div>
+
+            <div className="space-y-2">
+              <Label>Account Type</Label>
+              <div className="space-y-3">
+                <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedRole === "STUDENT" ? "border-primary bg-primary/5" : "border-border"
+                }`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="STUDENT"
+                    checked={selectedRole === "STUDENT"}
+                    onChange={() => setSelectedRole("STUDENT")}
+                    className="mt-1 accent-primary"
+                  />
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4" />
+                    <span className="font-medium text-sm">Student</span>
+                    <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 px-2 py-0.5 rounded-full">
+                      Open
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Watch videos, track progress, interact</p>
+                </label>
+
+                <label className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedRole === "TEACHER" ? "border-primary bg-primary/5" : "border-border"
+                }`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="TEACHER"
+                    checked={selectedRole === "TEACHER"}
+                    onChange={() => setSelectedRole("TEACHER")}
+                    className="mt-1 accent-primary"
+                  />
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="font-medium text-sm">Teacher</span>
+                    <span className="text-xs bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 px-2 py-0.5 rounded-full">
+                      Code Required
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Create and manage educational content</p>
+                </label>
+              </div>
+            </div>
+
+            {selectedRole === "TEACHER" && (
+              <div className="space-y-2">
+                <Label htmlFor="invitationCode">Teacher Invitation Code</Label>
+                <Input
+                  id="invitationCode"
+                  type="text"
+                  placeholder="Enter your invitation code"
+                  value={invitationCode}
+                  onChange={(e) => setInvitationCode(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Provided by your institution or administrator
+                </p>
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

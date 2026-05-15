@@ -52,6 +52,9 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String?
+  role          Role      @default(STUDENT)
+  banned        Boolean   @default(false)
+  bannedReason  String?
   username      String?   @unique
   location      String?
   website       String?
@@ -77,6 +80,8 @@ model User {
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   commentLikes      CommentLike[]
+  registeredWithCode InvitationCode? @relation(fields: [registeredWithCodeId], references: [id])
+  registeredWithCodeId String?
 
   @@index([email])
   @@index([username])
@@ -143,6 +148,12 @@ model Video {
   @@index([visibility])
   @@index([publishedAt])
   @@index([viewCount])
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
 }
 
 enum VideoStatus {
@@ -321,4 +332,21 @@ model CommentLike {
 
   @@unique([userId, commentId])
   @@index([commentId])
+}
+
+model InvitationCode {
+  id          String    @id @default(cuid())
+  code        String    @unique
+  label       String?
+  maxUses     Int?
+  usedCount   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdBy   String?
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  usedBy      User[]
+
+  @@index([code])
+  @@index([isActive])
 }

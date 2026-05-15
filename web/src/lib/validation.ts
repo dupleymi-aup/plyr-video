@@ -10,9 +10,19 @@ export const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
+  role: z.enum(["STUDENT", "TEACHER"]).default("STUDENT"),
+  invitationCode: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
+}).refine((data) => {
+  if (data.role === "TEACHER" && !data.invitationCode) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Invitation code is required for teacher accounts",
+  path: ["invitationCode"],
 });
 
 export const forgotPasswordSchema = z.object({
