@@ -314,11 +314,12 @@ const ui = {
       const recentTouchSeek = this.touch && this.lastSeekTime + 2000 > Date.now();
 
       // Show controls if force, loading, paused, button interaction, or recent seek, otherwise hide
-      this.toggleControls(
-        Boolean(
-          force || this.loading || this.paused || controlsElement.pressed || controlsElement.hover || recentTouchSeek,
-        ),
+      const showControls = Boolean(
+        force || this.loading || this.paused || controlsElement.pressed || controlsElement.hover || recentTouchSeek,
       );
+
+      // Negate because adding the class hides the controls
+      toggleClass(this.elements.container, this.config.classNames.hideControls, !showControls);
     }
   },
 
