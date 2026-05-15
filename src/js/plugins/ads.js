@@ -266,9 +266,21 @@ class Ads {
     settings.restoreCustomPlaybackStateOnAdBreakComplete = true;
     settings.enablePreloading = true;
 
-    // The SDK is polling currentTime on the contentPlayback. And needs a duration
-    // so it can determine when to start the mid- and post-roll
-    this.manager = event.getAdsManager(this.player, settings);
+    try {
+      this.manager = event.getAdsManager(this.player, settings);
+    }
+    catch (error) {
+      this.player.debug.error(`Failed to get ads manager: ${error.message}`);
+      this.trigger('error', error);
+      return;
+    }
+
+    // Guard against null manager
+    if (!this.manager) {
+      this.player.debug.error('Ads manager is null');
+      this.trigger('error', new Error('Ads manager is null'));
+      return;
+    }
 
     // Get the cue points for any mid-rolls by filtering out the pre- and post-roll
     this.cuePoints = this.manager.getCuePoints();

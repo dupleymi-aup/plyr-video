@@ -313,17 +313,20 @@ class PreviewThumbnails {
    */
   listeners = () => {
     // Hide thumbnail preview - on mouse click, mouse leave (in listeners.js for now), and video play/seek. All four are required, e.g., for buffering
-    this.player.on('play', () => {
+    this._onPlay = () => {
       this.toggleThumbContainer(false, true);
-    });
+    };
+    this.player.on('play', this._onPlay);
 
-    this.player.on('seeked', () => {
+    this._onSeeked = () => {
       this.toggleThumbContainer(false);
-    });
+    };
+    this.player.on('seeked', this._onSeeked);
 
-    this.player.on('timeupdate', () => {
+    this._onTimeUpdate = () => {
       this.lastTime = this.player.media.currentTime;
-    });
+    };
+    this.player.on('timeupdate', this._onTimeUpdate);
   };
 
   /**
@@ -365,12 +368,29 @@ class PreviewThumbnails {
   };
 
   destroy = () => {
+    // Remove player event listeners
+    if (this._onPlay) {
+      this.player.off('play', this._onPlay);
+    }
+    if (this._onSeeked) {
+      this.player.off('seeked', this._onSeeked);
+    }
+    if (this._onTimeUpdate) {
+      this.player.off('timeupdate', this._onTimeUpdate);
+    }
+
+    // Remove DOM elements
     if (this.elements.thumb.container) {
       this.elements.thumb.container.remove();
     }
     if (this.elements.scrubbing.container) {
       this.elements.scrubbing.container.remove();
     }
+
+    // Clear references
+    this._onPlay = null;
+    this._onSeeked = null;
+    this._onTimeUpdate = null;
   };
 
   showImageAtCurrentTime = () => {
