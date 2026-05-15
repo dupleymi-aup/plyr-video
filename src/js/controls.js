@@ -5,7 +5,7 @@
 
 import RangeTouch from 'rangetouch';
 
-import captions from './captions';
+import { getLabel as getCaptionsLabel, getTracks as getCaptionsTracks } from './captions-utils';
 import html5 from './html5';
 import support from './support';
 import { repaint, transitionEndEvent } from './utils/animation';
@@ -903,7 +903,7 @@ const controls = {
         return toTitleCase(value);
 
       case 'captions':
-        return captions.getLabel.call(this);
+        return getCaptionsLabel(this);
 
       case 'translation':
         return this.captions.translation.active ? i18n.get('translateEnabled', this.config) : i18n.get('translateDisabled', this.config);
@@ -1033,7 +1033,7 @@ const controls = {
     // TODO: Captions or language? Currently it's mixed
     const type = 'captions';
     const list = this.elements.settings.panels.captions.querySelector('[role="menu"]');
-    const tracks = captions.getTracks.call(this);
+    const tracks = getCaptionsTracks(this);
     const toggle = Boolean(tracks.length);
 
     // Toggle the pane and tab
@@ -1054,7 +1054,7 @@ const controls = {
     const options = tracks.map((track, value) => ({
       value,
       checked: this.captions.toggled && this.currentTrack === value,
-      title: captions.getLabel.call(this, track),
+      title: getCaptionsLabel(this, track),
       badge: track.language && controls.createBadge.call(this, track.language.toUpperCase()),
       list,
       type: 'language',
@@ -1819,7 +1819,7 @@ const controls = {
         seektime: this.config.seekTime,
         speed: this.speed,
         quality: this.quality,
-        captions: captions.getLabel.call(this),
+        captions: getCaptionsLabel(this),
         // TODO: Looping
         // loop: 'None',
       });

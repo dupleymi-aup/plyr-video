@@ -3,6 +3,7 @@
 // ==========================================================================
 
 import controls from './controls';
+import { getLabel as getLabelFromUtils } from './captions-utils';
 import { dedupe } from './utils/arrays';
 import browser from './utils/browser';
 import {
@@ -15,7 +16,6 @@ import {
 } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
 import fetch from './utils/fetch';
-import i18n from './utils/i18n';
 import is from './utils/is';
 import sendCommand from './utils/post-message';
 import { getHTML } from './utils/strings';
@@ -480,25 +480,7 @@ class Captions {
 
   // Get UI label for track
   getLabel(track) {
-    let currentTrack = track;
-
-    if (!is.track(currentTrack) && this.supported.textTracks && this.toggled) {
-      currentTrack = this.getCurrentTrack();
-    }
-
-    if (is.track(currentTrack)) {
-      if (!is.empty(currentTrack.label)) {
-        return currentTrack.label;
-      }
-
-      if (!is.empty(currentTrack.language)) {
-        return track.language.toUpperCase();
-      }
-
-      return i18n.get('enabled', this.config);
-    }
-
-    return i18n.get('disabled', this.config);
+    return getLabelFromUtils(this, track);
   }
 
   // Update captions using current track's active cues
