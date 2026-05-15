@@ -782,7 +782,11 @@ class Listeners {
       elements.inputs.volume,
       inputEvent,
       (event) => {
-        player.volume = event.target.value;
+        const volume = Number(event.target.value);
+        // Only set if it's a valid number
+        if (!Number.isNaN(volume)) {
+          player.volume = volume;
+        }
       },
       'volume',
     );

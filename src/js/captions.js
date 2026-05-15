@@ -2,8 +2,8 @@
 // Plyr Captions
 // ==========================================================================
 
-import controls from './controls';
 import { getLabel as getLabelFromUtils } from './captions-utils';
+import controls from './controls';
 import { dedupe } from './utils/arrays';
 import browser from './utils/browser';
 import {
@@ -57,6 +57,12 @@ class Captions {
     this.isRutube = plyr.isRutube;
     this.isYandexCloud = plyr.isYandexCloud;
     this.isYouTube = plyr.isYouTube;
+
+    // Track listener references for cleanup
+    this._listeners = {
+      textTracks: null,
+      tracks: new Map(),
+    };
   }
 
   // Get embed reference dynamically (embed is set up after Captions constructor runs)
@@ -170,7 +176,9 @@ class Captions {
     // Watch changes to textTracks and update captions menu
     if (this.isHTML5) {
       const trackEvents = this.config.captions.update ? 'addtrack removetrack' : 'removetrack';
-      on.call(this.plyr, this.media.textTracks, trackEvents, this.update.bind(this));
+      const boundUpdate = this.update.bind(this);
+      this._listeners.textTracks = boundUpdate;
+      on.call(this.plyr, this.media.textTracks, trackEvents, boundUpdate);
     }
 
     // Update available languages in list next tick (the event must not be triggered before the listeners)
@@ -205,7 +213,9 @@ class Captions {
           }
 
           // Add event listener for cue changes
-          on.call(this.plyr, track, 'cuechange', () => this.updateCues());
+          const boundCueChange = () => this.updateCues();
+          this._listeners.tracks.set(track, boundCueChange);
+          on.call(this.plyr, track, 'cuechange', boundCueChange);
         });
     }
 
@@ -546,6 +556,26 @@ class Captions {
       // Trigger event
       triggerEvent.call(this.plyr, this.media, 'cuechange');
     }
+  }
+
+  // Destroy - clean up event listeners to prevent memory leaks
+  destroy() {
+    // Remove textTracks listener
+    if (this._listeners.textTracks && this.media && this.media.textTracks) {
+      const trackEvents = this.config.captions.update ? 'addtrack removetrack' : 'removetrack';
+      this.media.textTracks.removeEventListener(trackEvents, this._listeners.textTracks);
+    }
+
+    // Remove individual track cuechange listeners
+    this._listeners.tracks.forEach((listener, track) => {
+      if (track) {
+        track.removeEventListener('cuechange', listener);
+      }
+    });
+
+    // Clear references
+    this._listeners.textTracks = null;
+    this._listeners.tracks.clear();
   }
 }
 

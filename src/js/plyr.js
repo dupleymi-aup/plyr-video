@@ -814,6 +814,12 @@ class Plyr {
 
     if (!options.includes(quality)) {
       const value = closest(options, quality);
+
+      // Bail if no fallback quality available
+      if (value === undefined) {
+        return;
+      }
+
       this.debug.warn(`Unsupported quality option: ${quality}, using ${value} instead`);
       quality = value;
 
@@ -1351,6 +1357,11 @@ class Plyr {
     if (this.ads && this.ads.manager) {
       this.ads.destroy();
       this.ads = null;
+    }
+
+    // Destroy captions plugin to clean up textTrack listeners
+    if (this.captions) {
+      this.captions.destroy();
     }
 
     // Remove global window/document listeners

@@ -48,13 +48,13 @@ describe('array utils', () => {
       expect(closest([1.1, 2.2, 3.3], 2.5)).toBe(2.2);
     });
 
-    it('should return null for empty arrays', () => {
-      expect(closest([], 5)).toBeNull();
+    it('should return undefined for empty arrays', () => {
+      expect(closest([], 5)).toBeUndefined();
     });
 
-    it('should return null for non-array input', () => {
-      expect(closest(null, 5)).toBeNull();
-      expect(closest(undefined, 5)).toBeNull();
+    it('should return undefined for non-array input', () => {
+      expect(closest(null, 5)).toBeUndefined();
+      expect(closest(undefined, 5)).toBeUndefined();
     });
   });
 });
