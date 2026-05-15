@@ -418,10 +418,6 @@ const defaults = {
     loop: 'Loop',
     loopOn: 'On',
     loopOff: 'Off',
-    start: 'Start',
-    end: 'End',
-    all: 'All',
-    reset: 'Reset',
     disabled: 'Disabled',
     enabled: 'Enabled',
     advertisement: 'Ad',
@@ -449,13 +445,11 @@ const defaults = {
     translate: 'Translate',
     translateEnabled: 'Translation enabled',
     translateDisabled: 'Translation disabled',
-    translationLanguage: 'Translation language',
     // Transcription
     transcribe: 'Transcribe',
     transcription: 'Transcription',
     transcriptionEnabled: 'Transcription enabled',
     transcriptionDisabled: 'Transcription disabled',
-    transcriptionLanguage: 'Transcription language',
     // Keyboard shortcuts
     keyboardShortcuts: 'Keyboard Shortcuts',
     keyboardShortcutsHelp: 'Press any of these keys while the player is focused:',
@@ -682,8 +676,6 @@ const defaults = {
       speed: '[data-plyr="speed"]',
       language: '[data-plyr="language"]',
       quality: '[data-plyr="quality"]',
-      translationLanguage: '[data-plyr="translation-language"]',
-      transcriptionLanguage: '[data-plyr="transcription-language"]',
     },
     display: {
       currentTime: '.plyr__time--current',
