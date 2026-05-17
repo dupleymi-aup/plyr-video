@@ -13,6 +13,7 @@ import {
   Upload,
   BarChart3,
   Video,
+  Shield,
 } from "lucide-react";
 
 const mainNav = [
@@ -33,13 +34,20 @@ const settingsNav = [
   { href: "/settings/profile", label: "Profile", icon: User },
 ];
 
+const adminNav = [
+  { href: "/admin", label: "Обзор", icon: BarChart3 },
+  { href: "/admin/users", label: "Пользователи", icon: User },
+  { href: "/admin/videos", label: "Видео", icon: Video },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
 
   const isStudio = pathname.startsWith("/studio");
   const isSettings = pathname.startsWith("/settings");
+  const isAdmin = pathname.startsWith("/admin");
 
-  const navItems = isStudio ? studioNav : isSettings ? settingsNav : mainNav;
+  const navItems = isAdmin ? adminNav : isStudio ? studioNav : isSettings ? settingsNav : mainNav;
 
   return (
     <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-60 flex-col overflow-y-auto border-r bg-background lg:flex">

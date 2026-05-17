@@ -66,3 +66,40 @@ export function getStorageUrl(key: string | null | undefined): string {
   const baseUrl = process.env.S3_PUBLIC_URL || "";
   return `${baseUrl}/${key}`;
 }
+
+export function formatWatchTime(seconds: number): string {
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) {
+    return `${hours} ч ${minutes} мин`;
+  }
+  return `${minutes} мин`;
+}
+
+export function formatRelativeTimeRu(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const now = new Date();
+  const diff = now.getTime() - d.getTime();
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  const months = Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (years > 0) return `${years} г. назад`;
+  if (months > 0) return `${months} мес. назад`;
+  if (days > 0) return `${days} дн. назад`;
+  if (hours > 0) return `${hours} ч. назад`;
+  if (minutes > 0) return `${minutes} мин. назад`;
+  return "Только что";
+}
+
+export function formatDateRu(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return d.toLocaleDateString("ru-RU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}

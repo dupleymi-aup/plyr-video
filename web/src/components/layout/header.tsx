@@ -6,7 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchBar } from "@/components/search/search-bar";
-import { Menu, Upload, User, LogOut, Settings } from "lucide-react";
+import { Menu, Upload, User, LogOut, Settings, Shield } from "lucide-react";
 
 export function Header() {
   const { data: session, status } = useSession();
@@ -81,6 +81,14 @@ export function Header() {
                         Studio
                       </button>
                     </Link>
+                    {session.user?.role === "ADMIN" && (
+                      <Link href="/admin" onClick={() => setUserMenuOpen(false)}>
+                        <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                          <Shield className="h-4 w-4" />
+                          Админ-панель
+                        </button>
+                      </Link>
+                    )}
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
