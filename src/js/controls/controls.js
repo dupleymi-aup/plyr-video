@@ -407,6 +407,11 @@ class Controls {
         container.appendChild(this.createButton('transcription', defaultAttributes));
       }
 
+      // Toggle dark mode button
+      if (control === 'dark-mode') {
+        container.appendChild(this.createButton('dark-mode', defaultAttributes));
+      }
+
       // Settings button / menu
       if (control === 'settings' && !is.empty(this.player.config.settings)) {
         const wrapper = createElement(

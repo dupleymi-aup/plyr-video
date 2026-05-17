@@ -158,6 +158,12 @@ class Listeners {
           player.loop = !player.loop;
           break;
 
+        case 'd':
+          if (!repeat) {
+            player.toggleDarkMode();
+          }
+          break;
+
         default:
           break;
       }
@@ -598,6 +604,16 @@ class Listeners {
 
     // Airplay
     this.bind(elements.buttons.airplay, 'click', player.airplay, 'airplay');
+
+    // Dark mode toggle
+    this.bind(
+      elements.buttons.darkMode,
+      'click',
+      () => {
+        player.toggleDarkMode();
+      },
+      'darkMode',
+    );
 
     // Settings menu - click toggle
     this.bind(

@@ -1197,6 +1197,52 @@ class Plyr {
   };
 
   /**
+   * Set dark mode state
+   * @param {boolean} input - Whether to enable dark mode
+   */
+  set darkMode(input) {
+    const toggle = is.boolean(input) ? input : this.config.darkMode.enabled;
+
+    this.config.darkMode.enabled = toggle;
+
+    // Toggle class on container
+    toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, toggle);
+
+    // Store preference if persistent
+    if (this.config.darkMode.persistent && this.storage) {
+      this.storage.set({ darkMode: toggle });
+    }
+
+    // Update button pressed state
+    const buttons = this.elements.buttons.darkMode;
+    if (buttons) {
+      Array.from(buttons).forEach((btn) => {
+        btn.setAttribute('aria-pressed', toggle);
+        toggleClass(btn, this.config.classNames.controlPressed, toggle);
+      });
+    }
+
+    // Trigger event
+    triggerEvent.call(this, this.media, toggle ? 'darkmodeenabled' : 'darkmodedisabled');
+  }
+
+  /**
+   * Get current dark mode state
+   */
+  get darkMode() {
+    return Boolean(this.config.darkMode.enabled);
+  }
+
+  /**
+   * Toggle dark mode
+   * @param {boolean} input - Whether to enable or disable dark mode
+   */
+  toggleDarkMode = (input) => {
+    const toggle = is.boolean(input) ? input : !this.darkMode;
+    this.darkMode = toggle;
+  };
+
+  /**
    * Toggle the player controls
    * @param {boolean} [toggle] - Whether to show the controls
    */

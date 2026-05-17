@@ -443,6 +443,8 @@ const defaults = {
     transcriptionDisabled: 'Transcription disabled',
     transcriptionLanguage: 'Transcription language',
     loading: 'Loading...',
+    darkModeOn: 'Enable dark mode',
+    darkModeOff: 'Disable dark mode',
   },
 
   // URLs
@@ -540,6 +542,10 @@ const defaults = {
     // Quality
     'qualitychange',
 
+    // Dark mode
+    'darkmodeenabled',
+    'darkmodedisabled',
+
     // Ads
     'adsloaded',
     'adscontentpause',
@@ -577,6 +583,7 @@ const defaults = {
       settings: '[data-plyr="settings"]',
       loop: '[data-plyr="loop"]',
       translation: '[data-plyr="translation"]',
+      darkMode: '[data-plyr="dark-mode"]',
     },
     inputs: {
       seek: '[data-plyr="seek"]',
@@ -653,6 +660,9 @@ const defaults = {
     pip: {
       supported: 'plyr--pip-supported',
       active: 'plyr--pip-active',
+    },
+    darkMode: {
+      enabled: 'plyr--dark-mode',
     },
     airplay: {
       supported: 'plyr--airplay-supported',
@@ -780,6 +790,12 @@ const defaults = {
   markers: {
     enabled: false,
     points: [],
+  },
+
+  // Dark mode settings
+  darkMode: {
+    enabled: false,
+    persistent: true, // Store preference in localStorage
   },
 };
 
