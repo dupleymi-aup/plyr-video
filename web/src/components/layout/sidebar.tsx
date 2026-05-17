@@ -14,6 +14,7 @@ import {
   BarChart3,
   Video,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 
 const mainNav = [
@@ -38,6 +39,7 @@ const adminNav = [
   { href: "/admin", label: "Обзор", icon: BarChart3 },
   { href: "/admin/users", label: "Пользователи", icon: User },
   { href: "/admin/videos", label: "Видео", icon: Video },
+  { href: "/admin/comments", label: "Комментарии", icon: MessageSquare },
 ];
 
 export function Sidebar() {

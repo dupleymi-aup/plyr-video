@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchBar } from "@/components/search/search-bar";
+import { NotificationBadge } from "@/components/notifications/notification-badge";
 import { Menu, Upload, User, LogOut, Settings, Shield } from "lucide-react";
 
 export function Header() {
@@ -45,6 +46,8 @@ export function Header() {
             <div className="h-8 w-8 animate-pulse rounded-full bg-secondary" />
           ) : session ? (
             <>
+              <NotificationBadge />
+
               <Link href="/studio/upload">
                 <Button variant="ghost" size="icon">
                   <Upload className="h-5 w-5" />

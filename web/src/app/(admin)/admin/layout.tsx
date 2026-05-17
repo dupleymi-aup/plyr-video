@@ -9,12 +9,14 @@ import {
   Users,
   Video,
   Shield,
+  MessageSquare,
 } from "lucide-react";
 
 const adminNav = [
   { href: "/admin", label: "Обзор", icon: LayoutDashboard },
   { href: "/admin/users", label: "Пользователи", icon: Users },
   { href: "/admin/videos", label: "Видео", icon: Video },
+  { href: "/admin/comments", label: "Комментарии", icon: MessageSquare },
 ];
 
 export default function AdminLayout({

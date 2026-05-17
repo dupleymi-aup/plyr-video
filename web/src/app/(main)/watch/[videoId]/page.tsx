@@ -1,71 +1,92 @@
+import { prisma } from "@/lib/prisma";
+import { notFound } from "next/navigation";
+import Link from "next/link";
 import { PlyrPlayer } from "@/components/player/plyr-player";
 import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { formatViews, formatRelativeTime, formatDuration } from "@/lib/utils";
-import { ThumbsUp, ThumbsDown, Share2, Plus } from "lucide-react";
+import { formatViews, formatRelativeTimeRu, formatDuration } from "@/lib/utils";
+import { VideoActions, SubscribeButton } from "@/components/watch/video-actions";
+import { Comments } from "@/components/watch/comments";
+import { Check, PlaySquare } from "lucide-react";
 
-// Demo video - will be fetched from API
-const demoVideo = {
-  id: "1",
-  title: "Getting Started with Plyr Video Player",
-  description: `Learn how to use Plyr, a simple, accessible, and customizable HTML5 media player. In this video we cover basic setup, configuration options, and how to integrate Plyr into your web applications.
+export default async function WatchPage({
+  params,
+}: {
+  params: Promise<{ videoId: string }>;
+}) {
+  const { videoId } = await params;
 
-Plyr supports:
-- HTML5 Video & Audio
-- YouTube
-- Vimeo
-- Rutube, VK Video, Yandex Cloud Video, and more
+  const video = await prisma.video.findUnique({
+    where: { id: videoId },
+    include: {
+      channel: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          avatar: true,
+          isVerified: true,
+          _count: {
+            select: { subscriptions: true },
+          },
+        },
+      },
+      _count: {
+        select: { comments: true },
+      },
+    },
+  });
 
-Links:
-- GitHub: https://github.com/quadDarv1ne/plyr-video
-- Demo: https://plyr-video-demo.example.com`,
-  source: "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer/View_From_A_Blue_Moon_Trailer-576p.mp4",
-  poster: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-  duration: 180,
-  views: 15420,
-  createdAt: "2024-01-15T10:00:00Z",
-  channel: {
-    id: "1",
-    name: "Plyr Official",
-    avatar: "",
-    subscribers: 12500,
-    isVerified: true,
-  },
-  likes: 892,
-  dislikes: 12,
-};
+  if (!video || video.visibility === "PRIVATE" || video.status !== "READY") {
+    notFound();
+  }
 
-const recommendedVideos = [
-  {
-    id: "2",
-    title: "Advanced Plyr Features",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 320,
-    channelName: "Plyr Official",
-    views: 8930,
-    createdAt: "2024-02-20T14:30:00Z",
-  },
-  {
-    id: "3",
-    title: "Integrating Plyr with React",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 450,
-    channelName: "Web Dev Tutorials",
-    views: 23100,
-    createdAt: "2024-03-10T09:00:00Z",
-  },
-  {
-    id: "4",
-    title: "Russian Video Platforms",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 600,
-    channelName: "Plyr Official",
-    views: 5200,
-    createdAt: "2024-04-05T16:00:00Z",
-  },
-];
+  // Recommended videos (same channel, excluding current)
+  const recommended = await prisma.video.findMany({
+    where: {
+      id: { not: videoId },
+      channelId: video.channelId,
+      status: "READY",
+      visibility: "PUBLIC",
+    },
+    select: {
+      id: true,
+      title: true,
+      thumbnailKey: true,
+      duration: true,
+      viewCount: true,
+      createdAt: true,
+      channel: { select: { name: true } },
+    },
+    orderBy: { publishedAt: "desc" },
+    take: 10,
+  });
 
-export default function WatchPage({ params }: { params: { videoId: string } }) {
+  // If not enough from same channel, get from others
+  let moreRecommended: any[] = [];
+  if (recommended.length < 5) {
+    moreRecommended = await prisma.video.findMany({
+      where: {
+        id: { not: videoId },
+        channelId: { not: video.channelId },
+        status: "READY",
+        visibility: "PUBLIC",
+      },
+      select: {
+        id: true,
+        title: true,
+        thumbnailKey: true,
+        duration: true,
+        viewCount: true,
+        createdAt: true,
+        channel: { select: { name: true } },
+      },
+      orderBy: { viewCount: "desc" },
+      take: 10 - recommended.length,
+    });
+  }
+
+  const allRecommended = [...recommended, ...moreRecommended];
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-6">
       {/* Main content */}
@@ -73,109 +94,108 @@ export default function WatchPage({ params }: { params: { videoId: string } }) {
         {/* Player */}
         <div className="aspect-video bg-black rounded-lg overflow-hidden">
           <PlyrPlayer
-            source={demoVideo.source}
-            poster={demoVideo.poster}
+            source={video.storageKey || ""}
+            poster={video.posterKey || ""}
             className="w-full h-full"
           />
         </div>
 
         {/* Video info */}
         <div className="mt-4">
-          <h1 className="text-xl font-bold">{demoVideo.title}</h1>
+          <h1 className="text-xl font-bold">{video.title}</h1>
 
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              {formatViews(demoVideo.views)} views • {formatRelativeTime(demoVideo.createdAt)}
+              {formatViews(video.viewCount)} просмотров &middot; {formatRelativeTimeRu(video.publishedAt || video.createdAt)}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <ThumbsUp className="h-4 w-4 mr-1" />
-                {demoVideo.likes}
-              </Button>
-              <Button variant="outline" size="sm">
-                <ThumbsDown className="h-4 w-4 mr-1" />
-                {demoVideo.dislikes}
-              </Button>
-              <Button variant="outline" size="sm">
-                <Share2 className="h-4 w-4 mr-1" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-            </div>
+            <VideoActions
+              videoId={video.id}
+              channelId={video.channel.id}
+              initialLikes={video.likeCount}
+              initialDislikes={0}
+            />
           </div>
         </div>
 
         {/* Channel info */}
         <div className="mt-4 flex items-start gap-4 border-b pb-4">
           <Avatar
-            src={demoVideo.channel.avatar}
-            fallback={demoVideo.channel.name[0]}
+            src={video.channel.avatar || undefined}
+            fallback={video.channel.name[0]}
             size="lg"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold">{demoVideo.channel.name}</h3>
-              {demoVideo.channel.isVerified && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                  Verified
+              <Link href={`/channel/${video.channel.slug}`} className="hover:underline">
+                <h3 className="font-semibold">{video.channel.name}</h3>
+              </Link>
+              {video.channel.isVerified && (
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  Верифицирован
                 </span>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {formatViews(demoVideo.channel.subscribers)} subscribers
+              {formatViews(video.channel._count.subscriptions)} подписчиков
             </p>
-            <Button className="mt-2" size="sm">
-              Subscribe
-            </Button>
+            <div className="mt-2">
+              <SubscribeButton channelId={video.channel.id} />
+            </div>
           </div>
         </div>
 
         {/* Description */}
-        <div className="mt-4 rounded-lg bg-secondary p-4">
-          <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans">
-            {demoVideo.description}
-          </pre>
-        </div>
+        {video.description && (
+          <div className="mt-4 rounded-lg bg-secondary p-4">
+            <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans">
+              {video.description}
+            </pre>
+          </div>
+        )}
 
-        {/* Comments section placeholder */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">Comments</h3>
-          <p className="text-muted-foreground">Comments will be implemented in the next phase.</p>
-        </div>
+        {/* Comments */}
+        <Comments videoId={video.id} />
       </div>
 
       {/* Sidebar - Recommended videos */}
       <div className="w-full lg:w-80 xl:w-96 shrink-0">
-        <h3 className="text-lg font-semibold mb-4">Recommended</h3>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <PlaySquare className="h-5 w-5" />
+          Рекомендации
+        </h3>
         <div className="space-y-4">
-          {recommendedVideos.map((video) => (
-            <a key={video.id} href={`/watch/${video.id}`} className="flex gap-2 group">
+          {allRecommended.map((rec) => (
+            <Link key={rec.id} href={`/watch/${rec.id}`} className="flex gap-2 group">
               <div className="relative w-40 aspect-video shrink-0 overflow-hidden rounded-md bg-secondary">
-                <img
-                  src={video.thumbnail}
-                  alt={video.title}
-                  className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                />
-                {video.duration && (
+                {rec.thumbnailKey ? (
+                  <img
+                    src={rec.thumbnailKey}
+                    alt={rec.title}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    <PlaySquare className="h-6 w-6" />
+                  </div>
+                )}
+                {rec.duration && (
                   <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.5 text-[10px] font-medium text-white">
-                    {formatDuration(video.duration)}
+                    {formatDuration(rec.duration)}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="line-clamp-2 text-sm font-medium group-hover:text-primary">
-                  {video.title}
+                  {rec.title}
                 </h4>
-                <p className="mt-1 text-xs text-muted-foreground">{video.channelName}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{rec.channel?.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatViews(video.views)} views • {formatRelativeTime(video.createdAt)}
+                  {formatViews(rec.viewCount)} &middot; {formatRelativeTimeRu(rec.createdAt)}
                 </p>
               </div>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
