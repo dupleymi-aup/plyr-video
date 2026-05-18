@@ -119,7 +119,7 @@ class SubmenuBuilders {
         // Generate options data
         const options = tracks.map((track, value) => ({
           value,
-          checked: this.player.captions.toggled && this.player.currentTrack === value,
+          checked: this.player.captions?.toggled && this.player.currentTrack === value,
           title: captions.getLabel.call(this.player, track),
           badge: track.language && this.elementCreators.createBadge(track.language.toUpperCase()),
           list,
@@ -129,7 +129,7 @@ class SubmenuBuilders {
         // Add the "Off" option to turn off captions
         options.unshift({
           value: -1,
-          checked: !this.player.captions.toggled,
+          checked: !this.player.captions?.toggled,
           title: i18n.get('captionsOff', this.player.config),
           list,
           type: 'language',
@@ -187,7 +187,7 @@ class SubmenuBuilders {
         // Generate options data
         const options = languages.map(language => ({
           value: language,
-          checked: this.player.captions.translation.active && this.player.captions.translation.language === language,
+          checked: this.player.captions?.translation?.active && this.player.captions.translation.language === language,
           title: language.toUpperCase(),
           badge: language.toUpperCase() && this.elementCreators.createBadge(language.toUpperCase()),
           list,
@@ -197,7 +197,7 @@ class SubmenuBuilders {
         // Add the "Off" option to turn off translation
         options.unshift({
           value: 'off',
-          checked: !this.player.captions.translation.active,
+          checked: !this.player.captions?.translation?.active,
           title: i18n.get('translationOff', this.player.config),
           list,
           type: 'translation',
@@ -227,7 +227,7 @@ class SubmenuBuilders {
         // Generate options data
         const options = languages.map(language => ({
           value: language,
-          checked: this.player.transcription.active && this.player.transcription.language === language,
+          checked: this.player.transcription?.active && this.player.transcription.language === language,
           title: language.toUpperCase(),
           badge: language.toUpperCase() && this.elementCreators.createBadge(language.toUpperCase()),
           list,
@@ -237,7 +237,7 @@ class SubmenuBuilders {
         // Add the "Off" option to turn off transcription
         options.unshift({
           value: 'off',
-          checked: !this.player.transcription.active,
+          checked: !this.player.transcription?.active,
           title: i18n.get('transcriptionOff', this.player.config),
           list,
           type: 'transcription',

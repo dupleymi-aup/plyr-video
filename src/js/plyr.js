@@ -26,7 +26,7 @@ import transcription from './transcription';
 import ui from './ui';
 import { closest } from './utils/arrays';
 import { createElement, hasClass, removeElement, replaceElement, toggleClass, wrap } from './utils/elements';
-import { off, on, once, triggerEvent, unbindListeners } from './utils/events';
+import { on as addListener, once as onceListener, off as removeListener, triggerEvent, unbindListeners } from './utils/events';
 import is from './utils/is';
 import loadSprite from './utils/load-sprite';
 import { clamp } from './utils/numbers';
@@ -294,7 +294,7 @@ class Plyr {
 
     // Listen for events if debugging
     if (this.config.debug) {
-      on.call(this, this.elements.container, this.config.events.join(' '), (event) => {
+      addListener.call(this, this.elements.container, this.config.events.join(' '), (event) => {
         this.debug.log(`event: ${event.type}`);
       });
     }
@@ -1253,7 +1253,7 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   on = (event, callback) => {
-    on.call(this, this.elements.container, event, callback);
+    addListener.call(this, this.elements.container, event, callback);
   };
 
   /**
@@ -1262,7 +1262,7 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   once = (event, callback) => {
-    once.call(this, this.elements.container, event, callback);
+    onceListener.call(this, this.elements.container, event, callback);
   };
 
   /**
@@ -1271,7 +1271,7 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   off = (event, callback) => {
-    off(this.elements.container, event, callback);
+    removeListener(this.elements.container, event, callback);
   };
 
   /**
@@ -1391,7 +1391,7 @@ class Plyr {
     if (this.isHTML5) {
       // Cancel any pending quality change
       if (this._pendingQualityChange) {
-        off.call(this, this.media, 'loadedmetadata', this._pendingQualityChange);
+        removeListener.call(this, this.media, 'loadedmetadata', this._pendingQualityChange);
         this._pendingQualityChange = null;
       }
 

@@ -324,7 +324,7 @@ const vimeo = {
     // Get title
     player.embed.getVideoTitle().then((title) => {
       player.config.title = title;
-      ui.setTitle.call(this);
+      ui.setTitle.call(player);
     });
 
     // Get current time

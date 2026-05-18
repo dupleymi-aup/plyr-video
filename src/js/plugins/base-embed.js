@@ -67,7 +67,7 @@ export function createEmbed(provider, options) {
     hasPlayed: false,
     state: 'paused',
     initTimeout: setTimeout(() => {
-      if (!player.embed.hasReceivedMessage) {
+      if (player.embed && !player.embed.hasReceivedMessage) {
         player.debug.warn(`${label}: Player did not initialize within ${initTimeoutMs / 1000}s`);
       }
     }, initTimeoutMs),
