@@ -504,8 +504,8 @@ class PreviewThumbnails {
     // Show higher quality of the same frame
     // Each step here has a short time delay, and only continues if still hovering/seeking the same spot. This is to protect slow connections from overloading
     this.preloadNearby(thumbNum, true)
-      .then(this.preloadNearby(thumbNum, false))
-      .then(this.getHigherQuality(qualityIndex, previewImage, frame, thumbFilename));
+      .then(() => this.preloadNearby(thumbNum, false))
+      .then(() => this.getHigherQuality(qualityIndex, previewImage, frame, thumbFilename));
   };
 
   // Remove all preview images that aren't the designated current image

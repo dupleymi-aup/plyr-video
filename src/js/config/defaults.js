@@ -538,6 +538,8 @@ const defaults = {
     captionsOff: 'Off',
     translationOff: 'Off',
     transcriptionOff: 'Off',
+    darkModeOn: 'Enable dark mode',
+    darkModeOff: 'Disable dark mode',
   },
 
   // URLs
@@ -635,6 +637,10 @@ const defaults = {
     // Quality
     'qualitychange',
 
+    // Dark mode
+    'darkmodeenabled',
+    'darkmodedisabled',
+
     // Ads
     'adsloaded',
     'adscontentpause',
@@ -672,6 +678,7 @@ const defaults = {
       settings: '[data-plyr="settings"]',
       loop: '[data-plyr="loop"]',
       translation: '[data-plyr="translation"]',
+      darkMode: '[data-plyr="dark-mode"]',
     },
     inputs: {
       seek: '[data-plyr="seek"]',
@@ -745,6 +752,9 @@ const defaults = {
     pip: {
       supported: 'plyr--pip-supported',
       active: 'plyr--pip-active',
+    },
+    darkMode: {
+      enabled: 'plyr--dark-mode',
     },
     airplay: {
       supported: 'plyr--airplay-supported',
@@ -872,6 +882,23 @@ const defaults = {
   markers: {
     enabled: false,
     points: [],
+  },
+
+  // Dark mode settings
+  darkMode: {
+    enabled: false,
+    persistent: true, // Store preference in localStorage
+  },
+
+  // Analytics plugin
+  analytics: {
+    enabled: false,
+    endpoint: '',
+    sessionId: null,
+    batchSize: 10,
+    flushInterval: 30000,
+    sendBeacon: true,
+    heatmapGranularity: 5,
   },
 };
 

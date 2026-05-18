@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 import useSWR, { mutate } from "swr";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ interface InvitationCode {
 }
 
 export default function InvitationCodesPage() {
+  const t = useTranslations("adminInviteCodes");
   const { data: codes, isLoading } = useSWR<InvitationCode[]>("/api/admin/invitation-codes", fetcher);
   const [showForm, setShowForm] = useState(false);
   const [label, setLabel] = useState("");
@@ -81,14 +83,12 @@ export default function InvitationCodesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Invitation Codes</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage teacher registration invitation codes
-          </p>
+          <h1 className="text-2xl font-bold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Button onClick={() => setShowForm(!showForm)}>
           <Plus className="mr-2 h-4 w-4" />
-          Generate Code
+          {t("generateCode")}
         </Button>
       </div>
 
@@ -96,27 +96,27 @@ export default function InvitationCodesPage() {
         <form onSubmit={handleCreate} className="rounded-lg border p-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="label">Label (optional)</Label>
+              <Label htmlFor="label">{t("label")}</Label>
               <Input
                 id="label"
-                placeholder="e.g. Math Dept 2025"
+                placeholder="Math Dept 2025"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="maxUses">Max Uses (optional)</Label>
+              <Label htmlFor="maxUses">{t("maxUses")}</Label>
               <Input
                 id="maxUses"
                 type="number"
                 min="1"
-                placeholder="Unlimited"
+                placeholder={t("unlimited")}
                 value={maxUses}
                 onChange={(e) => setMaxUses(e.target.value)}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="expiresAt">Expires (optional)</Label>
+              <Label htmlFor="expiresAt">{t("expires")}</Label>
               <Input
                 id="expiresAt"
                 type="date"
@@ -127,10 +127,10 @@ export default function InvitationCodesPage() {
           </div>
           <div className="flex gap-2">
             <Button type="submit" disabled={creating}>
-              {creating ? "Creating..." : "Create Code"}
+              {creating ? t("creating") : t("create")}
             </Button>
             <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-              Cancel
+              {t("cancel")}
             </Button>
           </div>
         </form>
@@ -140,20 +140,20 @@ export default function InvitationCodesPage() {
         <table className="w-full">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left px-4 py-2 text-sm font-medium">Code</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Label</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Uses</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Status</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Created</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Expires</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Actions</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("code")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("label")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("uses")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("status")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("created")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("expiresCol")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("actions")}</th>
             </tr>
           </thead>
           <tbody>
             {codes?.length === 0 ? (
               <tr>
                 <td colSpan={7} className="text-center py-8 text-muted-foreground">
-                  No invitation codes yet. Generate one to get started.
+                  {t("noCodes")}
                 </td>
               </tr>
             ) : (
@@ -165,10 +165,10 @@ export default function InvitationCodesPage() {
                       <button
                         onClick={() => copyToClipboard(c.code, c.id)}
                         className="text-muted-foreground hover:text-foreground"
-                        title="Copy code"
+                        title={t("copyCode")}
                       >
                         {copiedId === c.id ? (
-                          <span className="text-green-600 text-xs">Copied!</span>
+                          <span className="text-green-600 text-xs">{t("copied")}</span>
                         ) : (
                           <Copy className="h-3 w-3" />
                         )}
@@ -185,14 +185,14 @@ export default function InvitationCodesPage() {
                         ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300"
                         : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
                     }`}>
-                      {c.isActive ? "Active" : "Deactivated"}
+                      {c.isActive ? t("active") : t("deactivated")}
                     </span>
                   </td>
                   <td className="px-4 py-2 text-sm text-muted-foreground">
                     {formatDate(c.createdAt)}
                   </td>
                   <td className="px-4 py-2 text-sm text-muted-foreground">
-                    {c.expiresAt ? formatDate(c.expiresAt) : "Never"}
+                    {c.expiresAt ? formatDate(c.expiresAt) : t("never")}
                   </td>
                   <td className="px-4 py-2">
                     {c.isActive && (
@@ -200,7 +200,7 @@ export default function InvitationCodesPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDeactivate(c.id)}
-                        title="Deactivate code"
+                        title={t("deactivateCode")}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>

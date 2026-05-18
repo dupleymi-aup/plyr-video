@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Database, Trash2, RefreshCw } from "lucide-react";
@@ -11,6 +12,8 @@ interface DbStats {
 }
 
 export default function AdminDatabasePage() {
+  const t = useTranslations("adminDatabase");
+  const tCommon = useTranslations("common");
   const [stats, setStats] = useState<DbStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [action, setAction] = useState<string | null>(null);
@@ -24,6 +27,9 @@ export default function AdminDatabasePage() {
             Users: data.totalUsers,
             Videos: data.totalVideos,
             Channels: data.totalChannels,
+            Courses: data.totalCourses || 0,
+            Enrollments: data.totalEnrollments || 0,
+            Grades: data.totalGrades || 0,
           },
           totalSize: data.totalUsers + data.totalVideos + data.totalChannels,
         });
@@ -38,13 +44,13 @@ export default function AdminDatabasePage() {
     setAction(null);
   };
 
-  if (loading) return <div className="text-muted-foreground">Loading...</div>;
+  if (loading) return <div className="text-muted-foreground">{t("loading")}</div>;
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Database Administration</h1>
-        <p className="text-muted-foreground">Database stats and maintenance</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -52,7 +58,7 @@ export default function AdminDatabasePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Database className="h-4 w-4" />
-              Table Sizes
+              {t("tableSizes")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -64,12 +70,12 @@ export default function AdminDatabasePage() {
                     className="flex justify-between py-2 border-b last:border-0"
                   >
                     <span>{table}</span>
-                    <span className="font-medium">{count} records</span>
+                    <span className="font-medium">{count}</span>
                   </div>
                 ))}
                 <div className="flex justify-between py-2 font-bold">
-                  <span>Total</span>
-                  <span>{stats.totalSize} records</span>
+                  <span>{t("total")}</span>
+                  <span>{stats.totalSize}</span>
                 </div>
               </div>
             )}
@@ -78,7 +84,7 @@ export default function AdminDatabasePage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Maintenance</CardTitle>
+            <CardTitle>{t("maintenance")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button
@@ -90,7 +96,7 @@ export default function AdminDatabasePage() {
               <RefreshCw
                 className={`h-4 w-4 ${action === "refresh" ? "animate-spin" : ""}`}
               />
-              Refresh Stats
+              {t("refreshStats")}
             </Button>
             <Button
               variant="outline"
@@ -99,7 +105,7 @@ export default function AdminDatabasePage() {
               disabled={action !== null}
             >
               <Trash2 className="h-4 w-4" />
-              Clean Orphaned Records
+              {t("cleanOrphaned")}
             </Button>
           </CardContent>
         </Card>

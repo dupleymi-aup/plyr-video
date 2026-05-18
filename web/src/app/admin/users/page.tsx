@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,15 +29,11 @@ interface User {
   createdAt: string;
 }
 
-const ROLE_CONFIG: Record<string, { label: string; icon: typeof Shield; color: string; bg: string }> = {
-  ADMIN: { label: "Admin", icon: ShieldCheck, color: "text-red-700 dark:text-red-300", bg: "bg-red-100 dark:bg-red-900" },
-  TEACHER: { label: "Teacher", icon: BookOpen, color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-100 dark:bg-amber-900" },
-  STUDENT: { label: "Student", icon: GraduationCap, color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900" },
-};
-
 const PAGE_SIZE = 10;
 
 export default function AdminUsersPage() {
+  const t = useTranslations("adminUsers");
+  const tCommon = useTranslations("common");
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -47,6 +44,12 @@ export default function AdminUsersPage() {
   const [editBanned, setEditBanned] = useState(false);
   const [saving, setSaving] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  const roleConfig: Record<string, { label: string; icon: typeof Shield; color: string; bg: string }> = {
+    ADMIN: { label: t("admin"), icon: ShieldCheck, color: "text-red-700 dark:text-red-300", bg: "bg-red-100 dark:bg-red-900" },
+    TEACHER: { label: t("teacher"), icon: BookOpen, color: "text-amber-700 dark:text-amber-300", bg: "bg-amber-100 dark:bg-amber-900" },
+    STUDENT: { label: t("student"), icon: GraduationCap, color: "text-green-700 dark:text-green-300", bg: "bg-green-100 dark:bg-green-900" },
+  };
 
   useEffect(() => {
     fetchUsers();
@@ -100,7 +103,7 @@ export default function AdminUsersPage() {
   };
 
   const deleteUser = async (userId: string) => {
-    if (!confirm("Delete this user? This cannot be undone.")) return;
+    if (!confirm(tCommon("delete") + "?")) return;
     setActionLoading(userId);
     const res = await fetch(`/api/admin/users/${userId}`, { method: "DELETE" });
     setActionLoading(null);
@@ -129,8 +132,8 @@ export default function AdminUsersPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">Manage users, roles, and access</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Filters */}
@@ -138,7 +141,7 @@ export default function AdminUsersPage() {
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Search by name or email..."
+            placeholder={t("searchPlaceholder")}
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
@@ -158,7 +161,7 @@ export default function AdminUsersPage() {
                 setPage(0);
               }}
             >
-              {role === "ALL" ? "All" : ROLE_CONFIG[role]?.label}
+              {role === "ALL" ? t("all") : roleConfig[role]?.label}
             </Button>
           ))}
         </div>
@@ -167,31 +170,31 @@ export default function AdminUsersPage() {
       {/* Table */}
       <Card>
         <CardHeader>
-          <CardTitle>Users ({filtered.length})</CardTitle>
+          <CardTitle>{t("actions")} ({filtered.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-3 font-medium">Name</th>
-                  <th className="text-left py-2 px-3 font-medium">Email</th>
-                  <th className="text-left py-2 px-3 font-medium">Role</th>
-                  <th className="text-left py-2 px-3 font-medium">Status</th>
-                  <th className="text-left py-2 px-3 font-medium">Created</th>
-                  <th className="text-left py-2 px-3 font-medium">Actions</th>
+                  <th className="text-left py-2 px-3 font-medium">{t("name")}</th>
+                  <th className="text-left py-2 px-3 font-medium">{t("email")}</th>
+                  <th className="text-left py-2 px-3 font-medium">{t("role")}</th>
+                  <th className="text-left py-2 px-3 font-medium">{t("status")}</th>
+                  <th className="text-left py-2 px-3 font-medium">{t("created")}</th>
+                  <th className="text-left py-2 px-3 font-medium">{tCommon("actions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {paginated.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-8 text-muted-foreground">
-                      No users found
+                      {t("noUsers")}
                     </td>
                   </tr>
                 ) : (
                   paginated.map((user) => {
-                    const roleCfg = ROLE_CONFIG[user.role] || ROLE_CONFIG.STUDENT;
+                    const roleCfg = roleConfig[user.role] || roleConfig.STUDENT;
                     const RoleIcon = roleCfg.icon;
                     return (
                       <tr key={user.id} className="border-b hover:bg-muted/50">
@@ -207,10 +210,10 @@ export default function AdminUsersPage() {
                           {user.banned ? (
                             <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 font-medium text-xs">
                               <Ban className="h-3 w-3" />
-                              Banned
+                              {t("banned")}
                             </span>
                           ) : (
-                            <span className="text-green-600 dark:text-green-400 text-xs font-medium">Active</span>
+                            <span className="text-green-600 dark:text-green-400 text-xs font-medium">{t("active")}</span>
                           )}
                         </td>
                         <td className="py-2.5 px-3 text-muted-foreground">
@@ -225,7 +228,7 @@ export default function AdminUsersPage() {
                               onClick={() => openEdit(user)}
                             >
                               <Shield className="h-3 w-3 mr-1" />
-                              Edit
+                              {t("edit")}
                             </Button>
                             <Button
                               size="sm"
@@ -237,9 +240,9 @@ export default function AdminUsersPage() {
                               {actionLoading === user.id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : user.banned ? (
-                                "Unban"
+                                t("unban")
                               ) : (
-                                <><Ban className="h-3 w-3 mr-1" /> Ban</>
+                                <><Ban className="h-3 w-3 mr-1" /> {t("ban")}</>
                               )}
                             </Button>
                             <Button
@@ -265,7 +268,7 @@ export default function AdminUsersPage() {
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t">
               <span className="text-sm text-muted-foreground">
-                Page {page + 1} of {totalPages}
+                {t("page")} {page + 1} {t("of")} {totalPages}
               </span>
               <div className="flex gap-2">
                 <Button
@@ -295,7 +298,7 @@ export default function AdminUsersPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={closeEdit}>
           <div className="bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Edit User Permissions</h2>
+              <h2 className="text-lg font-semibold">{t("editTitle")}</h2>
               <Button variant="ghost" size="icon" onClick={closeEdit}>
                 <X className="h-4 w-4" />
               </Button>
@@ -304,16 +307,16 @@ export default function AdminUsersPage() {
             <div className="space-y-4">
               <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
                 <div>
-                  <p className="font-medium">{editingUser.name || "Unnamed"}</p>
+                  <p className="font-medium">{editingUser.name || "—"}</p>
                   <p className="text-sm text-muted-foreground">{editingUser.email}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>Role</Label>
+                <Label>{t("role")}</Label>
                 <div className="grid grid-cols-3 gap-2">
                   {(["STUDENT", "TEACHER", "ADMIN"] as const).map((role) => {
-                    const cfg = ROLE_CONFIG[role];
+                    const cfg = roleConfig[role];
                     const Icon = cfg.icon;
                     return (
                       <button
@@ -335,7 +338,7 @@ export default function AdminUsersPage() {
               </div>
 
               <div className="space-y-2">
-                <Label>Access</Label>
+                <Label>{t("access")}</Label>
                 <button
                   type="button"
                   className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
@@ -346,7 +349,7 @@ export default function AdminUsersPage() {
                   onClick={() => setEditBanned(!editBanned)}
                 >
                   <span className={`text-sm font-medium ${editBanned ? "text-red-700 dark:text-red-300" : "text-green-700 dark:text-green-300"}`}>
-                    {editBanned ? "Account Banned" : "Account Active"}
+                    {editBanned ? t("accountBanned") : t("accountActive")}
                   </span>
                   <Ban className={`h-4 w-4 ${editBanned ? "text-red-600" : "text-green-600"}`} />
                 </button>
@@ -355,10 +358,10 @@ export default function AdminUsersPage() {
 
             <div className="flex gap-2 mt-6">
               <Button onClick={saveEdit} disabled={saving} className="flex-1">
-                {saving ? "Saving..." : "Save Changes"}
+                {saving ? t("saving") : t("saveChanges")}
               </Button>
               <Button variant="outline" onClick={closeEdit}>
-                Cancel
+                {t("cancel")}
               </Button>
             </div>
           </div>

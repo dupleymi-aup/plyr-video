@@ -1,25 +1,27 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import useSWR from "swr";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Ban, Trash2, Key, X, UserPlus, ArrowUpDown, Loader2 } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-const ACTION_CONFIG: Record<string, { label: string; icon: typeof ShieldCheck; color: string }> = {
-  ROLE_CHANGED: { label: "Role Changed", icon: ArrowUpDown, color: "text-blue-600" },
-  USER_BANNED: { label: "User Banned", icon: Ban, color: "text-red-600" },
-  USER_UNBANNED: { label: "User Unbanned", icon: X, color: "text-green-600" },
-  USER_DELETED: { label: "User Deleted", icon: Trash2, color: "text-red-700" },
-  INVITATION_CODE_CREATED: { label: "Code Created", icon: Key, color: "text-amber-600" },
-  INVITATION_CODE_DEACTIVATED: { label: "Code Deactivated", icon: X, color: "text-orange-600" },
-  ADMIN_CREATED: { label: "Admin Created", icon: UserPlus, color: "text-purple-600" },
-};
-
 export default function AdminAuditPage() {
+  const t = useTranslations("adminAudit");
   const [page, setPage] = useState(1);
   const [actionFilter, setActionFilter] = useState("");
+
+  const actionConfig: Record<string, { label: string; icon: typeof ShieldCheck; color: string }> = {
+    ROLE_CHANGED: { label: t("roleChanged"), icon: ArrowUpDown, color: "text-blue-600" },
+    USER_BANNED: { label: t("userBanned"), icon: Ban, color: "text-red-600" },
+    USER_UNBANNED: { label: t("userUnbanned"), icon: X, color: "text-green-600" },
+    USER_DELETED: { label: t("userDeleted"), icon: Trash2, color: "text-red-700" },
+    INVITATION_CODE_CREATED: { label: t("codeCreated"), icon: Key, color: "text-amber-600" },
+    INVITATION_CODE_DEACTIVATED: { label: t("codeDeactivated"), icon: X, color: "text-orange-600" },
+    ADMIN_CREATED: { label: t("adminCreated"), icon: UserPlus, color: "text-purple-600" },
+  };
 
   const { data, isLoading } = useSWR(
     `/api/admin/audit?page=${page}&limit=20${actionFilter ? `&action=${actionFilter}` : ""}`,
@@ -42,8 +44,8 @@ export default function AdminAuditPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Audit Log</h1>
-        <p className="text-muted-foreground">Track all administrative actions</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {/* Filter */}
@@ -53,9 +55,9 @@ export default function AdminAuditPage() {
           size="sm"
           onClick={() => { setActionFilter(""); setPage(1); }}
         >
-          All
+          {t("all")}
         </Button>
-        {Object.entries(ACTION_CONFIG).map(([key, cfg]) => (
+        {Object.entries(actionConfig).map(([key, cfg]) => (
           <Button
             key={key}
             variant={actionFilter === key ? "default" : "outline"}
@@ -72,22 +74,22 @@ export default function AdminAuditPage() {
         <table className="w-full text-sm">
           <thead className="bg-muted/50">
             <tr>
-              <th className="text-left px-4 py-2 text-sm font-medium">Time</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Action</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Admin</th>
-              <th className="text-left px-4 py-2 text-sm font-medium">Details</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("time")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("action")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("admin")}</th>
+              <th className="text-left px-4 py-2 text-sm font-medium">{t("details")}</th>
             </tr>
           </thead>
           <tbody>
             {logs.length === 0 ? (
               <tr>
                 <td colSpan={4} className="text-center py-8 text-muted-foreground">
-                  No audit log entries yet
+                  {t("noLogs")}
                 </td>
               </tr>
             ) : (
               logs.map((log: any) => {
-                const cfg = ACTION_CONFIG[log.action] || ACTION_CONFIG.ROLE_CHANGED;
+                const cfg = actionConfig[log.action] || actionConfig.ROLE_CHANGED;
                 const Icon = cfg.icon;
                 return (
                   <tr key={log.id} className="border-t hover:bg-muted/50">
@@ -101,7 +103,7 @@ export default function AdminAuditPage() {
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-sm">
-                      {log.admin?.name || log.admin?.email || "System"}
+                      {log.admin?.name || log.admin?.email || t("system")}
                     </td>
                     <td className="px-4 py-2.5 text-sm text-muted-foreground">
                       {log.details}
@@ -118,7 +120,7 @@ export default function AdminAuditPage() {
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <span className="text-sm text-muted-foreground">
-            {total} entries, page {page} of {totalPages}
+            {total} {t("entries")}, {t("page")} {page} {t("of")} {totalPages}
           </span>
           <div className="flex gap-2">
             <Button
@@ -127,7 +129,7 @@ export default function AdminAuditPage() {
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
             >
-              Previous
+              {t("previous")}
             </Button>
             <Button
               variant="outline"
@@ -135,7 +137,7 @@ export default function AdminAuditPage() {
               disabled={page >= totalPages}
               onClick={() => setPage(page + 1)}
             >
-              Next
+              {t("next")}
             </Button>
           </div>
         </div>

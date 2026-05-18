@@ -1,0 +1,98 @@
+// ==========================================================================
+// Dark mode styling
+// ==========================================================================
+
+.plyr--dark-mode {
+  // Dark background
+  background: var(--plyr-dark-bg, hsl(216deg 15% 10%));
+
+  // Dark controls background
+  .plyr__controls {
+    background: var(--plyr-dark-controls-bg, hsl(216deg 15% 12%));
+  }
+
+  // Dark tooltips
+  .plyr__tooltip {
+    background: var(--plyr-dark-tooltip-bg, hsl(216deg 15% 18%));
+    color: var(--plyr-dark-text, hsl(216deg 15% 90%));
+  }
+
+  // Dark menu
+  .plyr__menu__container {
+    background: var(--plyr-dark-menu-bg, hsl(216deg 15% 14%));
+
+    .plyr__menu__value {
+      color: var(--plyr-dark-text, hsl(216deg 15% 90%));
+
+      &:hover {
+        background: var(--plyr-dark-menu-hover, hsl(216deg 15% 22%));
+      }
+    }
+
+    .plyr__menu__badge {
+      background: var(--plyr-dark-badge-bg, hsl(216deg 15% 30%));
+    }
+  }
+
+  // Dark sliders
+  .plyr__volume--display,
+  .plyr__progress__buffer {
+    background: var(--plyr-dark-slider-bg, hsl(216deg 15% 20%));
+  }
+
+  // Dark captions
+  .plyr__captions {
+    background: var(--plyr-dark-captions-bg, rgb(0 0 0 / 80%));
+    color: var(--plyr-dark-captions-text, hsl(216deg 15% 95%));
+  }
+
+  // Dark transcription
+  .plyr__transcription {
+    background: var(--plyr-dark-transcription-bg, hsl(216deg 15% 14%));
+    color: var(--plyr-dark-text, hsl(216deg 15% 90%));
+  }
+
+  // Dark translation
+  .plyr__translation {
+    background: var(--plyr-dark-translation-bg, hsl(216deg 15% 14%));
+    color: var(--plyr-dark-text, hsl(216deg 15% 90%));
+  }
+
+  // Dark preloader
+  .plyr__preloader {
+    background: var(--plyr-dark-preloader-bg, rgb(0 0 0 / 80%));
+
+    .plyr__preloader__spinner {
+      border-color: var(--plyr-dark-spinner-color, hsl(216deg 15% 50%));
+      border-top-color: var(--plyr-color-main, hsl(198deg 100% 50%));
+    }
+  }
+
+  // Dark time display
+  .plyr__time {
+    color: var(--plyr-dark-text, hsl(216deg 15% 90%));
+  }
+
+  // Dark progress bar
+  .plyr__progress__bar {
+    background: var(--plyr-dark-progress-bg, var(--plyr-color-main, hsl(198deg 100% 50%)));
+  }
+
+  // Dark volume panel
+  .plyr__volume {
+    background: var(--plyr-dark-volume-bg, hsl(216deg 15% 18%));
+  }
+
+  // Dark preview thumbnails
+  .plyr__preview-thumb {
+    background: var(--plyr-dark-preview-bg, hsl(216deg 15% 16%));
+
+    .plyr__preview-thumb__time-container {
+      background: var(--plyr-dark-preview-time-bg, rgb(0 0 0 / 70%));
+    }
+  }
+
+  .plyr__preview-scrubbing {
+    background: var(--plyr-dark-scrubbing-bg, rgb(0 0 0 / 80%));
+  }
+}

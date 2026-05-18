@@ -228,6 +228,7 @@ class Controls {
         settings: getElement.call(this.player, this.player.config.selectors.buttons.settings),
         captions: getElement.call(this.player, this.player.config.selectors.buttons.captions),
         fullscreen: getElement.call(this.player, this.player.config.selectors.buttons.fullscreen),
+        darkMode: getElements.call(this.player, this.player.config.selectors.buttons.darkMode),
       };
 
       // Progress
@@ -408,6 +409,11 @@ class Controls {
       // Toggle transcription button
       if (control === 'transcription') {
         container.appendChild(this.createButton('transcription', defaultAttributes));
+      }
+
+      // Toggle dark mode button
+      if (control === 'dark-mode') {
+        container.appendChild(this.createButton('dark-mode', defaultAttributes));
       }
 
       // Settings button / menu

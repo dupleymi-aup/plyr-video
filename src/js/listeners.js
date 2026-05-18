@@ -92,6 +92,7 @@ class Listeners {
         'k',
         'l',
         'm',
+        'd',
       ];
 
       // If the key is found prevent default (e.g. prevent scrolling for arrows)
@@ -157,6 +158,12 @@ class Listeners {
 
         case 'l':
           player.loop = !player.loop;
+          break;
+
+        case 'd':
+          if (!repeat) {
+            player.toggleDarkMode();
+          }
           break;
 
         default:
@@ -598,6 +605,21 @@ class Listeners {
 
     // Captions toggle
     this.bind(elements.buttons.captions, 'click', () => player.toggleCaptions());
+
+    // Dark mode toggle
+    if (elements.buttons.darkMode) {
+      Array.from(elements.buttons.darkMode).forEach((button) => {
+        this.bind(
+          button,
+          'click',
+          () => {
+            player.toggleDarkMode();
+          },
+          null,
+          false,
+        );
+      });
+    }
 
     // Download
     this.bind(

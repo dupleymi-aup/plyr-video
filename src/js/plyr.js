@@ -18,6 +18,7 @@ import html5 from './html5';
 import Listeners from './listeners';
 import media from './media';
 import Ads from './plugins/ads';
+import Analytics from './plugins/analytics';
 import PreviewThumbnails from './plugins/preview-thumbnails';
 import source from './source';
 import Storage from './storage';
@@ -274,6 +275,12 @@ class Plyr {
     // Setup local storage for user settings
     this.storage = new Storage(this);
 
+    // Load dark mode preference from storage
+    const storedDarkMode = this.storage.get('darkMode');
+    if (is.boolean(storedDarkMode)) {
+      this.config.darkMode.enabled = storedDarkMode;
+    }
+
     // Store reference
     this.media.plyr = this;
 
@@ -288,6 +295,11 @@ class Plyr {
 
     // Add style hook
     ui.addStyleHook.call(this);
+
+    // Apply dark mode class if enabled from storage
+    if (this.config.darkMode.enabled) {
+      toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, true);
+    }
 
     // Setup media
     media.setup.call(this);
@@ -330,6 +342,11 @@ class Plyr {
     // Setup preview thumbnails if enabled
     if (this.config.previewThumbnails.enabled) {
       this.previewThumbnails = new PreviewThumbnails(this);
+    }
+
+    // Setup analytics if enabled
+    if (this.config.analytics.enabled) {
+      this.analytics = new Analytics(this);
     }
   }
 
@@ -1182,6 +1199,51 @@ class Plyr {
     // Chrome
     return this.media === document.pictureInPictureElement;
   }
+
+  /**
+   * Set dark mode state
+   */
+  set darkMode(input) {
+    const toggle = is.boolean(input) ? input : !this.config.darkMode.enabled;
+
+    this.config.darkMode.enabled = toggle;
+
+    toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, toggle);
+
+    // Save to storage
+    if (this.config.darkMode.persistent) {
+      this.storage.set({ darkMode: toggle });
+    }
+
+    // Trigger event
+    triggerEvent.call(this, this.media, toggle ? 'darkmodeenabled' : 'darkmodedisabled');
+
+    // Update button pressed state
+    if (this.elements.buttons.darkMode) {
+      Array.from(this.elements.buttons.darkMode).forEach((button) => {
+        button.pressed = toggle;
+      });
+    }
+  }
+
+  /**
+   * Get current dark mode state
+   */
+  get darkMode() {
+    return this.config.darkMode.enabled;
+  }
+
+  /**
+   * Toggle dark mode
+   */
+  toggleDarkMode = (input) => {
+    if (is.boolean(input)) {
+      this.darkMode = input;
+    }
+    else {
+      this.darkMode = !this.config.darkMode.enabled;
+    }
+  };
 
   /**
    * Sets the preview thumbnails for the current source

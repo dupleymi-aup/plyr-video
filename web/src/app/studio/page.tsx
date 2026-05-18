@@ -69,12 +69,12 @@ export default async function StudioDashboard() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/studio/settings">
+        <Link href="/studio/courses">
           <Card className="hover:bg-accent transition-colors cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Users className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <h3 className="font-medium">Channel Settings</h3>
-              <p className="text-sm text-muted-foreground">Customize your channel</p>
+              <h3 className="font-medium">Manage Courses</h3>
+              <p className="text-sm text-muted-foreground">Create and manage courses</p>
             </CardContent>
           </Card>
         </Link>

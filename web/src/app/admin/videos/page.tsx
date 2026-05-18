@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -15,6 +16,8 @@ interface Video {
 }
 
 export default function AdminVideosPage() {
+  const t = useTranslations("adminVideos");
+  const tCommon = useTranslations("common");
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -29,7 +32,7 @@ export default function AdminVideosPage() {
   }, []);
 
   const deleteVideo = async (videoId: string) => {
-    if (!confirm("Delete this video? This cannot be undone.")) return;
+    if (!confirm(tCommon("delete") + "?")) return;
     const res = await fetch("/api/admin/videos", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -51,30 +54,30 @@ export default function AdminVideosPage() {
     }
   };
 
-  if (loading) return <div className="text-muted-foreground">Loading...</div>;
+  if (loading) return <div className="text-muted-foreground">{tCommon("loading")}</div>;
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Video Moderation</h1>
-        <p className="text-muted-foreground">Manage all videos on the platform</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Videos ({videos.length})</CardTitle>
+          <CardTitle>{t("all")} ({videos.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-2 px-3">Title</th>
-                  <th className="text-left py-2 px-3">Channel</th>
-                  <th className="text-left py-2 px-3">Status</th>
-                  <th className="text-left py-2 px-3">Visibility</th>
-                  <th className="text-left py-2 px-3">Views</th>
-                  <th className="text-left py-2 px-3">Actions</th>
+                  <th className="text-left py-2 px-3">{t("videoTitle")}</th>
+                  <th className="text-left py-2 px-3">{t("channel")}</th>
+                  <th className="text-left py-2 px-3">{tCommon("status")}</th>
+                  <th className="text-left py-2 px-3">{t("visibility")}</th>
+                  <th className="text-left py-2 px-3">{t("views")}</th>
+                  <th className="text-left py-2 px-3">{tCommon("actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -91,9 +94,9 @@ export default function AdminVideosPage() {
                         }
                         className="border rounded px-2 py-1 text-sm"
                       >
-                        <option value="PUBLIC">Public</option>
-                        <option value="UNLISTED">Unlisted</option>
-                        <option value="PRIVATE">Private</option>
+                        <option value="PUBLIC">{t("public")}</option>
+                        <option value="UNLISTED">{t("unlisted")}</option>
+                        <option value="PRIVATE">{t("private")}</option>
                       </select>
                     </td>
                     <td className="py-2 px-3">{video.viewCount}</td>
@@ -103,7 +106,7 @@ export default function AdminVideosPage() {
                         variant="destructive"
                         onClick={() => deleteVideo(video.id)}
                       >
-                        Delete
+                        {tCommon("delete")}
                       </Button>
                     </td>
                   </tr>

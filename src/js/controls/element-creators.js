@@ -145,6 +145,14 @@ class ElementCreators {
         props.iconPressed = 'transcribe';
         break;
 
+      case 'dark-mode':
+        props.toggle = true;
+        props.label = 'darkModeOn';
+        props.labelPressed = 'darkModeOff';
+        props.icon = 'moon';
+        props.iconPressed = 'sun';
+        break;
+
       default:
         if (is.empty(props.label)) {
           props.label = type;
@@ -193,6 +201,13 @@ class ElementCreators {
 
     // We have multiple play buttons
     if (type === 'play') {
+      if (!is.array(this.player.elements.buttons[type])) {
+        this.player.elements.buttons[type] = [];
+      }
+
+      this.player.elements.buttons[type].push(button);
+    }
+    else if (type === 'darkMode') {
       if (!is.array(this.player.elements.buttons[type])) {
         this.player.elements.buttons[type] = [];
       }
