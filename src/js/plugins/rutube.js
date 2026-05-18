@@ -16,7 +16,7 @@ import {
 } from './base-embed';
 
 // Parse Rutube ID from URL
-function parseId(url) {
+export function parseId(url) {
   if (is.empty(url)) {
     return null;
   }
@@ -54,7 +54,7 @@ function parseId(url) {
 }
 
 // Parse Rutube playlist ID from URL
-function parsePlaylistId(url) {
+export function parsePlaylistId(url) {
   if (is.empty(url)) {
     return null;
   }

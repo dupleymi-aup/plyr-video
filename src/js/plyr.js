@@ -39,8 +39,6 @@ import { translate } from './utils/translate';
 import { parseUrl } from './utils/urls';
 
 // Private properties
-// TODO: Use a WeakMap for private globals
-// const globals = new WeakMap();
 
 // Plyr instance
 class Plyr {
@@ -125,7 +123,6 @@ class Plyr {
     };
 
     // Debugging
-    // TODO: move to globals
     this.debug = new Console(this.config.debug);
 
     // Log config options and support
@@ -199,11 +196,10 @@ class Plyr {
               this.config.loop.active = true;
             }
 
-            // TODO: replace fullscreen.iosNative with this playsinline config option
             // YouTube requires the playsinline in the URL
             if (this.isYouTube) {
               this.config.playsinline = truthy.includes(url.searchParams.get('playsinline'));
-              this.config.youtube.hl = url.searchParams.get('hl'); // TODO: Should this be setting language?
+              this.config.youtube.hl = this.config.language || url.searchParams.get('hl') || '';
             }
             else {
               this.config.playsinline = true;
@@ -537,6 +533,8 @@ class Plyr {
 
   /**
    * Get buffered
+   * Returns a number (0-1) for single-range buffering (YouTube/Vimeo/simple HTML5)
+   * or an array of {start, end} objects when multiple buffered chunks exist
    */
   get buffered() {
     const { buffered } = this.media;
@@ -546,11 +544,22 @@ class Plyr {
       return buffered;
     }
 
-    // HTML5
-    // TODO: Handle buffered chunks of the media
-    // (i.e. seek to another section buffers only that section)
+    // HTML5 with multiple buffered ranges
     if (buffered && buffered.length && this.duration > 0) {
-      return buffered.end(0) / this.duration;
+      // If only one range, return the simple fraction for backwards compatibility
+      if (buffered.length === 1) {
+        return buffered.end(0) / this.duration;
+      }
+
+      // Multiple ranges — return array of normalized {start, end} pairs
+      const ranges = [];
+      for (let i = 0; i < buffered.length; i++) {
+        ranges.push({
+          start: buffered.start(i) / this.duration,
+          end: buffered.end(i) / this.duration,
+        });
+      }
+      return ranges;
     }
 
     return 0;
@@ -1103,18 +1112,18 @@ class Plyr {
       this.storage.set({ translationLanguage: input });
       // If translation is active, re-translate current captions
       if (this.captions.translation.active && this.elements.captions) {
-        const content = this.elements.captions.innerHTML;
+        const content = this.elements.captions.textContent;
         if (content) {
           translate(content, input)
             .then((translated) => {
               if (this.elements.translation) {
-                this.elements.translation.innerHTML = translated;
+                this.elements.translation.textContent = translated;
               }
             })
             .catch((error) => {
-              console.warn('Translation failed:', error);
+              this.debug.warn('Translation failed:', error);
               if (this.elements.translation) {
-                this.elements.translation.innerHTML = '';
+                this.elements.translation.textContent = '';
               }
             });
         }
@@ -1154,8 +1163,6 @@ class Plyr {
 
   /**
    * Toggle picture-in-picture playback on WebKit/MacOS
-   * TODO: update player with state, support, enabled
-   * TODO: detect outside changes
    */
   set pip(input) {
     // Bail if no support
@@ -1263,8 +1270,7 @@ class Plyr {
   }
 
   /**
-   * Trigger the airplay dialog
-   * TODO: update player with state, support, enabled
+   * Trigger the airplay dialog on supported devices (Safari/macOS)
    */
   airplay = () => {
     // Show dialog if supported
@@ -1422,6 +1428,12 @@ class Plyr {
     if (this.previewThumbnails && this.previewThumbnails.loaded) {
       this.previewThumbnails.destroy();
       this.previewThumbnails = null;
+    }
+
+    // Destroy analytics plugin if active
+    if (this.analytics) {
+      this.analytics.destroy();
+      this.analytics = null;
     }
 
     // Destroy ads plugin if active

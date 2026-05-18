@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchBar } from "@/components/search/search-bar";
@@ -12,6 +13,7 @@ export function Header() {
   const { data: session, status } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const t = useTranslations("layout");
 
   return (
     <header className="fixed top-0 z-40 w-full border-b bg-background">
@@ -20,6 +22,9 @@ export function Header() {
         <button
           className="lg:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label={mobileMenuOpen ? t("closeMenu") : t("openMenu")}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-menu"
         >
           <Menu className="h-6 w-6" />
         </button>
@@ -31,7 +36,7 @@ export function Header() {
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
-          <span className="hidden sm:inline-block">Plyr Platform</span>
+          <span className="hidden sm:inline-block">{t("logo")}</span>
         </Link>
 
         {/* Search */}
@@ -57,6 +62,9 @@ export function Header() {
                 <button
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring"
+                  aria-label={t("userMenu")}
+                  aria-expanded={userMenuOpen}
+                  aria-haspopup="menu"
                 >
                   <Avatar
                     src={session.user?.image || undefined}
@@ -66,30 +74,30 @@ export function Header() {
                 </button>
 
                 {userMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-56 rounded-md border bg-popover p-2 shadow-lg">
+                  <div className="absolute right-0 mt-2 w-56 rounded-md border bg-popover p-2 shadow-lg" role="menu">
                     <div className="px-3 py-2 border-b">
                       <p className="text-sm font-medium">{session.user?.name}</p>
                       <p className="text-xs text-muted-foreground truncate">{session.user?.email}</p>
                     </div>
                     <Link href="/settings/profile" onClick={() => setUserMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
+                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent" role="menuitem">
                         <User className="h-4 w-4" />
-                        Profile
+                        {t("profile")}
                       </button>
                     </Link>
                     {session.user?.role !== "STUDENT" && (
                     <Link href="/studio" onClick={() => setUserMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
+                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent" role="menuitem">
                         <Settings className="h-4 w-4" />
-                        Studio
+                        {t("studio")}
                       </button>
                     </Link>
                     )}
                     {session.user?.role === "ADMIN" && (
                     <Link href="/admin" onClick={() => setUserMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent">
+                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent" role="menuitem">
                         <Shield className="h-4 w-4" />
-                        Admin Panel
+                        {t("adminPanel")}
                       </button>
                     </Link>
                     )}
@@ -99,9 +107,10 @@ export function Header() {
                         signOut({ callbackUrl: "/" });
                       }}
                       className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10"
+                      role="menuitem"
                     >
                       <LogOut className="h-4 w-4" />
-                      Sign Out
+                      {t("signOut")}
                     </button>
                   </div>
                 )}
@@ -109,7 +118,7 @@ export function Header() {
             </>
           ) : (
             <Link href="/login">
-              <Button variant="default">Sign In</Button>
+              <Button variant="default">{t("signIn")}</Button>
             </Link>
           )}
         </div>
@@ -117,7 +126,7 @@ export function Header() {
 
       {/* Mobile search */}
       {mobileMenuOpen && (
-        <div className="border-t p-4 md:hidden">
+        <div id="mobile-menu" className="border-t p-4 md:hidden">
           <SearchBar />
         </div>
       )}

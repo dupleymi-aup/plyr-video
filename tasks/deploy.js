@@ -3,7 +3,7 @@ import path, { join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { S3Client } from '@aws-sdk/client-s3';
-import aws from 'aws-sdk';
+import { fromIni } from '@aws-sdk/credential-provider-ini';
 import { bold, cyan, green } from 'colorette';
 import log from 'fancy-log';
 import gitbranch from 'git-branch';
@@ -51,7 +51,7 @@ function getJobs() {
       })
       : new S3Client({
         region: options.region,
-        credentials: new aws.SharedIniFileCredentials({ profile: 'plyr' }),
+        credentials: fromIni({ profile: 'plyr' }),
       }),
   }]));
 

@@ -1,6 +1,15 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type {
+  AvgGradeResult,
+  TopCourseWithDetails,
+  GradeDistributionWithAvg,
+  EnrollmentTrendWithCount,
+  QuizStatsWithDetails,
+  LessonCompletionWithDetails,
+} from "@/types/analytics";
 
 export async function GET(request: Request) {
   try {
@@ -114,12 +123,12 @@ export async function GET(request: Request) {
       overview: {
         totalCourses: totalCoursesResult,
         totalEnrollments: totalEnrollmentsResult,
-        avgGrade: Number((avgGradeResult as any[])[0]?.avgGrade ?? 0),
+        avgGrade: Number((avgGradeResult as AvgGradeResult[])[0]?.avgGrade ?? 0),
         totalCompletions: totalCompletionsResult,
         totalQuizAttempts: totalAttemptsResult,
         quizPassRate: totalAttemptsResult > 0 ? 0 : 0, // will be computed from quizStats
       },
-      topCourses: (topCoursesResult as any[]).map((c: any) => ({
+      topCourses: (topCoursesResult as TopCourseWithDetails[]).map((c) => ({
         id: c.id,
         title: c.title,
         status: c.status,
@@ -128,15 +137,15 @@ export async function GET(request: Request) {
         completionCount: Number(c.completionCount),
         avgGrade: Number(c.avgGrade),
       })),
-      gradeDistribution: (gradeDistResult as any[]).map((d: any) => ({
+      gradeDistribution: (gradeDistResult as GradeDistributionWithAvg[]).map((d) => ({
         bucket: d.bucket,
         count: Number(d.count),
       })),
-      enrollmentTrend: (trendResult as any[]).map((t: any) => ({
+      enrollmentTrend: (trendResult as EnrollmentTrendWithCount[]).map((t) => ({
         date: t.date,
         enrollments: Number(t.enrollments),
       })),
-      quizStats: (quizStatsResult as any[]).map((q: any) => ({
+      quizStats: (quizStatsResult as QuizStatsWithDetails[]).map((q) => ({
         quizTitle: q.quizTitle,
         courseTitle: q.courseTitle,
         totalAttempts: Number(q.totalAttempts),
@@ -144,7 +153,7 @@ export async function GET(request: Request) {
         passedCount: Number(q.passedCount),
         passRate: Number(q.totalAttempts) > 0 ? (Number(q.passedCount) / Number(q.totalAttempts)) * 100 : 0,
       })),
-      lessonCompletionStats: (lessonCompletionResult as any[]).map((c: any) => ({
+      lessonCompletionStats: (lessonCompletionResult as LessonCompletionWithDetails[]).map((c) => ({
         id: c.id,
         title: c.title,
         totalLessons: Number(c.totalLessons),
@@ -156,7 +165,6 @@ export async function GET(request: Request) {
       })),
     });
   } catch (error) {
-    console.error("Course analytics API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-courses");
   }
 }

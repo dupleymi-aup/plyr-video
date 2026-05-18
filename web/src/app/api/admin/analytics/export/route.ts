@@ -1,6 +1,12 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type {
+  ExportStudentStats,
+  ExportVideoStats,
+  ExportTotalStats,
+} from "@/types/analytics";
 
 function escapeCsv(value: unknown): string {
   const str = String(value ?? "");
@@ -41,7 +47,7 @@ export async function POST(request: Request) {
       `;
 
       headers = ["ID", "Name", "Email", "Watch Time (min)", "Videos Watched", "Total Views"];
-      rows = (students as any[]).map((s: any) => [
+      rows = (students as ExportStudentStats[]).map((s) => [
         s.id,
         s.name || "",
         s.email || "",
@@ -66,7 +72,7 @@ export async function POST(request: Request) {
       `;
 
       headers = ["ID", "Title", "Duration (s)", "Unique Viewers", "Watch Time (min)", "Avg Completion %"];
-      rows = (videos as any[]).map((v: any) => [
+      rows = (videos as ExportVideoStats[]).map((v) => [
         v.id,
         v.title || "",
         v.duration || "",
@@ -85,7 +91,7 @@ export async function POST(request: Request) {
       `;
 
       headers = ["Metric", "Value"];
-      const statData = (stats as any[])[0];
+      const statData = (stats as ExportTotalStats[])[0];
       rows = [
         ["Total Watch Time (min)", (Number(statData?.totalSeconds ?? 0) / 60).toFixed(1)],
         ["Unique Viewers", String(Number(statData?.uniqueViewers ?? 0))],
@@ -105,7 +111,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Analytics export API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-export");
   }
 }

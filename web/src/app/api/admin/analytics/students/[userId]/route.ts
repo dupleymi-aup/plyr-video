@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type { WeeklyActivityDay, StudentSummary } from "@/types/analytics";
 
 export async function GET(
   request: Request,
@@ -91,11 +93,11 @@ export async function GET(
       WHERE vv.userId = ${userId}
     `;
 
-    const summaryData = (summary as any[])[0];
+    const summaryData = (summary as StudentSummary[])[0];
 
     return NextResponse.json({
       user,
-      watchHistory: watchHistory.map((w: any) => ({
+      watchHistory: watchHistory.map((w) => ({
         id: w.id,
         watchedSeconds: w.watchedSeconds,
         createdAt: w.createdAt,
@@ -105,18 +107,18 @@ export async function GET(
           : 0,
         video: w.video,
       })),
-      weeklyActivity: (weeklyActivity as any[]).map((w: any) => ({
+      weeklyActivity: (weeklyActivity as WeeklyActivityDay[]).map((w) => ({
         date: w.date,
         totalSeconds: Number(w.totalSeconds),
         videosWatched: Number(w.videosWatched),
       })),
-      comments: comments.map((c: any) => ({
+      comments: comments.map((c) => ({
         id: c.id,
         content: c.content,
         createdAt: c.createdAt,
         video: c.video,
       })),
-      likes: likes.map((l: any) => ({
+      likes: likes.map((l) => ({
         id: l.id,
         createdAt: l.createdAt,
         video: l.video,
@@ -129,7 +131,6 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Student analytics API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-student-detail");
   }
 }

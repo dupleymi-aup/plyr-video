@@ -90,20 +90,22 @@
     <link rel="stylesheet" href="../dist/plyr.css">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Инициализация всех плееров
-            const players = [
+            const ids = [
                 'player-rutube',
                 'player-yandex',
                 'player-vk',
                 'player-mailru',
                 'player-mts'
             ];
-            
-            // Создаем плееры
-            players.forEach(playerId => {
-                const playerElement = document.getElementById(playerId);
-                if (playerElement) {
-                    new Plyr(playerElement);
+
+            ids.forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                try {
+                    new Plyr(el);
+                }
+                catch (err) {
+                    console.error('Failed to init', id, err);
                 }
             });
         });

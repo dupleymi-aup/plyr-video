@@ -3,10 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { channelId: string } }
+  { params }: { params: Promise<{ channelId: string }> }
 ) {
+  const { channelId } = await params;
   const channel = await prisma.channel.findUnique({
-    where: { id: params.channelId },
+    where: { id: channelId },
     include: {
       videos: {
         where: { status: "READY", visibility: "PUBLIC" },

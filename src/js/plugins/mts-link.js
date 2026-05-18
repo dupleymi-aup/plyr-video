@@ -20,7 +20,7 @@ import {
 } from './base-embed';
 
 // Parse MTS Link Video ID from URL
-function parseId(url) {
+export function parseId(url) {
   if (is.empty(url)) {
     return null;
   }

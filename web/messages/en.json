@@ -347,6 +347,25 @@
     "adminCreated": "Admin created",
     "system": "System"
   },
+  "layout": {
+    "logo": "Plyr Platform",
+    "closeMenu": "Close menu",
+    "openMenu": "Open menu",
+    "userMenu": "User menu",
+    "profile": "Profile",
+    "studio": "Studio",
+    "adminPanel": "Admin Panel",
+    "signIn": "Sign In",
+    "signOut": "Sign Out",
+    "home": "Home",
+    "trending": "Trending",
+    "subscriptions": "Subscriptions",
+    "dashboard": "Dashboard",
+    "videos": "Videos",
+    "upload": "Upload",
+    "settings": "Settings",
+    "account": "Account"
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",

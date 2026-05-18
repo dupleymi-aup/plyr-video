@@ -3,7 +3,7 @@
 // ==========================================================================
 
 import controls from './controls';
-import { createElement, getAttributesFromSelector, insertAfter, toggleClass } from './utils/elements';
+import { createElement, emptyElement, getAttributesFromSelector, insertAfter, toggleClass } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
 import i18n from './utils/i18n';
 import is from './utils/is';
@@ -41,7 +41,10 @@ const transcription = {
 
       // Show user-facing message in the translation container (reused for transcription output)
       if (this.elements.translation) {
-        this.elements.translation.innerHTML = `<div class="plyr__transcription__message">${i18n.get('transcriptionNotSupported', this.config)}</div>`;
+        const msg = createElement('div', { class: 'plyr__transcription__message' });
+        msg.textContent = i18n.get('transcriptionNotSupported', this.config);
+        emptyElement(this.elements.translation);
+        this.elements.translation.appendChild(msg);
       }
       return;
     }
@@ -70,17 +73,20 @@ const transcription = {
 
     // Event listeners for recognition
     on.call(this, this.transcription.recognition, 'result', (event) => {
-      let transcript = '';
+      let ongoingFinal = '';
+      let interimText = '';
       for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          transcript += event.results[i][0].transcript;
+        const result = event.results[i];
+        if (result.isFinal) {
+          ongoingFinal += result[0].transcript;
         }
         else {
-          transcript += event.results[i][0].transcript;
+          interimText = result[0].transcript;
         }
       }
-      this.transcription.transcript = transcript.trim();
-      // Update UI
+      const accumulatedFinal = `${this.transcription._finalTranscript || ''}${ongoingFinal}`;
+      this.transcription._finalTranscript = accumulatedFinal;
+      this.transcription.transcript = accumulatedFinal + (interimText ? ` ${interimText}` : '');
       this.transcription.updateContainer.call(this);
     });
 
@@ -99,7 +105,10 @@ const transcription = {
         this.transcription.toggle.call(this, false);
 
         if (this.elements.translation) {
-          this.elements.translation.innerHTML = `<div class="plyr__transcription__message plyr__transcription__message--error">${i18n.get('transcriptionPermissionRequired', this.config)}</div>`;
+          const msg = createElement('div', { class: 'plyr__transcription__message plyr__transcription__message--error' });
+          msg.textContent = i18n.get('transcriptionPermissionRequired', this.config);
+          emptyElement(this.elements.translation);
+          this.elements.translation.appendChild(msg);
         }
       }
     });
@@ -113,7 +122,7 @@ const transcription = {
 
     // Get and set initial data
     const language = (this.storage.get('transcriptionLanguage') || this.config.transcription.language || 'en').toLowerCase();
-    let active = this.storage.get('transcriptionActive') || this.config.transcription.active;
+    let active = this.storage.get('transcriptionActive') ?? this.config.transcription.active;
     if (!is.boolean(active)) {
       active = this.config.transcription.active;
     }
@@ -186,6 +195,7 @@ const transcription = {
       else {
         this.transcription.recognition.stop();
         this.transcription.transcript = '';
+        this.transcription._finalTranscript = '';
         this.transcription.updateContainer.call(this);
       }
     }
@@ -210,20 +220,20 @@ const transcription = {
       translate(content, this.config.translation.language)
         .then((translated) => {
           if (this.elements.translation) {
-            this.elements.translation.innerHTML = translated;
+            this.elements.translation.textContent = translated;
           }
         })
         .catch((error) => {
           this.debug.warn('Translation failed:', error);
           if (this.elements.translation) {
-            this.elements.translation.innerHTML = content; // Fallback to original transcript
+            this.elements.translation.textContent = content; // Fallback to original transcript
           }
         });
     }
     else {
       // Show original transcript (or empty)
       if (this.elements.translation) {
-        this.elements.translation.innerHTML = content;
+        this.elements.translation.textContent = content;
       }
     }
   },

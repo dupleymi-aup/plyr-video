@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
   Home,
@@ -15,34 +16,35 @@ import {
   Video,
 } from "lucide-react";
 
-const mainNav = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/trending", label: "Trending", icon: TrendingUp },
-  { href: "/subscriptions", label: "Subscriptions", icon: PlaySquare },
-];
-
-const studioNav = [
-  { href: "/studio", label: "Dashboard", icon: BarChart3 },
-  { href: "/studio/videos", label: "Videos", icon: Video },
-  { href: "/studio/upload", label: "Upload", icon: Upload },
-  { href: "/studio/settings", label: "Settings", icon: Settings },
-];
-
-const settingsNav = [
-  { href: "/settings", label: "Account", icon: Settings },
-  { href: "/settings/profile", label: "Profile", icon: User },
-];
-
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useTranslations("layout");
 
   const isStudio = pathname.startsWith("/studio");
   const isSettings = pathname.startsWith("/settings");
 
+  const mainNav = [
+    { href: "/", label: t("home"), icon: Home },
+    { href: "/trending", label: t("trending"), icon: TrendingUp },
+    { href: "/subscriptions", label: t("subscriptions"), icon: PlaySquare },
+  ];
+
+  const studioNav = [
+    { href: "/studio", label: t("dashboard"), icon: BarChart3 },
+    { href: "/studio/videos", label: t("videos"), icon: Video },
+    { href: "/studio/upload", label: t("upload"), icon: Upload },
+    { href: "/studio/settings", label: t("settings"), icon: Settings },
+  ];
+
+  const settingsNav = [
+    { href: "/settings", label: t("account"), icon: Settings },
+    { href: "/settings/profile", label: t("profile"), icon: User },
+  ];
+
   const navItems = isStudio ? studioNav : isSettings ? settingsNav : mainNav;
 
   return (
-    <aside className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-60 flex-col overflow-y-auto border-r bg-background lg:flex">
+    <aside aria-label="Sidebar" className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-60 flex-col overflow-y-auto border-r bg-background lg:flex">
       <div className="flex-1 space-y-1 p-4">
         {navItems.map((item) => {
           const Icon = item.icon;

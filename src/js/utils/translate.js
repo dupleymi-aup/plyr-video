@@ -59,13 +59,10 @@ export function translate(text, to = 'en', from = 'auto', config = {}) {
     });
 }
 
-// Alternative: Using a translation service that requires different format
-// This function is a placeholder for other services if needed
-export function translateText(text, to, from, service = 'libretranslate') {
-  // Currently only supports libretranslate
+export function translateText(text, to, from, service) {
   if (service === 'libretranslate') {
     return translate(text, to, from);
   }
-  // For other services, you would implement their specific API here
-  return Promise.resolve(text); // Fallback
+
+  return Promise.resolve(text);
 }

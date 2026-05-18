@@ -2,7 +2,6 @@
 // Plyr controls: Submenu builders
 // ==========================================================================
 
-import captions from '../captions';
 import { dedupe } from '../utils/arrays';
 import { emptyElement } from '../utils/elements';
 import i18n from '../utils/i18n';
@@ -95,9 +94,6 @@ class SubmenuBuilders {
   // Set the looping options (commented out in original)
   // setLoopMenu() { ... }
 
-  // Get current selected caption language
-  // TODO: rework this to use the getter in the API?
-
   // Set a list of available captions languages
   setCaptionsMenu() {
     // Menu required
@@ -105,9 +101,8 @@ class SubmenuBuilders {
       return;
     }
 
-    // TODO: Captions or language? Currently it's mixed
     const type = 'captions';
-    const tracks = captions.getTracks.call(this.player);
+    const tracks = this.player.captions.getTracks();
     const toggle = Boolean(tracks.length);
 
     this.buildMenu({
@@ -120,7 +115,7 @@ class SubmenuBuilders {
         const options = tracks.map((track, value) => ({
           value,
           checked: this.player.captions?.toggled && this.player.currentTrack === value,
-          title: captions.getLabel.call(this.player, track),
+          title: this.player.captions.getLabel(track),
           badge: track.language && this.elementCreators.createBadge(track.language.toUpperCase()),
           list,
           type: 'language',

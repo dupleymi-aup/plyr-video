@@ -13,10 +13,29 @@ export async function GET(
 
   const { courseId } = await params;
 
+  // Verify course exists and check access
+  const course = await prisma.course.findUnique({ where: { id: courseId } });
+  if (!course) {
+    return NextResponse.json({ error: "Course not found" }, { status: 404 });
+  }
+
+  // Only course teacher, enrolled students, or admin can view enrollments
+  if (
+    session.user.role !== "ADMIN" &&
+    course.teacherId !== session.user.id
+  ) {
+    const enrollment = await prisma.courseEnrollment.findUnique({
+      where: { courseId_studentId: { courseId, studentId: session.user.id } },
+    });
+    if (!enrollment) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
+
   const enrollments = await prisma.courseEnrollment.findMany({
     where: { courseId },
     include: {
-      student: { select: { id: true, name: true, email: true } },
+      student: { select: { id: true, name: true } },
       _count: {
         select: { grades: true },
       },

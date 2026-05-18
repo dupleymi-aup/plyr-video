@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type { VideoAnalyticsItem, TotalCountResult } from "@/types/analytics";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -50,10 +52,10 @@ export async function GET(request: Request) {
       WHERE v.status != 'DELETED'
     `;
 
-    const total = Number((countResult as any[])[0]?.total ?? 0);
+    const total = Number((countResult as TotalCountResult[])[0]?.total ?? 0);
 
     return NextResponse.json({
-      videos: (videos as any[]).map((v: any) => ({
+      videos: (videos as VideoAnalyticsItem[]).map((v) => ({
         id: v.id,
         title: v.title,
         duration: v.duration,
@@ -73,7 +75,6 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Analytics videos API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-videos");
   }
 }

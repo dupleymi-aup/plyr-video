@@ -25,7 +25,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
 
         if (!user) {
-          throw new Error("User not found. Please register first.");
+          // Use a dummy hash comparison to prevent timing-based user enumeration
+          await bcrypt.compare(password, "$2a$10$abcdefghijklmnopqrstuuvwxzyz0123456789ABCDEF");
+          throw new Error("Invalid email or password");
         }
 
         if (user.banned) {

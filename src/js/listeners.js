@@ -378,6 +378,22 @@ class Listeners {
     // Loading state
     on.call(player, player.media, 'waiting canplay seeked playing', event => ui.checkLoading.call(player, event));
 
+    // Detect outside picture-in-picture changes (Chrome/Edge enterpictureinpicture / leavepictureinpicture)
+    on.call(player, player.media, 'enterpictureinpicture', () => {
+      ui.checkPlaying.call(player, { type: 'enterpictureinpicture' });
+      triggerEvent.call(player, player.media, 'pipchange');
+    });
+
+    on.call(player, player.media, 'leavepictureinpicture', () => {
+      ui.checkPlaying.call(player, { type: 'leavepictureinpicture' });
+      triggerEvent.call(player, player.media, 'pipchange');
+    });
+
+    // Safari PiP via webkitpresentationmodechanged
+    on.call(player, player.media, 'webkitpresentationmodechanged', () => {
+      triggerEvent.call(player, player.media, 'pipchange');
+    });
+
     // Preloader: show on loadstart/waiting, hide on canplay/playing
     on.call(player, player.media, 'loadstart waiting', () => {
       ui.showPreloader.call(player);
@@ -775,7 +791,6 @@ class Listeners {
       controls.updateSeekTooltip.call(player, event));
 
     // Preview thumbnails plugin
-    // TODO: Really need to work on some sort of plug-in wide event bus or pub-sub for this
     this.bind(elements.progress, 'mousemove touchmove', (event) => {
       const { previewThumbnails } = player;
 

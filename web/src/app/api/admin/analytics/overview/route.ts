@@ -1,6 +1,15 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type {
+  WatchTimeSummary,
+  CompletionSummary,
+  DailyWatchStats,
+  TopVideoStats,
+  TopStudentStats,
+  RoleActivity,
+} from "@/types/analytics";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -105,29 +114,29 @@ export async function GET(request: Request) {
       GROUP BY u.role
     `;
 
-    const watchTime = (watchTimeResult as any[])[0];
-    const completion = (completionResult as any[])[0];
-    const daily = dailyResult as any[];
+    const watchTime = (watchTimeResult as WatchTimeSummary[])[0];
+    const completion = (completionResult as CompletionSummary[])[0];
+    const daily = dailyResult as DailyWatchStats[];
 
     return NextResponse.json({
       totalWatchSeconds: Number(watchTime?.totalSeconds ?? 0),
       uniqueViewers: Number(watchTime?.uniqueViewers ?? 0),
       totalViews: Number(watchTime?.totalViews ?? 0),
       avgCompletionRate: Number(completion?.avgCompletion ?? 0) * 100,
-      dailyWatchTime: daily.map((d: any) => ({
+      dailyWatchTime: daily.map((d) => ({
         date: d.date,
         totalSeconds: Number(d.totalSeconds),
         uniqueViewers: Number(d.uniqueViewers),
         totalViews: Number(d.totalViews),
       })),
-      topVideos: (topVideosResult as any[]).map((v: any) => ({
+      topVideos: (topVideosResult as TopVideoStats[]).map((v) => ({
         id: v.id,
         title: v.title,
         totalSeconds: Number(v.totalSeconds),
         views: Number(v.views),
         avgCompletion: Number(v.avgCompletion) * 100,
       })),
-      topStudents: (topStudentsResult as any[]).map((s: any) => ({
+      topStudents: (topStudentsResult as TopStudentStats[]).map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
@@ -135,14 +144,13 @@ export async function GET(request: Request) {
         videosWatched: Number(s.videosWatched),
         totalViews: Number(s.totalViews),
       })),
-      activityByRole: (activityByRole as any[]).map((r: any) => ({
+      activityByRole: (activityByRole as RoleActivity[]).map((r) => ({
         role: r.role,
         viewCount: Number(r.viewCount),
         totalSeconds: Number(r.totalSeconds),
       })),
     });
   } catch (error) {
-    console.error("Analytics overview API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-overview");
   }
 }

@@ -347,6 +347,25 @@
     "adminCreated": "Админ создан",
     "system": "Система"
   },
+  "layout": {
+    "logo": "Plyr Platform",
+    "closeMenu": "Закрыть меню",
+    "openMenu": "Открыть меню",
+    "userMenu": "Меню пользователя",
+    "profile": "Профиль",
+    "studio": "Студия",
+    "adminPanel": "Панель администратора",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "home": "Главная",
+    "trending": "В тренде",
+    "subscriptions": "Подписки",
+    "dashboard": "Панель",
+    "videos": "Видео",
+    "upload": "Загрузить",
+    "settings": "Настройки",
+    "account": "Аккаунт"
+  },
   "common": {
     "save": "Сохранить",
     "cancel": "Отмена",

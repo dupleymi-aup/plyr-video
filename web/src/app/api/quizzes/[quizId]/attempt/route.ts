@@ -27,6 +27,16 @@ export async function POST(
     return NextResponse.json({ error: "Quiz not found" }, { status: 404 });
   }
 
+  // Verify user is enrolled in the course
+  const enrollment = await prisma.courseEnrollment.findUnique({
+    where: {
+      courseId_studentId: { courseId: quiz.courseId, studentId: session.user.id },
+    },
+  });
+  if (!enrollment) {
+    return NextResponse.json({ error: "You must be enrolled in this course to attempt the quiz" }, { status: 403 });
+  }
+
   // Auto-grade
   let totalScore = 0;
   let maxScore = 0;

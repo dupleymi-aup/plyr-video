@@ -3,69 +3,83 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatViews, formatRelativeTime, formatDuration } from "@/lib/utils";
 import { ThumbsUp, ThumbsDown, Share2, Plus } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
+import { notFound } from "next/navigation";
+import Link from "next/link";
+import VideoActions from "./video-actions";
+import { CommentForm } from "@/components/watch/comment-form";
+import { SubscribeButton } from "@/components/watch/subscribe-button";
+import type { Comment } from "@/types/comment";
 
-// Demo video - will be fetched from API
-const demoVideo = {
-  id: "1",
-  title: "Getting Started with Plyr Video Player",
-  description: `Learn how to use Plyr, a simple, accessible, and customizable HTML5 media player. In this video we cover basic setup, configuration options, and how to integrate Plyr into your web applications.
+interface WatchPageProps {
+  params: Promise<{ videoId: string }>;
+}
 
-Plyr supports:
-- HTML5 Video & Audio
-- YouTube
-- Vimeo
-- Rutube, VK Video, Yandex Cloud Video, and more
+export default async function WatchPage({ params }: WatchPageProps) {
+  const { videoId } = await params;
+  const session = await auth();
 
-Links:
-- GitHub: https://github.com/quadDarv1ne/plyr-video
-- Demo: https://plyr-video-demo.example.com`,
-  source: "https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer/View_From_A_Blue_Moon_Trailer-576p.mp4",
-  poster: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-  duration: 180,
-  views: 15420,
-  createdAt: "2024-01-15T10:00:00Z",
-  channel: {
-    id: "1",
-    name: "Plyr Official",
-    avatar: "",
-    subscribers: 12500,
-    isVerified: true,
-  },
-  likes: 892,
-  dislikes: 12,
-};
+  const video = await prisma.video.findUnique({
+    where: { id: videoId },
+    include: {
+      channel: {
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          avatar: true,
+          isVerified: true,
+          _count: {
+            select: { subscriptions: true },
+          },
+        },
+      },
+    },
+  });
 
-const recommendedVideos = [
-  {
-    id: "2",
-    title: "Advanced Plyr Features",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 320,
-    channelName: "Plyr Official",
-    views: 8930,
-    createdAt: "2024-02-20T14:30:00Z",
-  },
-  {
-    id: "3",
-    title: "Integrating Plyr with React",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 450,
-    channelName: "Web Dev Tutorials",
-    views: 23100,
-    createdAt: "2024-03-10T09:00:00Z",
-  },
-  {
-    id: "4",
-    title: "Russian Video Platforms",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 600,
-    channelName: "Plyr Official",
-    views: 5200,
-    createdAt: "2024-04-05T16:00:00Z",
-  },
-];
+  if (!video) {
+    notFound();
+  }
 
-export default function WatchPage({ params }: { params: { videoId: string } }) {
+  // Don't show private videos to non-owners
+  if (video.visibility === "PRIVATE") {
+    if (!session?.user?.id || video.channel.ownerId !== session.user.id) {
+      notFound();
+    }
+  }
+
+  // Fetch recommended videos (same channel or similar)
+  const recommendedVideos = await prisma.video.findMany({
+    where: {
+      AND: [
+        { id: { not: videoId } },
+        { status: "READY" },
+        { visibility: "PUBLIC" },
+        {
+          OR: [
+            { channelId: video.channelId },
+            { title: { contains: video.title.split(" ").slice(0, 3).join(" ") } },
+          ],
+        },
+      ],
+    },
+    include: {
+      channel: { select: { name: true } },
+    },
+    orderBy: { viewCount: "desc" },
+    take: 10,
+  });
+
+  const isSubscribed = session?.user?.id
+    ? await prisma.subscription.findFirst({
+        where: {
+          subscriberId: session.user.id,
+          channelId: video.channelId,
+        },
+      })
+    : null;
+
   return (
     <div className="flex flex-col lg:flex-row gap-6 p-6">
       {/* Main content */}
@@ -73,78 +87,72 @@ export default function WatchPage({ params }: { params: { videoId: string } }) {
         {/* Player */}
         <div className="aspect-video bg-black rounded-lg overflow-hidden">
           <PlyrPlayer
-            source={demoVideo.source}
-            poster={demoVideo.poster}
+            source={video.source}
+            poster={video.poster || undefined}
             className="w-full h-full"
           />
         </div>
 
         {/* Video info */}
         <div className="mt-4">
-          <h1 className="text-xl font-bold">{demoVideo.title}</h1>
+          <h1 className="text-xl font-bold">{video.title}</h1>
 
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              {formatViews(demoVideo.views)} views • {formatRelativeTime(demoVideo.createdAt)}
+              {formatViews(video.viewCount)} views • {formatRelativeTime(video.createdAt)}
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <ThumbsUp className="h-4 w-4 mr-1" />
-                {demoVideo.likes}
-              </Button>
-              <Button variant="outline" size="sm">
-                <ThumbsDown className="h-4 w-4 mr-1" />
-                {demoVideo.dislikes}
-              </Button>
-              <Button variant="outline" size="sm">
-                <Share2 className="h-4 w-4 mr-1" />
-                Share
-              </Button>
-              <Button variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-1" />
-                Save
-              </Button>
-            </div>
+            <VideoActions
+              videoId={video.id}
+              likes={video.likeCount}
+              initialLiked={false}
+            />
           </div>
         </div>
 
         {/* Channel info */}
         <div className="mt-4 flex items-start gap-4 border-b pb-4">
           <Avatar
-            src={demoVideo.channel.avatar}
-            fallback={demoVideo.channel.name[0]}
+            src={video.channel.avatar || undefined}
+            fallback={video.channel.name[0]}
             size="lg"
           />
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <h3 className="font-semibold">{demoVideo.channel.name}</h3>
-              {demoVideo.channel.isVerified && (
+              <Link href={`/channel/${video.channel.slug}`} className="font-semibold hover:underline">
+                {video.channel.name}
+              </Link>
+              {video.channel.isVerified && (
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                   Verified
                 </span>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {formatViews(demoVideo.channel.subscribers)} subscribers
+              {formatViews(video.channel._count.subscriptions)} subscribers
             </p>
-            <Button className="mt-2" size="sm">
-              Subscribe
-            </Button>
+            {!isSubscribed && (
+              <SubscribeButton
+                channelId={video.channelId}
+                isSubscribed={!!isSubscribed}
+              />
+            )}
           </div>
         </div>
 
         {/* Description */}
-        <div className="mt-4 rounded-lg bg-secondary p-4">
-          <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans">
-            {demoVideo.description}
-          </pre>
-        </div>
+        {video.description && (
+          <div className="mt-4 rounded-lg bg-secondary p-4">
+            <pre className="whitespace-pre-wrap text-sm text-muted-foreground font-sans">
+              {video.description}
+            </pre>
+          </div>
+        )}
 
-        {/* Comments section placeholder */}
+        {/* Comments section */}
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-4">Comments</h3>
-          <p className="text-muted-foreground">Comments will be implemented in the next phase.</p>
+          <CommentsSection videoId={videoId} />
         </div>
       </div>
 
@@ -152,31 +160,130 @@ export default function WatchPage({ params }: { params: { videoId: string } }) {
       <div className="w-full lg:w-80 xl:w-96 shrink-0">
         <h3 className="text-lg font-semibold mb-4">Recommended</h3>
         <div className="space-y-4">
-          {recommendedVideos.map((video) => (
-            <a key={video.id} href={`/watch/${video.id}`} className="flex gap-2 group">
+          {recommendedVideos.map((rec) => (
+            <Link key={rec.id} href={`/watch/${rec.id}`} className="flex gap-2 group">
               <div className="relative w-40 aspect-video shrink-0 overflow-hidden rounded-md bg-secondary">
-                <img
-                  src={video.thumbnail}
-                  alt={video.title}
-                  className="object-cover w-full h-full transition-transform group-hover:scale-105"
-                />
-                {video.duration && (
+                {rec.poster ? (
+                  <img
+                    src={rec.poster}
+                    alt={rec.title}
+                    className="object-cover w-full h-full transition-transform group-hover:scale-105"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                    No thumbnail
+                  </div>
+                )}
+                {rec.duration && (
                   <span className="absolute bottom-1 right-1 rounded bg-black/80 px-1 py-0.5 text-[10px] font-medium text-white">
-                    {formatDuration(video.duration)}
+                    {formatDuration(rec.duration)}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
                 <h4 className="line-clamp-2 text-sm font-medium group-hover:text-primary">
-                  {video.title}
+                  {rec.title}
                 </h4>
-                <p className="mt-1 text-xs text-muted-foreground">{video.channelName}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{rec.channel.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatViews(video.views)} views • {formatRelativeTime(video.createdAt)}
+                  {formatViews(rec.viewCount)} views • {formatRelativeTime(rec.createdAt)}
                 </p>
               </div>
-            </a>
+            </Link>
           ))}
+          {recommendedVideos.length === 0 && (
+            <p className="text-sm text-muted-foreground">No recommendations available.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+async function CommentsSection({ videoId }: { videoId: string }) {
+  const session = await auth();
+
+  const [comments, total] = await Promise.all([
+    prisma.comment.findMany({
+      where: { videoId, parentId: null },
+      include: {
+        user: { select: { id: true, name: true, image: true } },
+        _count: { select: { replies: true } },
+        replies: {
+          take: 3,
+          orderBy: { createdAt: "asc" },
+          include: { user: { select: { id: true, name: true, image: true } } },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    prisma.comment.count({ where: { videoId, parentId: null } }),
+  ]);
+
+  return (
+    <div>
+      {session?.user && (
+        <CommentForm videoId={videoId} />
+      )}
+      {!session?.user && (
+        <p className="text-sm text-muted-foreground mb-4">
+          <a href="/login" className="text-primary hover:underline">Sign in</a> to comment.
+        </p>
+      )}
+      {comments.map((comment) => (
+        <CommentItem key={comment.id} comment={comment} />
+      ))}
+      {comments.length === 0 && (
+        <p className="text-sm text-muted-foreground">No comments yet.</p>
+      )}
+      {total > 10 && (
+        <Link href={`/watch/${videoId}/comments`} className="text-sm text-primary hover:underline">
+          View all {total} comments
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function CommentItem({ comment }: { comment: Comment }) {
+  return (
+    <div className="mb-4">
+      <div className="flex gap-3">
+        <Avatar
+          src={comment.user.image || undefined}
+          fallback={comment.user.name?.[0] || "?"}
+          size="sm"
+        />
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium">{comment.user.name || "Anonymous"}</span>
+            <span className="text-xs text-muted-foreground">
+              {formatRelativeTime(comment.createdAt)}
+            </span>
+          </div>
+          <p className="mt-1 text-sm">{comment.content}</p>
+          {comment._count.replies > 0 && (
+            <div className="mt-2 ml-4 border-l-2 pl-4 space-y-2">
+              {comment.replies.map((reply) => (
+                <div key={reply.id} className="flex gap-2">
+                  <Avatar
+                    src={reply.user.image || undefined}
+                    fallback={reply.user.name?.[0] || "?"}
+                    size="sm"
+                  />
+                  <div>
+                    <span className="text-sm font-medium">{reply.user.name || "Anonymous"}</span>
+                    <span className="text-xs text-muted-foreground ml-2">
+                      {formatRelativeTime(reply.createdAt)}
+                    </span>
+                    <p className="text-sm">{reply.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

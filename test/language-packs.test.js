@@ -1,6 +1,6 @@
 // Tests for i18n language packs
 import { describe, it, expect } from 'vitest';
-import { ru, de, fr, es } from '../src/i18n/index.js';
+import { ru, de, fr, es, it as itPack, pt, zh } from '../src/i18n/index.js';
 
 describe('i18n language packs', () => {
   describe('Russian (ru)', () => {
@@ -80,6 +80,60 @@ describe('i18n language packs', () => {
       expect(es.loopOn).toBe('Activado');
       expect(es.loopOff).toBe('Desactivado');
       expect(es.loopAll).toBe('Repetir todo');
+    });
+  });
+
+  describe('Italian (it)', () => {
+    it('has play translation', () => {
+      expect(itPack.play).toBe('Riproduci');
+    });
+    it('has pause translation', () => {
+      expect(itPack.pause).toBe('Pausa');
+    });
+    it('has settings translation', () => {
+      expect(itPack.settings).toBe('Impostazioni');
+    });
+    it('has loop translations', () => {
+      expect(itPack.loop).toBe('Ripeti');
+      expect(itPack.loopOn).toBe('Attivo');
+      expect(itPack.loopOff).toBe('Disattivo');
+      expect(itPack.loopAll).toBe('Ripeti tutto');
+    });
+  });
+
+  describe('Portuguese (pt)', () => {
+    it('has play translation', () => {
+      expect(pt.play).toBe('Reproduzir');
+    });
+    it('has pause translation', () => {
+      expect(pt.pause).toBe('Pausar');
+    });
+    it('has settings translation', () => {
+      expect(pt.settings).toBe('Configurações');
+    });
+    it('has loop translations', () => {
+      expect(pt.loop).toBe('Repetir');
+      expect(pt.loopOn).toBe('Ativado');
+      expect(pt.loopOff).toBe('Desativado');
+      expect(pt.loopAll).toBe('Repetir tudo');
+    });
+  });
+
+  describe('Chinese (zh)', () => {
+    it('has play translation', () => {
+      expect(zh.play).toBe('播放');
+    });
+    it('has pause translation', () => {
+      expect(zh.pause).toBe('暂停');
+    });
+    it('has settings translation', () => {
+      expect(zh.settings).toBe('设置');
+    });
+    it('has loop translations', () => {
+      expect(zh.loop).toBe('循环');
+      expect(zh.loopOn).toBe('开');
+      expect(zh.loopOff).toBe('关');
+      expect(zh.loopAll).toBe('全部循环');
     });
   });
 });

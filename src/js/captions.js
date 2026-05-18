@@ -345,24 +345,24 @@ class Captions {
     }
 
     // Update translation container immediately
-    if (translationActive && this.elements.translation && this.elements.captions.innerHTML) {
+    if (translationActive && this.elements.translation && this.elements.captions.textContent) {
       // Translate current captions
-      translate(this.elements.captions.innerHTML, this.translation.language)
+      translate(this.elements.captions.textContent, this.translation.language)
         .then((translated) => {
           if (this.elements.translation) {
-            this.elements.translation.innerHTML = translated;
+            this.elements.translation.textContent = translated;
           }
         })
         .catch((error) => {
-          console.warn('Translation failed:', error);
+          this.debug.warn('Translation failed:', error);
           if (this.elements.translation) {
-            this.elements.translation.innerHTML = '';
+            this.elements.translation.textContent = '';
           }
         });
     }
     else if (this.elements.translation) {
       // Clear translation container if not active
-      this.elements.translation.innerHTML = '';
+      this.elements.translation.textContent = '';
     }
   }
 
@@ -545,19 +545,19 @@ class Captions {
         translate(content, this.translation.language)
           .then((translated) => {
             if (this.elements.translation) {
-              this.elements.translation.innerHTML = translated;
+              this.elements.translation.textContent = translated;
             }
           })
           .catch((error) => {
-            console.warn('Translation failed:', error);
+            this.debug.warn('Translation failed:', error);
             if (this.elements.translation) {
-              this.elements.translation.innerHTML = ''; // Clear on error
+              this.elements.translation.textContent = '';
             }
           });
       }
       else if (this.elements.translation && !(this.plyr.transcription && this.plyr.transcription.active)) {
         // Clear translation container if not active (and transcription is not active)
-        this.elements.translation.innerHTML = '';
+        this.elements.translation.textContent = '';
       }
 
       // Trigger event

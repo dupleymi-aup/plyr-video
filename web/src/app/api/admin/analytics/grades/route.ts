@@ -1,6 +1,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type {
+  GradeOverview,
+  GradeDistributionWithAvg,
+  CourseGradeWithDetails,
+  StudentWithGradeDetails,
+} from "@/types/analytics";
 
 export async function GET(request: Request) {
   try {
@@ -113,7 +120,7 @@ export async function GET(request: Request) {
       LIMIT 10
     `;
 
-    const overview = (overviewResult as any[])[0];
+    const overview = (overviewResult as GradeOverview[])[0];
     const totalGrades = Number(overview?.totalGrades ?? 0);
 
     return NextResponse.json({
@@ -124,12 +131,12 @@ export async function GET(request: Request) {
         maxGrade: Number(overview?.maxGrade ?? 0),
         passRate: totalGrades > 0 ? (Number(overview?.passing ?? 0) / totalGrades) * 100 : 0,
       },
-      gradeDistribution: (distributionResult as any[]).map((d: any) => ({
+      gradeDistribution: (distributionResult as GradeDistributionWithAvg[]).map((d) => ({
         bucket: d.bucket,
         count: Number(d.count),
         avgValue: Number(d.avgValue),
       })),
-      courseGrades: (courseGradesResult as any[]).map((c: any) => ({
+      courseGrades: (courseGradesResult as CourseGradeWithDetails[]).map((c) => ({
         id: c.id,
         title: c.title,
         teacherName: c.teacherName,
@@ -139,7 +146,7 @@ export async function GET(request: Request) {
         maxGrade: Number(c.maxGrade),
         passRate: Number(c.total) > 0 ? (Number(c.passing) / Number(c.total)) * 100 : 0,
       })),
-      topStudents: (topStudentsResult as any[]).map((s: any) => ({
+      topStudents: (topStudentsResult as StudentWithGradeDetails[]).map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
@@ -147,7 +154,7 @@ export async function GET(request: Request) {
         avgGrade: Number(s.avgGrade),
         coursesCompleted: Number(s.coursesCompleted),
       })),
-      strugglingStudents: (strugglingResult as any[]).map((s: any) => ({
+      strugglingStudents: (strugglingResult as StudentWithGradeDetails[]).map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
@@ -157,7 +164,6 @@ export async function GET(request: Request) {
       })),
     });
   } catch (error) {
-    console.error("Grades analytics API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-grades");
   }
 }

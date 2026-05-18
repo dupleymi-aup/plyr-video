@@ -141,6 +141,8 @@ const es = {
   captionsOff: 'Desactivado',
   translationOff: 'Desactivado',
   transcriptionOff: 'Desactivado',
+  darkModeOn: 'Activar modo oscuro',
+  darkModeOff: 'Desactivar modo oscuro',
 };
 
 export default es;

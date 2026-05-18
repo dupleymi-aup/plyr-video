@@ -2,20 +2,38 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const videos = await prisma.video.findMany({
-    include: {
-      channel: { select: { name: true } },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const { searchParams } = request.nextUrl;
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const skip = (page - 1) * limit;
 
-  return NextResponse.json(videos);
+  const [videos, total] = await Promise.all([
+    prisma.video.findMany({
+      include: {
+        channel: { select: { name: true } },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.video.count(),
+  ]);
+
+  return NextResponse.json({
+    videos,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 }
 
 export async function PATCH(request: NextRequest) {

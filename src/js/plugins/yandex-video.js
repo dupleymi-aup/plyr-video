@@ -16,7 +16,7 @@ import {
 } from './base-embed';
 
 // Parse Yandex Cloud Video ID from URL
-function parseId(url) {
+export function parseId(url) {
   if (is.empty(url)) {
     return null;
   }

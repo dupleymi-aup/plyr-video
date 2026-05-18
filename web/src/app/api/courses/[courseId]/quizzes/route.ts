@@ -2,6 +2,14 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+interface QuizQuestionInput {
+  question: string;
+  type?: string;
+  options?: string[];
+  correctAnswer?: unknown;
+  points?: number;
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
@@ -60,7 +68,7 @@ export async function POST(
       ...(questions && questions.length > 0
         ? {
             questions: {
-              create: questions.map((q: any, i: number) => ({
+              create: questions.map((q: QuizQuestionInput, i: number) => ({
                 question: q.question,
                 type: q.type || "MULTIPLE_CHOICE",
                 options: q.options || [],

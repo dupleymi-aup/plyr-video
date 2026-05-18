@@ -187,6 +187,16 @@ const sources = {
       },
     ],
   },
+  mtslink: {
+    type: 'video',
+    ratio: '16:9',
+    sources: [
+      {
+        src: 'https://player.mts-link.ru/j/7c10a15d-1e87-4d6e-a0e7-8f0f5e5c5e5d',
+        provider: 'mtslink',
+      },
+    ],
+  },
 };
 
 // Gallery data for the video selection view
@@ -271,6 +281,15 @@ const gallery = [
     duration: '2:10',
     provider: 'mailru',
     providerLabel: 'Mail.ru',
+  },
+  {
+    id: 'mtslink',
+    title: 'MTS Link Video',
+    subtitle: 'MTS Link Platform',
+    poster: 'https://cdn.plyr.io/static/demo/View_From_A_Blue_Moon_Trailer-HD.jpg',
+    duration: '3:30',
+    provider: 'mtslink',
+    providerLabel: 'MTS Link',
   },
 ];
 

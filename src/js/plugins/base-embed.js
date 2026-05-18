@@ -81,7 +81,6 @@ export function createEmbed(provider, options) {
   player.media.duration = 0;
   player.media.seeking = false;
   player.media.buffered = 0;
-  player.media.lastBuffered = null;
 
   // Setup postMessage listener
   player.embed.messageHandler = (event) => {
@@ -343,7 +342,7 @@ export function handleCaptionList(player, data) {
     }));
     player.media.textTracks = player.embed.captionTracks;
     player.debug.log('Available caption tracks:', player.embed.captionTracks.length);
-    if (player.embed.captionTracks.length > 0) {
+    if (player.embed.captionTracks.length > 0 && player.captions) {
       player.captions.setup();
     }
   }
@@ -361,7 +360,9 @@ export function handleCueChange(player, data) {
       }
       return cue;
     });
-    player.captions.updateCues(strippedCues);
+    if (player.captions) {
+      player.captions.updateCues(strippedCues);
+    }
   }
 }
 

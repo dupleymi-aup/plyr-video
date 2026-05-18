@@ -140,11 +140,30 @@
 - [x] Все провайдеры теперь проходят ESLint без ошибок
 - [x] Сборка проходит успешно (gulp build)
 
-## Текущий статус (2026-05-04)
-- ✅ Линтинг проходит успешно (eslint + stylelint)
-- ✅ Сборка проходит успешно без ошибок
+## Текущий статус (2026-05-18)
+- ✅ Линтинг проходит успешно (eslint + stylelint, 0 ошибок)
+- ✅ Сборка проходит успешно без ошибок (0 circular dependency warnings)
 - ✅ Все российские платформы интегрированы: Rutube, Yandex, VK, Mail.ru, MTS Link
 - ✅ Обновлены тестовые ID в демо-странице на реальные видео
-- ✅ Создана инфраструктура unit-тестов (Vitest, 17 тестов)
-- ✅ Merge-конфликты с upstream разрешены
+- ✅ Создана инфраструктура unit-тестов (Vitest, 26 файлов, 378 тестов)
+- ✅ Исправлены 8 падающих тестов (captions-utils.getTracks, translate.translateText)
+- ✅ Исправлены pre-existing ошибки линтинга (analytics.js, defaults.js, SVG)
+- ✅ Провайдеры рефакторинг: parseId/parsePlaylistId экспортируются для тестирования
+- ✅ Добавлены тесты для MTS Link провайдера
+- ✅ Тесты провайдеров теперь импортируют из исходных модулей (а не дублируют логику)
+- ✅ Добавлены URL-паттерны в тесты: Rutube (channel, short, play.rutube.ru), VK (clips, oid/id/hash, z=video), Mail.ru (old format, community, bk, list.ru), Yandex (cloud.yandex.ru), MTS (player.mts.ru, recordings, webinar)
 - ⏳ Требуется тестирование с реальными видео
+
+## Исправления (Round 10 — Устранение circular dependencies и багов)
+- [x] Устранена circular dependency: captions.js ↔ controls/controls.js (через player.captions)
+- [x] Устранена circular dependency: captions.js → controls/settings-menu.js → captions.js
+- [x] Устранена circular dependency: captions.js → controls/submenu-builders.js → captions.js
+- [x] Исправлен баг transcription.js: одинаковые ветки if/else для interim/final результатов SpeechRecognition
+  - Interim результаты теперь не накапливаются (заменяют друг друга)
+  - Final результаты корректно сохраняются в _finalTranscript
+- [x] Добавлены null-проверки для player.captions в base-embed.js (setup, updateCues)
+- [x] Удалён мёртвый код player.media.lastBuffered из base-embed.js
+- [x] Исправлен out-of-bounds доступ в captions-utils.js (fallback на последний трек)
+- [x] Исправлена потенциальная потеря значения `false` в transcription.js (?? вместо ||)
+- [x] Добавлен MTS Link в demo/index.html и demo/src/js/sources.js
+- [x] Добавлен try/catch в demo-russian-hosts.html и test-russian-hosts.html

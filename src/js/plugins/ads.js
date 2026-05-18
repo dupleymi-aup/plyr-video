@@ -36,6 +36,11 @@ function destroy(instance) {
   if (instance._resizeHandler) {
     window.removeEventListener('resize', instance._resizeHandler);
   }
+
+  // Disconnect ResizeObserver
+  if (instance._ro) {
+    instance._ro.disconnect();
+  }
 }
 
 class Ads {
@@ -458,8 +463,17 @@ class Ads {
       });
     });
 
-    // Listen to the resizing of the window. And resize ad accordingly
-    // TODO: eventually implement ResizeObserver
+    // Listen to the resizing of the ad container. And resize ad accordingly
+    if (window.ResizeObserver) {
+      this._ro = new ResizeObserver(() => {
+        if (this.manager) {
+          this.manager.resize(container.offsetWidth, container.offsetHeight, google.ima.ViewMode.NORMAL);
+        }
+      });
+      this._ro.observe(container);
+    }
+
+    // Fallback for older browsers
     this._resizeHandler = () => {
       if (this.manager) {
         this.manager.resize(container.offsetWidth, container.offsetHeight, google.ima.ViewMode.NORMAL);

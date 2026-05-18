@@ -9,8 +9,9 @@ function generateCode(): string {
   const segments = [];
   for (let s = 0; s < 3; s++) {
     let segment = "";
+    const randomBytes = crypto.randomBytes(4);
     for (let i = 0; i < 4; i++) {
-      segment += chars[Math.floor(Math.random() * chars.length)];
+      segment += chars[randomBytes[i] % chars.length];
     }
     segments.push(segment);
   }

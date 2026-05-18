@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import type { TotalSecondsResult } from "@/types/analytics";
+import { handleApiError } from "@/lib/api-errors";
 
 export async function GET() {
   try {
@@ -46,7 +48,7 @@ export async function GET() {
     const watchTimeResult = await prisma.$queryRaw<[{ totalSeconds: number }]>`
       SELECT COALESCE(SUM(watchedSeconds), 0) as totalSeconds FROM VideoView
     `;
-    const totalWatchSeconds = Number((watchTimeResult[0] as any).totalSeconds ?? 0);
+    const totalWatchSeconds = Number((watchTimeResult as TotalSecondsResult[])[0]?.totalSeconds ?? 0);
 
     return NextResponse.json({
       totalUsers,
@@ -67,7 +69,6 @@ export async function GET() {
       totalWatchSeconds,
     });
   } catch (error) {
-    console.error("Stats API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "admin-stats");
   }
 }

@@ -2,7 +2,7 @@
 // Plyr Analytics Plugin
 // ==========================================================================
 
-import { on, off } from '../utils/events';
+import { on } from '../utils/events';
 
 const STORAGE_KEY = 'plyr_viewer_id';
 
@@ -88,12 +88,12 @@ class Analytics {
     on.call(player, player.elements.container, 'seeking', () => this._onSeeking());
     on.call(player, player.elements.container, 'seeked', () => this._onSeeked());
     on.call(player, player.elements.container, 'timeupdate', () => this._onTimeupdate());
-    on.call(player, player.elements.container, 'qualitychange', (e) => this._onQualityChange(e));
-    on.call(player, player.elements.container, 'ratechange', (e) => this._onRateChange(e));
+    on.call(player, player.elements.container, 'qualitychange', e => this._onQualityChange(e));
+    on.call(player, player.elements.container, 'ratechange', e => this._onRateChange(e));
     on.call(player, player.elements.container, 'volumechange', () => this._onVolumeChange());
     on.call(player, player.elements.container, 'waiting', () => this._onWaiting());
     on.call(player, player.elements.container, 'canplay', () => this._onCanPlay());
-    on.call(player, player.elements.container, 'error', (e) => this._onError(e));
+    on.call(player, player.elements.container, 'error', e => this._onError(e));
     on.call(player, player.elements.container, 'enterfullscreen', () => this._onFullscreenEnter());
     on.call(player, player.elements.container, 'exitfullscreen', () => this._onFullscreenExit());
     on.call(player, player.elements.container, 'controlshidden', () => this._onControlsHidden());
@@ -108,7 +108,7 @@ class Analytics {
     const duration = this.player.duration || 0;
     if (duration > 0) {
       const bucketCount = Math.ceil(duration / this._heatmapGranularity);
-      this._heatmapBuckets = new Array(bucketCount).fill(0);
+      this._heatmapBuckets = Array.from({ length: bucketCount }, () => 0);
     }
   }
 
@@ -325,7 +325,8 @@ class Analytics {
     // Merge if overlapping or adjacent (within 2 seconds)
     if (newSegment.start <= last.end + 2) {
       last.end = Math.max(last.end, newSegment.end);
-    } else {
+    }
+    else {
       this.watchSegments.push({ ...newSegment });
     }
   }
@@ -436,7 +437,7 @@ class Analytics {
 
   /**
    * Get all collected analytics data
-   * @returns {Object} Complete analytics data
+   * @returns {object} Complete analytics data
    */
   getData() {
     const duration = this.player.duration || 0;
@@ -515,7 +516,7 @@ class Analytics {
     const duration = this.player.duration || 0;
     if (duration > 0) {
       const bucketCount = Math.ceil(duration / this._heatmapGranularity);
-      this._heatmapBuckets = new Array(bucketCount).fill(0);
+      this._heatmapBuckets = Array.from({ length: bucketCount }, () => 0);
     }
   }
 
@@ -573,7 +574,8 @@ class Analytics {
         localStorage.setItem(STORAGE_KEY, id);
       }
       return id;
-    } catch {
+    }
+    catch {
       // localStorage not available
       return this._generateUUID();
     }

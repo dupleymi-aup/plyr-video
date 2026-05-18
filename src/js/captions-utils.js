@@ -6,20 +6,16 @@
 import i18n from './utils/i18n';
 import is from './utils/is';
 
-// Get current valid caption tracks
-// If update is false it will also ignore tracks without metadata
-// This is used to "freeze" the language options when captions.update is false
 export function getTracks(plyr, update = false) {
-  const media = plyr.media;
-  const meta = plyr.captions?.meta || new WeakMap();
+  if (!plyr.media || !plyr.media.textTracks) {
+    return [];
+  }
+
+  const tracks = Array.from(plyr.media.textTracks);
   const isHTML5 = plyr.isHTML5;
 
-  // Handle media or textTracks missing or null
-  const tracks = Array.from((media || {}).textTracks || []);
-  // For HTML5, use cache instead of current tracks when it exists (if captions.update is false)
-  // Filter out removed tracks and tracks that aren't captions/subtitles (for example metadata)
   return tracks
-    .filter(track => !isHTML5 || update || meta.has(track))
+    .filter(track => !isHTML5 || update || (plyr.captions?.meta?.has(track)))
     .filter(track => ['captions', 'subtitles'].includes(track.kind));
 }
 
@@ -32,7 +28,7 @@ export function getLabel(plyr, track) {
 
   if (!is.track(currentTrack) && supported.textTracks && captions?.toggled) {
     const tracks = getTracks(plyr);
-    currentTrack = tracks[captions.currentTrack];
+    currentTrack = tracks[captions.currentTrack] || tracks[tracks.length - 1];
   }
 
   if (is.track(currentTrack)) {

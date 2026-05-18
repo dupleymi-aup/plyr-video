@@ -2,7 +2,6 @@
 // Plyr controls: Settings menu management
 // ==========================================================================
 
-import captions from '../captions';
 import support from '../support';
 import { transitionEndEvent } from '../utils/animation';
 import { removeElement, setFocus, toggleClass, toggleHidden } from '../utils/elements';
@@ -102,7 +101,7 @@ class SettingsMenu {
         return toTitleCase(value);
 
       case 'captions':
-        return captions.getLabel.call(this.player);
+        return this.player.captions.getLabel();
 
       case 'translation':
         return this.player.captions?.translation?.active ? i18n.get('translateEnabled', this.player.config) : i18n.get('translateDisabled', this.player.config);

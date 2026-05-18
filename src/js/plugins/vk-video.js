@@ -24,7 +24,7 @@ const VK_HD_TO_RESOLUTION = { 1: 360, 2: 480, 3: 720, 4: 1080 };
 const VK_RESOLUTION_TO_HD = { 360: 1, 480: 2, 720: 3, 1080: 4 };
 
 // Parse VK Video ID from URL
-function parseId(url) {
+export function parseId(url) {
   if (is.empty(url)) {
     return null;
   }
@@ -61,7 +61,7 @@ function parseId(url) {
 }
 
 // Parse VK postMessage format (objects/strings, not JSON { type, data })
-function parseVKMessage(event) {
+export function parseVKMessage(event) {
   const { data } = event;
 
   // VK sends objects or strings directly (not JSON-encoded)

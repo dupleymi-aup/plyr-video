@@ -1,6 +1,8 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { handleApiError } from "@/lib/api-errors";
 import { NextResponse } from "next/server";
+import type { StudentAnalyticsItem, TotalCountResult } from "@/types/analytics";
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -18,8 +20,12 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * limit;
 
+    // Escape LIKE special characters to prevent wildcard injection
+    const escapeLike = (str: string) =>
+      str.replace(/%/g, "\\%").replace(/_/g, "\\_");
+
     const searchFilter = search
-      ? prisma.sql`AND (u.name LIKE ${`%${search}%`} OR u.email LIKE ${`%${search}%`})`
+      ? prisma.sql`AND (u.name LIKE ${`%${escapeLike(search)}%`} ESCAPE '\\' OR u.email LIKE ${`%${escapeLike(search)}%`} ESCAPE '\\')`
       : prisma.sql``;
 
     const dateFilter = startDate || endDate
@@ -51,10 +57,10 @@ export async function GET(request: Request) {
       WHERE u.role = 'STUDENT' ${searchFilter}
     `;
 
-    const total = Number((countResult as any[])[0]?.total ?? 0);
+    const total = Number((countResult as TotalCountResult[])[0]?.total ?? 0);
 
     return NextResponse.json({
-      students: (students as any[]).map((s: any) => ({
+      students: (students as StudentAnalyticsItem[]).map((s) => ({
         id: s.id,
         name: s.name,
         email: s.email,
@@ -70,7 +76,6 @@ export async function GET(request: Request) {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.error("Analytics students API error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return handleApiError(error, "analytics-students");
   }
 }

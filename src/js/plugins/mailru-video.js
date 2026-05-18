@@ -13,11 +13,13 @@ import {
   defineMediaControls,
   defineMediaProperties,
   destroy,
+  handleCaptionList,
+  handleCueChange,
   handleCurrentTime,
 } from './base-embed';
 
 // Parse Mail.ru Video ID from URL
-function parseId(url) {
+export function parseId(url) {
   if (is.empty(url)) {
     return null;
   }
@@ -47,7 +49,7 @@ function parseId(url) {
 }
 
 // Resolve embed URL from video ID
-function getEmbedUrl(videoId) {
+export function getEmbedUrl(videoId) {
   if (videoId.includes('mail/') || videoId.includes('bk/') || videoId.includes('inbox/') || videoId.includes('list.ru/')) {
     return `https://api.video.mail.ru/videos/embed/${videoId}`;
   }
@@ -55,7 +57,7 @@ function getEmbedUrl(videoId) {
 }
 
 // Parse Mail.ru postMessage (mixed format: JSON objects, plain strings, or regex-matchable strings)
-function parseMailruMessage(event) {
+export function parseMailruMessage(event) {
   const { data } = event;
 
   // Try JSON parse first (structured messages)
@@ -223,6 +225,11 @@ const mailru = {
       },
     });
 
+    // Request captions after delay
+    player.embed.captionTimeout = setTimeout(() => {
+      sendCommand(player, 'getCaptions');
+    }, 1500);
+
     // Rebuild UI
     if (config.customControls) {
       setTimeout(() => ui.build.call(player), 0);
@@ -281,6 +288,16 @@ const mailru = {
           player.media.volume = data.volume;
         }
         triggerEvent.call(player, player.media, 'volumechange');
+        break;
+
+      case 'captionList':
+      case 'player:captionList':
+        handleCaptionList(player, data);
+        break;
+
+      case 'cueChange':
+      case 'player:cueChange':
+        handleCueChange(player, data);
         break;
 
       case 'error':

@@ -2,13 +2,21 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { checkRoleAccess, type Role } from "@/lib/permissions";
+import { z } from "zod";
+
+const videoUpdateSchema = z.object({
+  title: z.string().min(1, "Title is required").max(100, "Title must be less than 100 characters").optional(),
+  description: z.string().max(5000, "Description must be less than 5000 characters").optional().nullable(),
+  visibility: z.enum(["PRIVATE", "UNLISTED", "PUBLIC"]).optional(),
+});
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { videoId: string } }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
+  const { videoId } = await params;
   const video = await prisma.video.findUnique({
-    where: { id: params.videoId },
+    where: { id: videoId },
     include: {
       channel: {
         select: {
@@ -46,7 +54,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { videoId: string } }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -57,9 +65,19 @@ export async function PATCH(
   if (roleError) return roleError;
 
   const body = await request.json();
+  const validation = videoUpdateSchema.safeParse(body);
+
+  if (!validation.success) {
+    return NextResponse.json(
+      { error: validation.error.errors[0].message },
+      { status: 400 }
+    );
+  }
+
+  const { videoId } = await params;
 
   const video = await prisma.video.findUnique({
-    where: { id: params.videoId },
+    where: { id: videoId },
     include: { channel: true },
   });
 
@@ -68,12 +86,8 @@ export async function PATCH(
   }
 
   const updated = await prisma.video.update({
-    where: { id: params.videoId },
-    data: {
-      ...(body.title && { title: body.title }),
-      ...(body.description !== undefined && { description: body.description }),
-      ...(body.visibility && { visibility: body.visibility }),
-    },
+    where: { id: videoId },
+    data: validation.data,
   });
 
   return NextResponse.json(updated);
@@ -81,7 +95,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { videoId: string } }
+  { params }: { params: Promise<{ videoId: string }> }
 ) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -91,8 +105,10 @@ export async function DELETE(
   const roleError = checkRoleAccess(session.user.role as Role, "TEACHER");
   if (roleError) return roleError;
 
+  const { videoId } = await params;
+
   const video = await prisma.video.findUnique({
-    where: { id: params.videoId },
+    where: { id: videoId },
     include: { channel: true },
   });
 
@@ -100,7 +116,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Video not found" }, { status: 404 });
   }
 
-  await prisma.video.delete({ where: { id: params.videoId } });
+  await prisma.video.delete({ where: { id: videoId } });
 
   return NextResponse.json({ success: true });
 }

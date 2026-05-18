@@ -8,23 +8,41 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const subscriptions = await prisma.subscription.findMany({
-    where: { subscriberId: session.user.id },
-    include: {
-      channel: {
-        select: {
-          id: true,
-          name: true,
-          slug: true,
-          avatar: true,
-          isVerified: true,
+  const { searchParams } = request.nextUrl;
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const skip = (page - 1) * limit;
+
+  const [subscriptions, total] = await Promise.all([
+    prisma.subscription.findMany({
+      where: { subscriberId: session.user.id },
+      include: {
+        channel: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            avatar: true,
+            isVerified: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.subscription.count({ where: { subscriberId: session.user.id } }),
+  ]);
 
-  return NextResponse.json(subscriptions);
+  return NextResponse.json({
+    subscriptions,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -49,8 +67,8 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(subscription, { status: 201 });
-  } catch (error: any) {
-    if (error.code === "P2002") {
+  } catch (error: unknown) {
+    if (error instanceof Error && "code" in error && error.code === "P2002") {
       return NextResponse.json({ error: "Already subscribed" }, { status: 400 });
     }
     throw error;

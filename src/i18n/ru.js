@@ -129,7 +129,7 @@ const ru = {
   errorMediaRemoved: 'Видео было удалено.',
   errorMediaPrivate: 'Доступ к видео ограничен.',
   errorPlayerInit: 'Ошибка инициализации плеера.',
-  errorEmbedBlocked: 'Воспроизведение встроеного видео заблокировано.',
+  errorEmbedBlocked: 'Воспроизведение встроенного видео заблокировано.',
   errorDRM: 'DRM-защищённый контент не может быть воспроизведён.',
   errorUnknown: 'Произошла неизвестная ошибка.',
   errorRetry: 'Повторить',
@@ -141,6 +141,8 @@ const ru = {
   captionsOff: 'Выкл',
   translationOff: 'Выкл',
   transcriptionOff: 'Выкл',
+  darkModeOn: 'Включить тёмную тему',
+  darkModeOff: 'Выключить тёмную тему',
 };
 
 export default ru;

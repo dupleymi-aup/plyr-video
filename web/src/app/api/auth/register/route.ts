@@ -2,9 +2,23 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validation";
-import { validateInvitationCode, consumeInvitationCode } from "@/lib/invitation-codes";
+import { validateAndConsumeInvitationCode } from "@/lib/invitation-codes";
+import { handleApiError } from "@/lib/api-errors";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
+
+// Max 5 registration attempts per 10 minutes per IP
+const REGISTER_LIMIT = { limit: 5, windowMs: 10 * 60 * 1000 };
 
 export async function POST(req: Request) {
+  const ip = getClientIp(req.headers as unknown as Headers);
+  const limit = rateLimit(`register:${ip}`, REGISTER_LIMIT.limit, REGISTER_LIMIT.windowMs);
+
+  if (!limit.ok) {
+    return NextResponse.json(
+      { error: "Too many registration attempts. Please try again later." },
+      { status: 429, headers: { "Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)) } }
+    );
+  }
   try {
     const body = await req.json();
     const validated = registerSchema.safeParse(body);
@@ -24,16 +38,6 @@ export async function POST(req: Request) {
         { error: "Admin accounts cannot be self-registered" },
         { status: 403 }
       );
-    }
-
-    if (role === "TEACHER") {
-      const validation = await validateInvitationCode(invitationCode || "");
-      if (!validation.valid) {
-        return NextResponse.json(
-          { error: validation.error || "Invalid invitation code" },
-          { status: 400 }
-        );
-      }
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -59,7 +63,15 @@ export async function POST(req: Request) {
     });
 
     if (role === "TEACHER" && invitationCode) {
-      await consumeInvitationCode(invitationCode, user.id);
+      const result = await validateAndConsumeInvitationCode(invitationCode, user.id);
+      if (!result.success) {
+        // Rollback: delete the user since code consumption failed
+        await prisma.user.delete({ where: { id: user.id } });
+        return NextResponse.json(
+          { error: result.error || "Invalid invitation code" },
+          { status: 400 }
+        );
+      }
     }
 
     return NextResponse.json(
@@ -67,10 +79,6 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Registration error:", error);
-    return NextResponse.json(
-      { error: "An error occurred. Please try again." },
-      { status: 500 }
-    );
+    return handleApiError(error, "register");
   }
 }

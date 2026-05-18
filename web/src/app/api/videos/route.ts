@@ -7,7 +7,11 @@ export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
-  const sort = searchParams.get("sort") || "publishedAt";
+  const rawSort = searchParams.get("sort") || "publishedAt";
+  const allowedSortFields = ["publishedAt", "viewCount", "title", "createdAt"] as const;
+  const sort: (typeof allowedSortFields)[number] = allowedSortFields.includes(rawSort as typeof allowedSortFields[number])
+    ? (rawSort as typeof allowedSortFields[number])
+    : "publishedAt";
 
   const skip = (page - 1) * limit;
 

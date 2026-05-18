@@ -2,7 +2,6 @@
 // Plyr controls: Orchestrator class
 // ==========================================================================
 
-import captions from '../captions';
 import html5 from '../html5';
 import support from '../support';
 import { dedupe } from '../utils/arrays';
@@ -457,7 +456,7 @@ class Controls {
 
         // Build the menu items
         this.player.config.settings.forEach((type) => {
-          // TODO: bundle this with the createMenuItem helper and bindings
+          // Menu item for a settings category (separate from createMenuItem which handles selectable options)
           const menuItem = createElement(
             'button',
             extend(getAttributesFromSelector(this.player.config.selectors.buttons.settings), {
@@ -798,9 +797,7 @@ class Controls {
         seektime: this.player.config.seekTime,
         speed: this.player.speed,
         quality: this.player.quality,
-        captions: captions.getLabel.call(this.player),
-        // TODO: Looping
-        // loop: 'None',
+        captions: this.player.captions.getLabel(),
       });
       update = false;
     }

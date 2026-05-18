@@ -4,21 +4,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { generateSlug } from "@/lib/utils";
 import { checkRoleAccess, type Role } from "@/lib/permissions";
 
-export async function GET() {
-  const channels = await prisma.channel.findMany({
-    include: {
-      _count: {
-        select: {
-          videos: true,
-          subscriptions: true,
+export async function GET(request: NextRequest) {
+  const { searchParams } = request.nextUrl;
+  const page = parseInt(searchParams.get("page") || "1");
+  const limit = parseInt(searchParams.get("limit") || "20");
+  const skip = (page - 1) * limit;
+
+  const [channels, total] = await Promise.all([
+    prisma.channel.findMany({
+      include: {
+        _count: {
+          select: {
+            videos: true,
+            subscriptions: true,
+          },
         },
       },
-    },
-    orderBy: { createdAt: "desc" },
-    take: 20,
-  });
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.channel.count(),
+  ]);
 
-  return NextResponse.json(channels);
+  return NextResponse.json({
+    channels,
+    pagination: {
+      page,
+      limit,
+      total,
+      pages: Math.ceil(total / limit),
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {

@@ -52,8 +52,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const players = document.querySelectorAll('[id^="player-"]');
-            players.forEach(playerElement => {
-                new Plyr(playerElement);
+            players.forEach((el) => {
+                try {
+                    new Plyr(el);
+                }
+                catch (err) {
+                    console.error('Failed to init', el.id, err);
+                }
             });
         });
     </script>

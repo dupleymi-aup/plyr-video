@@ -114,3 +114,35 @@ export function ready() {
     this.ready ? setTimeout(resolve, 0) : on.call(this, this.elements.container, 'ready', resolve),
   ).then(() => {});
 }
+
+// Lightweight pub/sub event bus for plugin communication
+export function createEventBus() {
+  const handlers = {};
+
+  return {
+    on(event, fn) {
+      (handlers[event] || (handlers[event] = [])).push(fn);
+      return () => this.off(event, fn);
+    },
+    off(event, fn) {
+      const fns = handlers[event];
+      if (fns) {
+        handlers[event] = fns.filter(f => f !== fn);
+      }
+    },
+    emit(event, ...args) {
+      const fns = handlers[event];
+      if (fns) {
+        fns.forEach(fn => fn(...args));
+      }
+    },
+    clear(event) {
+      if (event) {
+        delete handlers[event];
+      }
+      else {
+        Object.keys(handlers).forEach(key => delete handlers[key]);
+      }
+    },
+  };
+}

@@ -65,7 +65,7 @@ const fr = {
   transcription: 'Transcription',
   transcriptionEnabled: 'Transcription activée',
   transcriptionDisabled: 'Transcription désactivée',
-  keyboardShortcuts: 'Claviers raccourcis',
+  keyboardShortcuts: 'Raccourcis clavier',
   keyboardShortcutsHelp: 'Appuyez sur l\'une de ces touches lorsque le lecteur est en focus:',
   shortcutPlayPause: 'Reproduire / Pause',
   shortcutRewind: 'Reculer',
@@ -141,6 +141,8 @@ const fr = {
   captionsOff: 'Désactivé',
   translationOff: 'Désactivé',
   transcriptionOff: 'Désactivé',
+  darkModeOn: 'Activer le mode sombre',
+  darkModeOff: 'Désactiver le mode sombre',
 };
 
 export default fr;
