@@ -104,6 +104,18 @@ const ui = {
     // Ready for API calls
     this.ready = true;
 
+    // Initialize dark mode from storage
+    if (this.config.darkMode.persistent) {
+      const storedDarkMode = this.storage.get('darkMode');
+      if (storedDarkMode !== null) {
+        this.config.darkMode.enabled = storedDarkMode;
+      }
+    }
+    // Apply dark mode if enabled
+    if (this.config.darkMode.enabled) {
+      toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, true);
+    }
+
     // Ready event at end of execution stack
     setTimeout(() => {
       triggerEvent.call(this, this.media, 'ready');
@@ -325,7 +337,7 @@ const ui = {
       errorContainer.setAttribute('role', 'alert');
       errorContainer.setAttribute('aria-live', 'assertive');
       errorContainer.innerHTML = `
-        <div class="plyr__error__icon">⚠️</div>
+        <div class="plyr__error__icon">&#9888;</div>
         <div class="plyr__error__content">
           <h3 class="plyr__error__title">${title}</h3>
           <p class="plyr__error__message"></p>
@@ -391,11 +403,12 @@ const ui = {
       const recentTouchSeek = this.touch && this.lastSeekTime + 2000 > Date.now();
 
       // Show controls if force, loading, paused, button interaction, or recent seek, otherwise hide
-      this.toggleControls(
-        Boolean(
-          force || this.loading || this.paused || controlsElement.pressed || controlsElement.hover || recentTouchSeek,
-        ),
+      const showControls = Boolean(
+        force || this.loading || this.paused || controlsElement.pressed || controlsElement.hover || recentTouchSeek,
       );
+
+      // Negate because adding the class hides the controls
+      toggleClass(this.elements.container, this.config.classNames.hideControls, !showControls);
     }
   },
 

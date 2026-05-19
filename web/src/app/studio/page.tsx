@@ -1,38 +1,67 @@
+"use client";
+
+import useSWR from "swr";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Video, Users, Eye, Upload } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { formatViews, formatWatchTime, formatRelativeTimeRu } from "@/lib/utils";
 
-const stats = [
-  { label: "Total Views", value: "12.4K", icon: Eye, change: "+12%" },
-  { label: "Subscribers", value: "892", icon: Users, change: "+5%" },
-  { label: "Videos", value: "24", icon: Video, change: "+2" },
-  { label: "Watch Time", value: "156h", icon: Upload, change: "+18%" },
-];
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-const recentVideos = [
-  { id: "1", title: "Getting Started with Plyr", views: 15420, status: "READY" },
-  { id: "2", title: "Advanced Plyr Features", views: 8930, status: "READY" },
-  { id: "3", title: "Processing Video...", views: 0, status: "PROCESSING" },
-];
+export default function StudioDashboard() {
+  const { data: session, status: sessionStatus } = useSession();
+  const userId = session?.user?.id;
 
-export default async function StudioDashboard() {
-  const session = await auth();
-  if (session?.user?.role === "STUDENT" || !session) {
-    redirect("/");
-  }
+  // Redirect if not authorized (handled client-side)
+  const { data: profile } = useSWR(userId ? "/api/users/me" : null, fetcher);
+
+  const channelIds = profile?.channels?.map((ch: { id: string }) => ch.id) || [];
+
+  const { data: videosData } = useSWR(
+    channelIds.length > 0 ? `/api/videos?page=1&limit=5` : null,
+    fetcher
+  );
+
+  // Calculate stats from profile channels
+  const totalViews = profile?.channels?.reduce(
+    (sum: number, ch: { totalViews: number }) => sum + (ch.totalViews || 0),
+    0
+  ) || 0;
+
+  const totalSubscribers = profile?.channels?.reduce(
+    (sum: number, ch: { _count?: { subscriptions: number } }) => sum + (ch._count?.subscriptions || 0),
+    0
+  ) || 0;
+
+  const totalVideos = profile?.channels?.reduce(
+    (sum: number, ch: { _count?: { videos: number } }) => sum + (ch._count?.videos || 0),
+    0
+  ) || 0;
+
+  const statCards = [
+    { label: "Просмотры", value: formatViews(totalViews), icon: Eye },
+    { label: "Подписчики", value: formatViews(totalSubscribers), icon: Users },
+    { label: "Видео", value: totalVideos, icon: Video },
+    { label: "Время просмотра", value: "—", icon: Upload },
+  ];
+
+  // Recent videos from user's channels
+  const recentVideos = profile?.channels?.flatMap(
+    (ch: { videos?: Array<{ id: string; title: string; viewCount: number; status: string; createdAt: string }> }) =>
+      ch.videos || []
+  ) || [];
 
   return (
     <div className="p-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Creator Studio</h1>
-        <p className="text-muted-foreground">Manage your channel and content</p>
+        <p className="text-muted-foreground">Управление каналом и контентом</p>
       </div>
 
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat) => {
+        {statCards.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.label}>
@@ -42,7 +71,6 @@ export default async function StudioDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground text-green-600">{stat.change}</p>
               </CardContent>
             </Card>
           );
@@ -55,8 +83,8 @@ export default async function StudioDashboard() {
           <Card className="hover:bg-accent transition-colors cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <h3 className="font-medium">Upload Video</h3>
-              <p className="text-sm text-muted-foreground">Add new content to your channel</p>
+              <h3 className="font-medium">Загрузить видео</h3>
+              <p className="text-sm text-muted-foreground">Добавить новый контент</p>
             </CardContent>
           </Card>
         </Link>
@@ -64,8 +92,8 @@ export default async function StudioDashboard() {
           <Card className="hover:bg-accent transition-colors cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Video className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <h3 className="font-medium">Manage Videos</h3>
-              <p className="text-sm text-muted-foreground">Edit metadata and settings</p>
+              <h3 className="font-medium">Управление видео</h3>
+              <p className="text-sm text-muted-foreground">Редактировать метаданные</p>
             </CardContent>
           </Card>
         </Link>
@@ -73,37 +101,57 @@ export default async function StudioDashboard() {
           <Card className="hover:bg-accent transition-colors cursor-pointer">
             <CardContent className="pt-6 text-center">
               <Users className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <h3 className="font-medium">Manage Courses</h3>
-              <p className="text-sm text-muted-foreground">Create and manage courses</p>
+              <h3 className="font-medium">Управление курсами</h3>
+              <p className="text-sm text-muted-foreground">Создание и управление курсами</p>
             </CardContent>
           </Card>
         </Link>
       </div>
 
-      {/* Recent videos */}
+      {/* Recent Videos */}
       <div className="mt-8">
-        <h2 className="text-lg font-semibold mb-4">Recent Videos</h2>
-        <div className="space-y-2">
-          {recentVideos.map((video) => (
-            <div key={video.id} className="flex items-center justify-between rounded-lg border p-4">
-              <div>
-                <h4 className="font-medium">{video.title}</h4>
-                <p className="text-sm text-muted-foreground">{video.views} views</p>
+        <h2 className="text-lg font-semibold mb-4">Последние видео</h2>
+        {recentVideos.length === 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center text-muted-foreground">
+              <Video className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+              <p>У вас пока нет видео</p>
+              <Link href="/studio/upload" className="text-sm text-primary hover:underline mt-2 inline-block">
+                Загрузить первое видео
+              </Link>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {recentVideos.slice(0, 5).map((video: {
+              id: string;
+              title: string;
+              viewCount: number;
+              status: string;
+              createdAt: string;
+            }) => (
+              <div key={video.id} className="flex items-center justify-between rounded-lg border p-4">
+                <div>
+                  <h4 className="font-medium">{video.title}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {formatViews(video.viewCount)} просмотров &middot; {formatRelativeTimeRu(video.createdAt)}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    video.status === "READY"
+                      ? "bg-green-100 text-green-700"
+                      : video.status === "PROCESSING"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : "bg-red-100 text-red-700"
+                  }`}
+                >
+                  {video.status === "READY" ? "Готово" : video.status === "PROCESSING" ? "Обработка" : video.status}
+                </span>
               </div>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-medium ${
-                  video.status === "READY"
-                    ? "bg-green-100 text-green-700"
-                    : video.status === "PROCESSING"
-                    ? "bg-yellow-100 text-yellow-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {video.status}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

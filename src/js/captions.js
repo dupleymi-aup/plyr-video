@@ -274,6 +274,11 @@ class Captions {
         const tracks = this.getTracks();
         const track = this.findTrack([this.language, ...this.languages], true);
 
+        if (!track) {
+          this.debug.warn('No caption track found to enable');
+          return;
+        }
+
         // Override user preferences to avoid switching languages if a matching track is added
         this.language = track.language;
 
@@ -302,7 +307,7 @@ class Captions {
     // Wait for the call stack to clear before setting mode='hidden'
     // on the active track - forcing the browser to download it
     setTimeout(() => {
-      if (active && this.toggled) {
+      if (active && this.toggled && this.currentTrackNode) {
         this.currentTrackNode.mode = 'hidden';
       }
     });
@@ -345,7 +350,7 @@ class Captions {
     }
 
     // Update translation container immediately
-    if (translationActive && this.elements.translation && this.elements.captions.textContent) {
+    if (translationActive && this.elements.translation && this.elements.captions && this.elements.captions.textContent) {
       // Translate current captions
       translate(this.elements.captions.textContent, this.translation.language)
         .then((translated) => {

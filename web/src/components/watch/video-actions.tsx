@@ -1,0 +1,149 @@
+"use client";
+
+import { useState } from "react";
+import useSWR, { mutate } from "swr";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { ThumbsUp, ThumbsDown, Share2, Check } from "lucide-react";
+
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+interface VideoActionsProps {
+  videoId: string;
+  channelId: string;
+  initialLikes: number;
+  initialDislikes: number;
+}
+
+export function VideoActions({ videoId, channelId, initialLikes, initialDislikes }: VideoActionsProps) {
+  const { data: session } = useSession();
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
+  const [likeCount, setLikeCount] = useState(initialLikes);
+  const [dislikeCount, setDislikeCount] = useState(initialDislikes);
+  const [copied, setCopied] = useState(false);
+
+  // Check like status on mount
+  useSWR(
+    session ? `/api/videos/${videoId}/like` : null,
+    fetcher,
+    {
+      onSuccess: (data) => {
+        if (data?.liked) setLiked(true);
+      },
+    }
+  );
+
+  const handleLike = async () => {
+    if (!session) return;
+
+    if (liked) {
+      await fetch(`/api/videos/${videoId}/like`, { method: "DELETE" });
+      setLiked(false);
+      setLikeCount((c) => c - 1);
+    } else {
+      await fetch(`/api/videos/${videoId}/like`, { method: "POST" });
+      setLiked(true);
+      setLikeCount((c) => c + 1);
+      if (disliked) {
+        setDisliked(false);
+        setDislikeCount((c) => c - 1);
+      }
+    }
+  };
+
+  const handleDislike = async () => {
+    if (!session) return;
+
+    if (disliked) {
+      setDisliked(false);
+      setDislikeCount((c) => c - 1);
+    } else {
+      setDisliked(true);
+      setDislikeCount((c) => c + 1);
+      if (liked) {
+        setLiked(false);
+        setLikeCount((c) => c - 1);
+      }
+    }
+  };
+
+  const handleShare = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        variant={liked ? "default" : "outline"}
+        size="sm"
+        onClick={handleLike}
+        className={liked ? "bg-blue-600 hover:bg-blue-700" : ""}
+      >
+        <ThumbsUp className="h-4 w-4 mr-1" />
+        {likeCount}
+      </Button>
+      <Button
+        variant={disliked ? "default" : "outline"}
+        size="sm"
+        onClick={handleDislike}
+      >
+        <ThumbsDown className="h-4 w-4 mr-1" />
+        {dislikeCount}
+      </Button>
+      <Button variant="outline" size="sm" onClick={handleShare}>
+        {copied ? (
+          <Check className="h-4 w-4 mr-1" />
+        ) : (
+          <Share2 className="h-4 w-4 mr-1" />
+        )}
+        {copied ? "Скопировано" : "Поделиться"}
+      </Button>
+    </div>
+  );
+}
+
+export function SubscribeButton({ channelId }: { channelId: string }) {
+  const { data: session } = useSession();
+  const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async () => {
+    if (!session) return;
+    setLoading(true);
+
+    if (subscribed) {
+      await fetch(`/api/subscriptions/${channelId}`, { method: "DELETE" });
+      setSubscribed(false);
+    } else {
+      await fetch("/api/subscriptions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channelId }),
+      });
+      setSubscribed(true);
+    }
+    setLoading(false);
+  };
+
+  if (!session) {
+    return (
+      <a href="/login" className="text-sm text-muted-foreground hover:text-primary">
+        Войдите, чтобы подписаться
+      </a>
+    );
+  }
+
+  return (
+    <Button
+      variant={subscribed ? "outline" : "default"}
+      size="sm"
+      onClick={handleSubscribe}
+      disabled={loading}
+    >
+      {loading ? "..." : subscribed ? "Отписаться" : "Подписаться"}
+    </Button>
+  );
+}

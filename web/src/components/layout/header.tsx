@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { SearchBar } from "@/components/search/search-bar";
+import { NotificationBadge } from "@/components/notifications/notification-badge";
 import { Menu, Upload, User, LogOut, Settings, Shield } from "lucide-react";
 
 export function Header() {
@@ -50,6 +51,8 @@ export function Header() {
             <div className="h-8 w-8 animate-pulse rounded-full bg-secondary" />
           ) : session ? (
             <>
+              <NotificationBadge />
+
               {session.user?.role !== "STUDENT" && (
               <Link href="/studio/upload">
                 <Button variant="ghost" size="icon">
@@ -95,7 +98,7 @@ export function Header() {
                     )}
                     {session.user?.role === "ADMIN" && (
                     <Link href="/admin" onClick={() => setUserMenuOpen(false)}>
-                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-accent" role="menuitem">
+                      <button className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm text-destructive hover:bg-destructive/10" role="menuitem">
                         <Shield className="h-4 w-4" />
                         {t("adminPanel")}
                       </button>

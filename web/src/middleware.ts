@@ -2,16 +2,22 @@ import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { getRequiredRoleForPath, ROLE_LEVELS, type Role } from "@/lib/permissions";
 
-const protectedRoutes = ["/studio", "/settings", "/subscriptions", "/admin"];
+const protectedRoutes = ["/studio", "/settings", "/subscriptions"];
+const adminRoutes = ["/admin"];
 
 export default auth((req) => {
   const pathname = req.nextUrl.pathname;
   const isAuthenticated = !!req.auth;
+
   const isProtectedRoute = protectedRoutes.some((route) =>
     pathname.startsWith(route)
   );
 
-  if (isProtectedRoute && !isAuthenticated) {
+  const isAdminRoute = adminRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
+
+  if ((isProtectedRoute || isAdminRoute) && !isAuthenticated) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
@@ -25,6 +31,10 @@ export default auth((req) => {
       const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("banned", "1");
       return NextResponse.redirect(loginUrl);
+    }
+
+    if (isAdminRoute && userRole !== "ADMIN") {
+      return NextResponse.redirect(new URL("/", req.url));
     }
 
     const requiredRole = getRequiredRoleForPath(pathname);

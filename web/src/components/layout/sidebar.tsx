@@ -14,6 +14,8 @@ import {
   Upload,
   BarChart3,
   Video,
+  Shield,
+  MessageSquare,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -22,6 +24,7 @@ export function Sidebar() {
 
   const isStudio = pathname.startsWith("/studio");
   const isSettings = pathname.startsWith("/settings");
+  const isAdmin = pathname.startsWith("/admin");
 
   const mainNav = [
     { href: "/", label: t("home"), icon: Home },
@@ -41,7 +44,14 @@ export function Sidebar() {
     { href: "/settings/profile", label: t("profile"), icon: User },
   ];
 
-  const navItems = isStudio ? studioNav : isSettings ? settingsNav : mainNav;
+  const adminNav = [
+    { href: "/admin", label: t("adminOverview"), icon: BarChart3 },
+    { href: "/admin/users", label: t("adminUsers"), icon: User },
+    { href: "/admin/videos", label: t("adminVideos"), icon: Video },
+    { href: "/admin/comments", label: t("adminComments"), icon: MessageSquare },
+  ];
+
+  const navItems = isAdmin ? adminNav : isStudio ? studioNav : isSettings ? settingsNav : mainNav;
 
   return (
     <aside aria-label="Sidebar" className="fixed left-0 top-16 z-30 hidden h-[calc(100vh-4rem)] w-60 flex-col overflow-y-auto border-r bg-background lg:flex">

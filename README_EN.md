@@ -184,6 +184,17 @@ plyr-video/
 
 ---
 
+## Legal Documentation
+
+| Document | Description |
+|----------|-------------|
+| [License Agreement](./LICENSE) | Software use terms (Civil Code RF Arts. 1235, 1286) |
+| [User Agreement](./ПОЛЬЗОВАТЕЛЬСКОЕ_СОГЛАШЕНИЕ.md) | Public offer for Player use |
+| [Privacy Policy](./ПОЛИТИКА_КОНФИДЕНЦИАЛЬНОСТИ.md) | Personal data processing (152-FZ) |
+| [Cookie Policy](./ПОЛИТИКА_COOKIE.md) | Cookie and localStorage usage |
+
+---
+
 ## Author
 
 **Dupley Maxim Igorevich**
@@ -198,6 +209,6 @@ This project is the intellectual property of Dupley Maxim Igorevich. Terms of us
 
 <div align="center">
 
-**Plyr Video Player v3.8.4** — © 2025 Dupley Maxim Igorevich
+**Plyr Video Player v3.8.4** — © 2026 Dupley Maxim Igorevich
 
 </div>

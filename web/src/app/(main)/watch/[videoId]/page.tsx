@@ -1,8 +1,8 @@
 import { PlyrPlayer } from "@/components/player/plyr-player";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { formatViews, formatRelativeTime, formatDuration } from "@/lib/utils";
-import { ThumbsUp, ThumbsDown, Share2, Plus } from "lucide-react";
+import { formatViews, formatRelativeTime, formatRelativeTimeRu, formatDuration } from "@/lib/utils";
+import { ThumbsUp, ThumbsDown, Share2, Plus, Check, PlaySquare } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
@@ -10,6 +10,7 @@ import Link from "next/link";
 import VideoActions from "./video-actions";
 import { CommentForm } from "@/components/watch/comment-form";
 import { SubscribeButton } from "@/components/watch/subscribe-button";
+import { Comments } from "@/components/watch/comments";
 import type { Comment } from "@/types/comment";
 
 interface WatchPageProps {
@@ -35,6 +36,9 @@ export default async function WatchPage({ params }: WatchPageProps) {
           },
         },
       },
+      _count: {
+        select: { comments: true },
+      },
     },
   });
 
@@ -43,33 +47,60 @@ export default async function WatchPage({ params }: WatchPageProps) {
   }
 
   // Don't show private videos to non-owners
-  if (video.visibility === "PRIVATE") {
+  if (video.visibility === "PRIVATE" || video.status !== "READY") {
     if (!session?.user?.id || video.channel.ownerId !== session.user.id) {
       notFound();
     }
   }
 
-  // Fetch recommended videos (same channel or similar)
-  const recommendedVideos = await prisma.video.findMany({
+  // Recommended videos (same channel first)
+  const recommended = await prisma.video.findMany({
     where: {
-      AND: [
-        { id: { not: videoId } },
-        { status: "READY" },
-        { visibility: "PUBLIC" },
-        {
-          OR: [
-            { channelId: video.channelId },
-            { title: { contains: video.title.split(" ").slice(0, 3).join(" ") } },
-          ],
-        },
-      ],
+      id: { not: videoId },
+      channelId: video.channelId,
+      status: "READY",
+      visibility: "PUBLIC",
     },
-    include: {
+    select: {
+      id: true,
+      title: true,
+      thumbnailKey: true,
+      poster: true,
+      duration: true,
+      viewCount: true,
+      createdAt: true,
       channel: { select: { name: true } },
     },
-    orderBy: { viewCount: "desc" },
+    orderBy: { publishedAt: "desc" },
     take: 10,
   });
+
+  // If not enough from same channel, get from others
+  let moreRecommended: any[] = [];
+  if (recommended.length < 5) {
+    moreRecommended = await prisma.video.findMany({
+      where: {
+        id: { not: videoId },
+        channelId: { not: video.channelId },
+        status: "READY",
+        visibility: "PUBLIC",
+      },
+      select: {
+        id: true,
+        title: true,
+        thumbnailKey: true,
+        poster: true,
+        duration: true,
+        viewCount: true,
+        createdAt: true,
+        channel: { select: { name: true } },
+      },
+      orderBy: { viewCount: "desc" },
+      take: 10 - recommended.length,
+    });
+  }
+
+  const allRecommended = [...recommended, ...moreRecommended];
 
   const isSubscribed = session?.user?.id
     ? await prisma.subscription.findFirst({
@@ -87,8 +118,8 @@ export default async function WatchPage({ params }: WatchPageProps) {
         {/* Player */}
         <div className="aspect-video bg-black rounded-lg overflow-hidden">
           <PlyrPlayer
-            source={video.source}
-            poster={video.poster || undefined}
+            source={video.storageKey || video.source || ""}
+            poster={video.posterKey || video.poster || undefined}
             className="w-full h-full"
           />
         </div>
@@ -99,13 +130,16 @@ export default async function WatchPage({ params }: WatchPageProps) {
 
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              {formatViews(video.viewCount)} views • {formatRelativeTime(video.createdAt)}
+              {formatViews(video.viewCount)} views &middot; {formatRelativeTimeRu(video.publishedAt || video.createdAt)}
             </div>
 
             <VideoActions
               videoId={video.id}
+              channelId={video.channel.id}
               likes={video.likeCount}
               initialLiked={false}
+              initialLikes={video.likeCount}
+              initialDislikes={0}
             />
           </div>
         </div>
@@ -123,7 +157,8 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 {video.channel.name}
               </Link>
               {video.channel.isVerified && (
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary flex items-center gap-1">
+                  <Check className="h-3 w-3" />
                   Verified
                 </span>
               )}
@@ -131,12 +166,14 @@ export default async function WatchPage({ params }: WatchPageProps) {
             <p className="text-sm text-muted-foreground">
               {formatViews(video.channel._count.subscriptions)} subscribers
             </p>
-            {!isSubscribed && (
-              <SubscribeButton
-                channelId={video.channelId}
-                isSubscribed={!!isSubscribed}
-              />
-            )}
+            <div className="mt-2">
+              {!isSubscribed && (
+                <SubscribeButton
+                  channelId={video.channelId}
+                  isSubscribed={!!isSubscribed}
+                />
+              )}
+            </div>
           </div>
         </div>
 
@@ -152,27 +189,30 @@ export default async function WatchPage({ params }: WatchPageProps) {
         {/* Comments section */}
         <div className="mt-6">
           <h3 className="text-lg font-semibold mb-4">Comments</h3>
-          <CommentsSection videoId={videoId} />
+          <Comments videoId={video.id} />
         </div>
       </div>
 
       {/* Sidebar - Recommended videos */}
       <div className="w-full lg:w-80 xl:w-96 shrink-0">
-        <h3 className="text-lg font-semibold mb-4">Recommended</h3>
+        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+          <PlaySquare className="h-5 w-5" />
+          Recommended
+        </h3>
         <div className="space-y-4">
-          {recommendedVideos.map((rec) => (
+          {allRecommended.map((rec) => (
             <Link key={rec.id} href={`/watch/${rec.id}`} className="flex gap-2 group">
               <div className="relative w-40 aspect-video shrink-0 overflow-hidden rounded-md bg-secondary">
-                {rec.poster ? (
+                {rec.thumbnailKey || rec.poster ? (
                   <img
-                    src={rec.poster}
+                    src={rec.thumbnailKey || rec.poster}
                     alt={rec.title}
                     className="object-cover w-full h-full transition-transform group-hover:scale-105"
                     loading="lazy"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                    No thumbnail
+                    <PlaySquare className="h-6 w-6" />
                   </div>
                 )}
                 {rec.duration && (
@@ -185,104 +225,15 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 <h4 className="line-clamp-2 text-sm font-medium group-hover:text-primary">
                   {rec.title}
                 </h4>
-                <p className="mt-1 text-xs text-muted-foreground">{rec.channel.name}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{rec.channel?.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatViews(rec.viewCount)} views • {formatRelativeTime(rec.createdAt)}
+                  {formatViews(rec.viewCount)} views &middot; {formatRelativeTimeRu(rec.createdAt)}
                 </p>
               </div>
             </Link>
           ))}
-          {recommendedVideos.length === 0 && (
+          {allRecommended.length === 0 && (
             <p className="text-sm text-muted-foreground">No recommendations available.</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-async function CommentsSection({ videoId }: { videoId: string }) {
-  const session = await auth();
-
-  const [comments, total] = await Promise.all([
-    prisma.comment.findMany({
-      where: { videoId, parentId: null },
-      include: {
-        user: { select: { id: true, name: true, image: true } },
-        _count: { select: { replies: true } },
-        replies: {
-          take: 3,
-          orderBy: { createdAt: "asc" },
-          include: { user: { select: { id: true, name: true, image: true } } },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-      take: 10,
-    }),
-    prisma.comment.count({ where: { videoId, parentId: null } }),
-  ]);
-
-  return (
-    <div>
-      {session?.user && (
-        <CommentForm videoId={videoId} />
-      )}
-      {!session?.user && (
-        <p className="text-sm text-muted-foreground mb-4">
-          <a href="/login" className="text-primary hover:underline">Sign in</a> to comment.
-        </p>
-      )}
-      {comments.map((comment) => (
-        <CommentItem key={comment.id} comment={comment} />
-      ))}
-      {comments.length === 0 && (
-        <p className="text-sm text-muted-foreground">No comments yet.</p>
-      )}
-      {total > 10 && (
-        <Link href={`/watch/${videoId}/comments`} className="text-sm text-primary hover:underline">
-          View all {total} comments
-        </Link>
-      )}
-    </div>
-  );
-}
-
-function CommentItem({ comment }: { comment: Comment }) {
-  return (
-    <div className="mb-4">
-      <div className="flex gap-3">
-        <Avatar
-          src={comment.user.image || undefined}
-          fallback={comment.user.name?.[0] || "?"}
-          size="sm"
-        />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium">{comment.user.name || "Anonymous"}</span>
-            <span className="text-xs text-muted-foreground">
-              {formatRelativeTime(comment.createdAt)}
-            </span>
-          </div>
-          <p className="mt-1 text-sm">{comment.content}</p>
-          {comment._count.replies > 0 && (
-            <div className="mt-2 ml-4 border-l-2 pl-4 space-y-2">
-              {comment.replies.map((reply) => (
-                <div key={reply.id} className="flex gap-2">
-                  <Avatar
-                    src={reply.user.image || undefined}
-                    fallback={reply.user.name?.[0] || "?"}
-                    size="sm"
-                  />
-                  <div>
-                    <span className="text-sm font-medium">{reply.user.name || "Anonymous"}</span>
-                    <span className="text-xs text-muted-foreground ml-2">
-                      {formatRelativeTime(reply.createdAt)}
-                    </span>
-                    <p className="text-sm">{reply.content}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
         </div>
       </div>

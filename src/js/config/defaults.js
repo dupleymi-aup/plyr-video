@@ -579,6 +579,8 @@ const defaults = {
       speed: '[data-plyr="speed"]',
       language: '[data-plyr="language"]',
       quality: '[data-plyr="quality"]',
+      translationLanguage: '[data-plyr="translation-language"]',
+      transcriptionLanguage: '[data-plyr="transcription-language"]',
     },
     display: {
       currentTime: '.plyr__time--current',
@@ -590,6 +592,7 @@ const defaults = {
     progress: '.plyr__progress',
     captions: '.plyr__captions',
     caption: '.plyr__caption',
+    transcriptionContainer: '.plyr__transcription',
   },
 
   // Class hooks added to the player in different states

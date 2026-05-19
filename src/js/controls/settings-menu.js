@@ -91,7 +91,7 @@ class SettingsMenu {
         if (is.number(value)) {
           const label = i18n.get(`qualityLabel.${value}`, this.player.config);
 
-          if (!label.length) {
+          if (is.empty(label)) {
             return `${value}p`;
           }
 

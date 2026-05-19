@@ -2,21 +2,34 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+async function requireAdmin() {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  if (!session?.user?.id) return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  if (!user || user.role !== "ADMIN") return { error: NextResponse.json({ error: "Forbidden" }, { status: 403 }) };
+  return { user, session };
+}
+
+export async function GET(request: NextRequest) {
+  const authResult = await requireAdmin();
+  if ("error" in authResult) return authResult.error;
 
   const { searchParams } = request.nextUrl;
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "20");
   const skip = (page - 1) * limit;
   const role = searchParams.get("role");
+  const search = searchParams.get("search") || "";
 
   const where: Record<string, unknown> = {};
   if (role && ["STUDENT", "TEACHER", "ADMIN"].includes(role)) {
     where.role = role;
+  }
+  if (search) {
+    where.OR = [
+      { name: { contains: search } },
+      { email: { contains: search } },
+    ];
   }
 
   const [users, total] = await Promise.all([
@@ -25,9 +38,20 @@ export async function GET(request: NextRequest) {
         id: true,
         name: true,
         email: true,
+        image: true,
         role: true,
         banned: true,
         createdAt: true,
+        updatedAt: true,
+        _count: {
+          select: {
+            channels: true,
+            playlists: true,
+            comments: true,
+            likedVideos: true,
+            viewHistory: true,
+          },
+        },
       },
       where,
       orderBy: { createdAt: "desc" },
@@ -49,10 +73,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PATCH(request: NextRequest) {
-  const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
+  const authResult = await requireAdmin();
+  if ("error" in authResult) return authResult.error;
+  const { user: adminUser, session } = authResult;
 
   const body = await request.json();
   const { userId, role, banned } = body;
@@ -120,8 +143,8 @@ export async function PATCH(request: NextRequest) {
           targetType: "User",
           oldValue: currentUser.role,
           newValue: updateData.role as string,
-          details: `Role changed for ${targetName}: ${currentUser.role} → ${updateData.role}`,
-          adminId: session.user.id,
+          details: `Role changed for ${targetName}: ${currentUser.role} -> ${updateData.role}`,
+          adminId: adminUser.id,
         },
       })
     );
@@ -137,7 +160,7 @@ export async function PATCH(request: NextRequest) {
           oldValue: String(currentUser.banned),
           newValue: String(updateData.banned),
           details: `${updateData.banned ? "Banned" : "Unbanned"} ${targetName}`,
-          adminId: session.user.id,
+          adminId: adminUser.id,
         },
       })
     );

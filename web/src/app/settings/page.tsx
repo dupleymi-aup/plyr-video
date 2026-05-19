@@ -1,20 +1,21 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { User, Bell, Shield, Trash2 } from "lucide-react";
+import { User, Bell, Shield, Trash2, BarChart3 } from "lucide-react";
 
 const settingsLinks = [
-  { href: "/settings/profile", label: "Profile", description: "Manage your public profile", icon: User },
-  { href: "/settings/notifications", label: "Notifications", description: "Configure notification preferences", icon: Bell },
-  { href: "/settings/security", label: "Security", description: "Password and security settings", icon: Shield },
+  { href: "/settings/profile", label: "Профиль", description: "Управление публичным профилем", icon: User },
+  { href: "/settings/stats", label: "Статистика", description: "Просмотр вашей активности", icon: BarChart3 },
+  { href: "/settings/notifications", label: "Уведомления", description: "Настройка уведомлений", icon: Bell },
+  { href: "/settings/security", label: "Безопасность", description: "Пароль и настройки безопасности", icon: Shield },
 ];
 
 export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your account settings</p>
+        <h1 className="text-2xl font-bold">Настройки</h1>
+        <p className="text-muted-foreground">Управление аккаунтом</p>
       </div>
 
       <div className="space-y-4">
@@ -40,15 +41,15 @@ export default function SettingsPage() {
 
       <Card className="mt-8 border-destructive/20">
         <CardHeader>
-          <CardTitle className="text-destructive">Danger Zone</CardTitle>
+          <CardTitle className="text-destructive">Опасная зона</CardTitle>
           <CardDescription>
-            Irreversible actions that affect your account
+            Необратимые действия, влияющие на аккаунт
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button variant="destructive">
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Account
+            Удалить аккаунт
           </Button>
         </CardContent>
       </Card>

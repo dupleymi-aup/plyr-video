@@ -1,5 +1,5 @@
 ================================================================================
-  ЛИЦЕНЗИЯ / LICENSE
+  ЛИЦЕНЗИОННОЕ СОГЛАШЕНИЕ / LICENSE AGREEMENT
   Plyr Video Player v3.8.4
 ================================================================================
 
@@ -12,75 +12,185 @@
 Проект: Plyr Video Player
 Версия: 3.8.4
 Автор и правообладатель: Дуплей Максим Игоревич
-Год: 2025
+Год создания: 2026
+
+ТЕРМИНЫ И ОПРЕДЕЛЕНИЯ
+
+Программное обеспечение (ПО) — проект «Plyr Video Player», включая все
+исходные и объектные коды, интерфейсы, дизайн, документацию, графические
+элементы, алгоритмы, структуры данных, стили, спрайты, иконки и любые иные
+компоненты, распространяемые правообладателем.
+
+Правообладатель — Дуплей Максим Игоревич, автор и исключительный владелец
+прав на Программное обеспечение.
+
+Пользователь — любое физическое, юридическое лицо или индивидуальный
+предприниматель, осуществляющее использование Программного обеспечения на
+условиях настоящего Соглашения.
+
+Использование — любое действие с Программным обеспечением, включая
+воспроизведение, распространение, модификацию, интеграцию, публичный показ
+и иное использование в соответствии со ст. 1229, 1270 Гражданского кодекса
+Российской Федерации.
 
 1. ИНТЕЛЛЕКТУАЛЬНАЯ СОБСТВЕННОСТЬ
 
-Настоящим подтверждается, что проект «Plyr Video Player» (далее — «Проект»),
-включая все исходные коды, дизайн интерфейса, текстовый контент, документацию,
-графику, алгоритмы, структуры данных, Sass-стили, SVG-спрайты, иконки, а также
-любую связанную с Проектом документацию, является исключительной интеллектуальной
-собственностью Дуплей Максима Игоревича.
+1.1. Программное обеспечение, включая все его компоненты, является
+     исключительной интеллектуальной собственностью Правообладателя —
+     Дуплей Максима Игоревича.
 
-Все авторские права на Проект принадлежат Дуплей Максиму Игоревичу в
-соответствии с законодательством Российской Федерации об авторском праве и
-смежных правах, а также международными конвенциями об охране интеллектуальной
-собственности.
+1.2. Все авторские права на Программное обеспечение охраняются в соответствии
+     с частью четвёртой Гражданского кодекса Российской Федерации (ГК РФ,
+     ст. 1225–1308), а также международными конвенциями об охране
+     интеллектуальной собственности, включая Бернскую конвенцию по охране
+     литературных и художественных произведений.
 
-2. ПРАВА НА ИСПОЛЬЗОВАНИЕ
+1.3. Исключительное право на Программное обеспечение принадлежит Правообладателю
+     в полном объёме. Настоящее Соглашение не является договором об отчуждении
+     исключительного права (ст. 1234 ГК РФ) и не является договором об отчуждении
+     права на результат интеллектуальной деятельности.
 
-Настоящее соглашение предоставляет пользователю следующие права:
+2. ПРЕДОСТАВЛЕНИЕ ПРАВ (ЛИЦЕНЗИЯ)
 
-a) Право на использование — разрешается использовать Программное обеспечение
-   в личных, образовательных и некоммерческих целях без ограничений.
+2.1. Правообладатель предоставляет Пользователю простую (неисключительную)
+     лицензию на использование Программного обеспечения на условиях,
+     предусмотренных настоящим Соглашением (ст. 1235, 1286 ГК РФ).
 
-b) Право на изучение — разрешается изучать исходный код Программного
-   обеспечения в целях образования и исследования.
+2.2. В рамках настоящей лицензии Пользователю предоставляются следующие права:
 
-c) Право на распространение — разрешается распространять копии Программного
-   обеспечения при условии сохранения настоящего лицензионного соглашения и
-   указания автора — Дуплей Максима Игоревича.
+     a) Право на использование — разрешается использовать Программное
+        обеспечение в личных, образовательных и некоммерческих целях без
+        территориальных ограничений.
+
+     b) Право на изучение — разрешается изучать исходный код Программного
+        обеспечения в целях образования и научного исследования.
+
+     c) Право на распространение — разрешается распространять копии
+        Программного обеспечения при условии сохранения настоящего
+        лицензионного соглашения в неизменном виде и указания автора —
+        Дуплей Максима Игоревича.
+
+2.3. Лицензия предоставляется на весь срок действия исключительного права
+     на Программное обеспечение.
+
+2.4. Территория использования: все страны мира.
 
 3. ОГРАНИЧЕНИЯ
 
-Пользователю запрещается:
+3.1. Пользователю запрещается:
 
-a) Использовать Проект или его компоненты в коммерческих целях без
-   предварительного письменного согласия автора.
+     a) Использовать Программное обеспечение или его компоненты в коммерческих
+        целях без предварительного письменного согласия Правообладателя.
 
-b) Изменять, модифицировать или создавать производные работы на основе Проекта
-   без указания оригинального автора и ссылки на исходный Проект.
+     b) Создавать производные произведения на основе Программного обеспечения
+        без указания оригинального автора и ссылки на исходный Проект
+        (ст. 1270 ГК РФ).
 
-c) Удалять или изменять любые уведомления об авторских правах, торговых
-   марках или иных правах собственности, содержащиеся в Проекте.
+     c) Удалять, изменять или скрывать любые уведомления об авторских правах,
+        товарных знаках или иных правах собственности, содержащиеся в
+        Программном обеспечении.
 
-d) Предоставлять сублицензии на использование Проекта третьим лицам без
-   письменного согласия автора.
+     d) Предоставлять сублицензии на использование Программного обеспечения
+        третьим лицам без письменного согласия Правообладателя (п. 2 ст. 1235
+        ГК РФ).
 
-e) Использовать имя автора, название Проекта или любые связанные товарные
-   знаки для продвижения любых продуктов или услуг без предварительного
-   письменного согласия автора.
+     e) Использовать имя Правообладателя, название Программного обеспечения
+        или любые связанные товарные знаки для продвижения любых продуктов
+        или услуг без предварительного письменного согласия Правообладателя.
 
-4. АВТОРСКОЕ ПРАВО
+     f) Осуществлять действия, нарушающие нормы законодательства Российской
+        Федерации, включая, но не ограничиваясь, Федеральные законы
+        «Об информации, информационных технологиях и о защите информации»,
+        «О персональных данных».
 
-Все права, не предоставленные явно в настоящем соглашении, остаются за
-автором — Дуплей Максимом Игоревичем. Настоящее соглашение не является
-договором об отчуждении исключительных прав.
+3.2. Нарушение любого из пунктов раздела 3 влечёт автоматическое прекращение
+     действия настоящей лицензии без дополнительного уведомления.
+
+4. ОТВЕТСТВЕННОСТЬ СТОРОН
+
+4.1. Пользователь несёт полную ответственность за соблюдение прав третьих лиц
+     при использовании Программного обеспечения.
+
+4.2. Правообладатель не несёт ответственности за:
+
+     a) Любой прямой, косвенный, случайный, особый или последующий ущерб,
+        возникший в результате использования или невозможности использования
+        Программного обеспечения.
+
+     b) Совместимость Программного обеспечения с конкретными требованиями
+        Пользователя.
+
+     c) Результаты использования Программного обеспечения, включая, но не
+        ограничиваясь, потерю данных, прерывание работы систем, убытки,
+        вызванные ошибками в работе Программного обеспечения.
 
 5. ОТКАЗ ОТ ГАРАНТИЙ
 
-ПРОЕКТ ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ», БЕЗ КАКИХ-ЛИБО ГАРАНТИЙ, ЯВНО
-ВЫРАЖЕННЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО НЕ ОГРАНИЧИВАЯСЬ, ГАРАНТИИ
-ТОВАРНОЙ ПРИГОДНОСТИ, ПРИГОДНОСТИ ДЛЯ КОНКРЕТНОЙ ЦЕЛИ И НЕНАРУШЕНИЯ ПРАВ
-ТРЕТЬИХ ЛИЦ. АВТОР НЕ НЕСЁТ ОТВЕТСТВЕННОСТИ ЗА ЛЮБЫЕ ПРЯМЫЕ, КОСВЕННЫЕ,
-СЛУЧАЙНЫЕ, ОСОБЫЕ ИЛИ ПОСЛЕДОВАТЕЛЬНЫЕ УБЫТКИ, ВОЗНИКАЮЩИЕ В РЕЗУЛЬТАТЕ
-ИСПОЛЬЗОВАНИЯ ИЛИ НЕВОЗМОЖНОСТИ ИСПОЛЬЗОВАНИЯ ПРОЕКТА.
+5.1. ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ ПРЕДОСТАВЛЯЕТСЯ «КАК ЕСТЬ» (AS IS), БЕЗ КАКИХ-ЛИБО
+     ГАРАНТИЙ, ЯВНО ВЫРАЖЕННЫХ ИЛИ ПОДРАЗУМЕВАЕМЫХ, ВКЛЮЧАЯ, НО НЕ
+     ОГРАНИЧИВАЯСЬ, ПОДРАЗУМЕВАЕМЫЕ ГАРАНТИИ ТОВАРНОЙ ПРИГОДНОСТИ,
+     ПРИГОДНОСТИ ДЛЯ КОНКРЕТНОЙ ЦЕЛИ И НЕНАРУШЕНИЯ ПРАВ ТРЕТЬИХ ЛИЦ.
 
-6. ПРИМЕНИМОЕ ПРАВО
+5.2. ПРАВООБЛАДАТЕЛЬ НЕ ГАРАНТИРУЕТ, ЧТО:
 
-Настоящее соглашение регулируется законодательством Российской Федерации.
-Любые споры, возникающие в связи с настоящим соглашением, подлежат
-разрешению в суде по месту нахождения автора.
+     a) ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ БУДЕТ СООТВЕТСТВОВАТЬ КОНКРЕТНЫМ ТРЕБОВАНИЯМ
+        ПОЛЬЗОВАТЕЛЯ;
+
+     b) ПРОГРАММНОЕ ОБЕСПЕЧЕНИЕ БУДЕТ РАБОТАТЬ БЕЗОШИБОЧНО ИЛИ БЕСПРЕРЫВНО;
+
+     c) РЕЗУЛЬТАТЫ, ПОЛУЧЕННЫЕ В РЕЗУЛЬТАТЕ ИСПОЛЬЗОВАНИЯ ПРОГРАММНОГО
+        ОБЕСПЕЧЕНИЯ, БУДУТ ТОЧНЫМИ ИЛИ НАДЁЖНЫМИ.
+
+6. ЗАЩИITA ПЕРСОНАЛЬНЫХ ДАННЫХ
+
+6.1. При использовании Программного обеспечения Пользователь может осуществлять
+     обработку персональных данных в соответствии с Федеральным законом
+     от 27.07.2006 № 152-ФЗ «О персональных данных».
+
+6.2. Правообладатель не собирает, не хранит и не обрабатывает персональные
+     данные Пользователей самостоятельно, за исключением случаев,
+     предусмотренных Политикой конфиденциальности, размещённой в
+     репозитории Программного обеспечения.
+
+7. СРОК ДЕЙСТВИЯ И ПОРЯДОК ПРЕКРАЩЕНИЯ
+
+7.1. Настоящее Соглашение вступает в силу с момента начала использования
+     Программного обеспечения и действует на весь срок действия
+     исключительного права.
+
+7.2. Правообладатель вправе в одностороннем порядке прекратить действие
+     настоящей лицензии в случае нарушения Пользователем любого из условий
+     настоящего Соглашения, направив соответствующее уведомление.
+
+7.3. После прекращения действия лицензии Пользователь обязан прекратить
+     использование Программного обеспечения и уничтожить все его копии.
+
+8. РАЗРЕШЕНИЕ СПОРОВ
+
+8.1. Все споры и разногласия, возникающие из настоящего Соглашения или в связи
+     с ним, подлежат разрешению путём переговоров между сторонами.
+
+8.2. В случае невозможности разрешения споров путём переговоров они подлежат
+     рассмотрению в суде по месту нахождения Правообладателя в соответствии
+     с законодательством Российской Федерации.
+
+8.3. К настоящему Соглашению применяется право Российской Федерации, включая
+     Гражданский кодекс Российской Федерации (часть четвёртая), Федеральный
+     закон «Об информации, информационных технологиях и о защите информации»,
+     Федеральный закон «О персональных данных» и иные нормативные правовые
+     акты Российской Федерации.
+
+9. ЗАКЛЮЧИТЕЛЬНЫЕ ПОЛОЖЕНИЯ
+
+9.1. Если какое-либо условие настоящего Соглашения будет признано недействительным
+     судом, это не влияет на действительность остальных условий.
+
+9.2. Правообладатель вправе в одностороннем порядке изменять условия настоящего
+     Соглашения. Изменения вступают в силу с момента их публикации в репозитории
+     Программного обеспечения.
+
+9.3. Настоящее Соглашение является полным и исчерпывающим соглашением между
+     сторонами в отношении использования Программного обеспечения.
 
 --------------------------------------------------------------------------------
   ENGLISH VERSION
@@ -91,78 +201,175 @@ SOFTWARE LICENSE AGREEMENT
 Project: Plyr Video Player
 Version: 3.8.4
 Author and Copyright Holder: Dupley Maxim Igorevich (Дуплей Максим Игоревич)
-Year: 2025
+Year of Creation: 2026
+
+TERMS AND DEFINITIONS
+
+Software — the "Plyr Video Player" project, including all source and object
+code, interfaces, design, documentation, graphical elements, algorithms, data
+structures, styles, sprites, icons, and any other components distributed by
+the Copyright Holder.
+
+Copyright Holder — Dupley Maxim Igorevich, the author and exclusive owner of
+rights to the Software.
+
+User — any individual, legal entity, or individual entrepreneur using the
+Software under the terms of this Agreement.
+
+Use — any action with the Software, including reproduction, distribution,
+modification, integration, public display, and other use in accordance with
+Articles 1229, 1270 of the Civil Code of the Russian Federation.
 
 1. INTELLECTUAL PROPERTY
 
-It is hereby confirmed that the project "Plyr Video Player" (hereinafter
-referred to as the "Project"), including all source code, interface design,
-text content, documentation, graphics, algorithms, data structures, Sass
-styles, SVG sprites, icons, and any Project-related documentation, is the
-exclusive intellectual property of Dupley Maxim Igorevich.
+1.1. The Software, including all its components, is the exclusive intellectual
+     property of the Copyright Holder — Dupley Maxim Igorevich.
 
-All copyrights to the Project belong to Dupley Maxim Igorevich in accordance
-with the copyright laws of the Russian Federation and international
-conventions on the protection of intellectual property.
+1.2. All copyrights to the Software are protected in accordance with Part Four
+     of the Civil Code of the Russian Federation (Articles 1225–1308), as well
+     as international conventions on the protection of intellectual property,
+     including the Berne Convention for the Protection of Literary and Artistic
+     Works.
 
-2. LICENSED RIGHTS
+1.3. The exclusive right to the Software belongs to the Copyright Holder in full.
+     This Agreement is not a contract for the alienation of the exclusive right
+     (Article 1234 of the Civil Code of the Russian Federation).
 
-This agreement grants the user the following rights:
+2. GRANT OF RIGHTS (LICENSE)
 
-a) Right to Use — the Software may be used for personal, educational, and
-   non-commercial purposes without restrictions.
+2.1. The Copyright Holder grants the User a simple (non-exclusive) license to
+     use the Software on the terms provided by this Agreement (Articles 1235,
+     1286 of the Civil Code of the Russian Federation).
 
-b) Right to Study — the source code of the Software may be studied for
-   educational and research purposes.
+2.2. Under this license, the User is granted the following rights:
 
-c) Right to Distribute — copies of the Software may be distributed provided
-   that this license agreement is preserved and the author — Dupley Maxim
-   Igorevich — is properly credited.
+     a) Right to Use — the Software may be used for personal, educational, and
+        non-commercial purposes without territorial restrictions.
+
+     b) Right to Study — the source code of the Software may be studied for
+        educational and scientific research purposes.
+
+     c) Right to Distribute — copies of the Software may be distributed provided
+        that this license agreement is preserved unchanged and the author —
+        Dupley Maxim Igorevich — is properly credited.
+
+2.3. The license is granted for the entire duration of the exclusive right to
+     the Software.
+
+2.4. Territory of use: worldwide.
 
 3. RESTRICTIONS
 
-The user is prohibited from:
+3.1. The User is prohibited from:
 
-a) Using the Project or its components for commercial purposes without the
-   prior written consent of the author.
+     a) Using the Software or its components for commercial purposes without
+        prior written consent of the Copyright Holder.
 
-b) Modifying, altering, or creating derivative works based on the Project
-   without crediting the original author and providing a reference to the
-   original Project.
+     b) Creating derivative works based on the Software without crediting the
+        original author and providing a reference to the original Project
+        (Article 1270 of the Civil Code of the Russian Federation).
 
-c) Removing or altering any copyright notices, trademarks, or other
-   proprietary rights notices contained in the Project.
+     c) Removing, altering, or concealing any copyright, trademark, or other
+        proprietary rights notices contained in the Software.
 
-d) Granting sublicenses for the use of the Project to third parties without
-   the written consent of the author.
+     d) Granting sublicenses for the use of the Software to third parties
+        without written consent of the Copyright Holder (Paragraph 2, Article
+        1235 of the Civil Code of the Russian Federation).
 
-e) Using the author's name, the Project name, or any associated trademarks
-   to promote any products or services without prior written consent of the
-   author.
+     e) Using the Copyright Holder's name, the Software name, or any associated
+        trademarks to promote any products or services without prior written
+        consent of the Copyright Holder.
 
-4. COPYRIGHT
+     f) Engaging in actions that violate the laws of the Russian Federation,
+        including but not limited to the Federal Laws "On Information,
+        Information Technologies, and Protection of Information" and "On
+        Personal Data."
 
-All rights not expressly granted in this agreement are reserved by the author
-— Dupley Maxim Igorevich. This agreement is not a contract for the transfer
-of exclusive rights.
+3.2. Violation of any provision of Section 3 results in automatic termination
+     of this license without additional notice.
+
+4. LIABILITY OF THE PARTIES
+
+4.1. The User bears full responsibility for compliance with the rights of third
+     parties when using the Software.
+
+4.2. The Copyright Holder is not liable for:
+
+     a) Any direct, indirect, incidental, special, or consequential damages
+        arising from the use or inability to use the Software.
+
+     b) Compatibility of the Software with the User's specific requirements.
+
+     c) Results of using the Software, including but not limited to data loss,
+        system interruptions, or losses caused by Software errors.
 
 5. DISCLAIMER OF WARRANTIES
 
-THE PROJECT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE
-AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, OR
-CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE PROJECT.
+5.1. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+     OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF
+     MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT
+     OF THIRD-PARTY RIGHTS.
 
-6. GOVERNING LAW
+5.2. THE COPYRIGHT HOLDER DOES NOT WARRANT THAT:
 
-This agreement shall be governed by the laws of the Russian Federation. Any
-disputes arising in connection with this agreement shall be resolved in the
-courts of the Russian Federation.
+     a) THE SOFTWARE WILL MEET THE USER'S SPECIFIC REQUIREMENTS;
+
+     b) THE SOFTWARE WILL OPERATE ERROR-FREE OR UNINTERRUPTED;
+
+     c) THE RESULTS OBTAINED FROM USING THE SOFTWARE WILL BE ACCURATE OR
+        RELIABLE.
+
+6. PERSONAL DATA PROTECTION
+
+6.1. When using the Software, the User may process personal data in accordance
+     with Federal Law No. 152-FZ dated 27.07.2006 "On Personal Data."
+
+6.2. The Copyright Holder does not independently collect, store, or process
+     Users' personal data, except as provided in the Privacy Policy published
+     in the Software's repository.
+
+7. TERM AND TERMINATION
+
+7.1. This Agreement enters into force from the moment the Software is first
+     used and remains in effect for the entire duration of the exclusive right.
+
+7.2. The Copyright Holder may unilaterally terminate this license in the event
+     of the User's breach of any condition of this Agreement by sending
+     appropriate notice.
+
+7.3. Upon termination of this license, the User must cease all use of the
+     Software and destroy all copies.
+
+8. DISPUTE RESOLUTION
+
+8.1. All disputes and disagreements arising from or in connection with this
+     Agreement shall be resolved through negotiations between the parties.
+
+8.2. If disputes cannot be resolved through negotiations, they shall be
+     submitted to the court at the location of the Copyright Holder in
+     accordance with the legislation of the Russian Federation.
+
+8.3. This Agreement is governed by the laws of the Russian Federation, including
+     the Civil Code of the Russian Federation (Part Four), the Federal Law
+     "On Information, Information Technologies, and Protection of Information,"
+     the Federal Law "On Personal Data," and other regulatory legal acts of
+     the Russian Federation.
+
+9. FINAL PROVISIONS
+
+9.1. If any provision of this Agreement is found to be invalid by a court, this
+     shall not affect the validity of the remaining provisions.
+
+9.2. The Copyright Holder may unilaterally amend the terms of this Agreement.
+     Amendments enter into force upon their publication in the Software's
+     repository.
+
+9.3. This Agreement constitutes the entire and exclusive agreement between the
+     parties regarding the use of the Software.
 
 ================================================================================
 
-  Copyright (c) 2025 Дуплей Максим Игоревич / Dupley Maxim Igorevich
+  Copyright (c) 2026 Дуплей Максим Игоревич / Dupley Maxim Igorevich
   All rights reserved. Все права защищены.
 
 ================================================================================

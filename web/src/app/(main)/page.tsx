@@ -1,8 +1,11 @@
 import { VideoGrid } from "@/components/video/video-grid";
 import { prisma } from "@/lib/prisma";
 import { formatDuration } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 export default async function HomePage() {
+  const t = useTranslations("home");
+
   const videos = await prisma.video.findMany({
     where: {
       status: "READY",
@@ -21,26 +24,28 @@ export default async function HomePage() {
     take: 20,
   });
 
-  const mappedVideos = videos.map((v) => ({
-    id: v.id,
-    title: v.title,
-    thumbnail: v.poster || undefined,
-    duration: v.duration ? formatDuration(v.duration) : undefined,
-    channelName: v.channel?.name || undefined,
-    channelAvatar: v.channel?.avatar || undefined,
-    views: v.viewCount,
-    createdAt: v.createdAt.toISOString(),
+  const mappedVideos = videos.map((video) => ({
+    id: video.id,
+    title: video.title,
+    thumbnail: video.thumbnailKey || "",
+    duration: video.duration ? formatDuration(video.duration) : undefined,
+    channelName: video.channel?.name || "Unknown",
+    channelAvatar: video.channel?.avatar || "",
+    views: video.viewCount || 0,
+    createdAt: video.publishedAt?.toISOString() || video.createdAt.toISOString(),
   }));
 
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Home</h1>
-        <p className="text-muted-foreground">Discover the latest videos</p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
+        <p className="text-muted-foreground">{t("subtitle")}</p>
       </div>
 
       {mappedVideos.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No videos available.</p>
+        <div className="rounded-lg border p-8 text-center text-muted-foreground">
+          {t("noVideos")}
+        </div>
       ) : (
         <VideoGrid videos={mappedVideos} columns={3} />
       )}

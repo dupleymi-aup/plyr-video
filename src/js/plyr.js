@@ -286,7 +286,7 @@ class Plyr {
       wrap(this.media, this.elements.container);
     }
 
-    // Migrate custom properties from media to container (so they work 😉)
+    // Migrate custom properties from media to container (so they work)
     ui.migrateStyles.call(this);
 
     // Add style hook
@@ -891,7 +891,7 @@ class Plyr {
     }
 
     // Advanced mode with start/end/all/toggle
-    const type = ['start', 'end', 'all'].includes(input) ? input : 'toggle';
+    const type = ['start', 'end', 'all', 'toggle'].includes(input) ? input : 'toggle';
 
     switch (type) {
       case 'start':
