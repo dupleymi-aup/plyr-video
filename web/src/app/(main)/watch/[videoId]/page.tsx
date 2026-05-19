@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import VideoActions from "./video-actions";
+import { VideoActions } from "@/components/watch/video-actions";
 import { SubscribeButton } from "@/components/watch/subscribe-button";
 import { Comments } from "@/components/watch/comments";
 import type { Comment } from "@/types/comment";
@@ -145,7 +145,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
         <div className="mt-4 flex items-start gap-4 border-b pb-4">
           <Avatar
             src={video.channel.avatar || undefined}
-            fallback={video.channel.name[0]}
+            fallback={video.channel.name?.[0] || "?"}
             size="lg"
           />
           <div className="flex-1">
@@ -221,7 +221,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 </h4>
                 <p className="mt-1 text-xs text-muted-foreground">{rec.channel?.name}</p>
                 <p className="text-xs text-muted-foreground">
-                  {formatViews(rec.viewCount)} views &middot; {formatRelativeTimeRu(rec.createdAt)}
+                  {formatViews(rec.viewCount)} просмотров &middot; {formatRelativeTimeRu(rec.createdAt)}
                 </p>
               </div>
             </Link>

@@ -308,8 +308,8 @@ class Listeners {
         target.style.height = overflow ? '100%' : 'auto';
       }
       else {
-        target.style.maxWidth = overflow ? `${(viewportHeight / videoHeight) * videoWidth}px` : null;
-        target.style.margin = overflow ? '0 auto' : null;
+        target.style.maxWidth = overflow ? `${(viewportHeight / videoHeight) * videoWidth}px` : '';
+        target.style.margin = overflow ? '0 auto' : '';
       }
     };
 

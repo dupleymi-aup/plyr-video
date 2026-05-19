@@ -41,20 +41,20 @@ export class ErrorBoundary extends Component<Props, State> {
 
       return (
         <div className="flex min-h-[200px] flex-col items-center justify-center gap-4 rounded-lg border p-8 text-center">
-          <h2 className="text-lg font-semibold">Something went wrong</h2>
+          <h2 className="text-lg font-semibold">Что-то пошло не так</h2>
           <p className="text-sm text-muted-foreground max-w-md">
-            {this.state.error?.message || "An unexpected error occurred."}
+            {this.state.error?.message || "Произошла непредвиденная ошибка."}
           </p>
           <div className="flex gap-2">
             <Button onClick={this.handleReset} variant="outline" size="sm">
-              Try Again
+              Попробовать снова
             </Button>
             <Button
               onClick={() => window.location.reload()}
               variant="default"
               size="sm"
             >
-              Reload Page
+              Перезагрузить
             </Button>
           </div>
         </div>

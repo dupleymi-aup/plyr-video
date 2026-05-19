@@ -8,7 +8,8 @@ export async function requireRole(requiredRole: Role) {
     redirect("/login");
   }
 
-  if (ROLE_LEVELS[session.user.role as Role] < ROLE_LEVELS[requiredRole]) {
+  const userRole = session.user.role;
+  if (!userRole || !(userRole in ROLE_LEVELS) || ROLE_LEVELS[userRole] < ROLE_LEVELS[requiredRole]) {
     redirect("/");
   }
 }

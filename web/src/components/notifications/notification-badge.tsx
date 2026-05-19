@@ -12,6 +12,14 @@ const fetcher = (url: string) => fetch(url).then((res) => {
   return res.json();
 });
 
+interface NotificationItem {
+  id: string;
+  type: string;
+  content: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
 const typeLabels: Record<string, string> = {
   NEW_SUBSCRIBER: "Новый подписчик",
   NEW_COMMENT: "Новый комментарий",
@@ -70,7 +78,7 @@ export function NotificationBadge() {
               {recent.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-6">Нет уведомлений</p>
               ) : (
-                recent.map((n: any) => (
+                recent.map((n: NotificationItem) => (
                   <div
                     key={n.id}
                     className={`px-3 py-2.5 hover:bg-accent cursor-pointer ${!n.isRead ? "bg-accent/50" : ""}`}
