@@ -245,3 +245,171 @@ export interface ExportTotalStats {
   uniqueViewers: number | string;
   totalViews: number | string;
 }
+
+// ---- Performance Analytics ----
+
+export interface PerformanceOverview {
+  totalSubmissions: number | string;
+  totalQuizAttempts: number | string;
+  avgSubmissionScore: number | string;
+  avgQuizScore: number | string;
+  submissionCompletionRate: number | string;
+  quizPassRate: number | string;
+}
+
+export interface PerformanceTrend {
+  date: string;
+  avgScore: number | string;
+  submissionCount: number | string;
+  quizAttemptCount: number | string;
+}
+
+export interface CoursePerformanceComparison {
+  courseId: string;
+  courseTitle: string;
+  teacherName: string | null;
+  studentCount: number | string;
+  avgGrade: number | string;
+  avgSubmissionScore: number | string;
+  avgQuizScore: number | string;
+  completionRate: number | string;
+}
+
+export interface SubmissionCompletionRate {
+  courseId: string;
+  courseTitle: string;
+  totalAssignments: number | string;
+  totalSubmissions: number | string;
+  completionRate: number | string;
+  avgScore: number | string;
+}
+
+export interface QuizPassRateTrend {
+  date: string;
+  totalAttempts: number | string;
+  passedCount: number | string;
+  passRate: number | string;
+  avgScore: number | string;
+}
+
+export interface PerformanceDistribution {
+  range: string;
+  studentCount: number | string;
+  percentage: number | string;
+}
+
+export interface CohortData {
+  cohortLabel: string;
+  studentCount: number | string;
+  avgGrade: number | string;
+  completionRate: number | string;
+  activeStudents: number | string;
+}
+
+export interface AtRiskStudent {
+  id: string;
+  name: string | null;
+  email: string;
+  riskFactors: string[];
+  avgGrade: number | string;
+  lastActivityDate: string | null;
+  coursesEnrolled: number | string;
+  coursesAtRisk: number | string;
+  riskScore: number | string;
+}
+
+// ---- Comparative Analytics ----
+
+export interface StudentComparison {
+  studentId: string;
+  name: string | null;
+  email: string;
+  courseTitle: string;
+  grade: number | string;
+  submissionCount: number | string;
+  quizAttempts: number | string;
+  quizPassRate: number | string;
+  completionRate: number | string;
+}
+
+export interface TeacherPerformance {
+  teacherId: string;
+  teacherName: string;
+  courseCount: number | string;
+  totalStudents: number | string;
+  avgGrade: number | string;
+  avgQuizScore: number | string;
+  passRate: number | string;
+}
+
+export interface CourseDifficultyIndex {
+  courseId: string;
+  courseTitle: string;
+  avgGrade: number | string;
+  gradeStdDev: number | string;
+  failureRate: number | string;
+  difficultyScore: number | string;
+}
+
+// ---- Trends Analytics ----
+
+export interface SemesterAnalysis {
+  semester: string;
+  startDate: string;
+  endDate: string;
+  enrollmentCount: number | string;
+  avgGrade: number | string;
+  completionRate: number | string;
+  quizPassRate: number | string;
+  activeStudents: number | string;
+}
+
+export interface MonthOverMonth {
+  month: string;
+  avgGrade: number | string;
+  totalSubmissions: number | string;
+  quizPassRate: number | string;
+  enrollmentCount: number | string;
+}
+
+export interface HeatmapDataPoint {
+  dayOfWeek: number;
+  hour: number;
+  activityCount: number | string;
+  watchSeconds: number | string;
+}
+
+export interface LearningVelocity {
+  studentId: string;
+  name: string | null;
+  email: string;
+  completionsPerWeek: number | string;
+  trend: string;
+}
+
+// ---- Export Extensions ----
+
+export interface ExportPerformanceStats {
+  studentName: string;
+  email: string;
+  courseTitle: string;
+  grade: number | string;
+  submissionCount: number | string;
+  quizAttempts: number | string;
+  quizPassRate: number | string;
+}
+
+export interface ExportCohortStats {
+  cohort: string;
+  studentCount: number | string;
+  avgGrade: number | string;
+  completionRate: number | string;
+}
+
+export interface ExportAtRiskStats {
+  name: string;
+  email: string;
+  avgGrade: number | string;
+  riskScore: number | string;
+  riskFactors: string;
+}

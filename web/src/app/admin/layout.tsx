@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
-import { Users, Video, Database, BarChart3, Key, ClipboardList, TrendingUp, BookOpen, GraduationCap } from "lucide-react";
+import { Users, Video, Database, BarChart3, Key, ClipboardList, TrendingUp, BookOpen, GraduationCap, Target, BarChart2, Clock } from "lucide-react";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 
 export default async function AdminLayout({
@@ -27,6 +27,9 @@ export default async function AdminLayout({
     { href: "/admin/analytics/courses", label: t("navCourseAnalytics"), icon: GraduationCap },
     { href: "/admin/courses", label: t("courses"), icon: BookOpen },
     { href: "/admin/grades", label: t("navGrades"), icon: GraduationCap },
+    { href: "/admin/analytics/performance", label: t("navPerformance"), icon: Target },
+    { href: "/admin/analytics/comparative", label: t("navComparative"), icon: BarChart2 },
+    { href: "/admin/analytics/trends", label: t("navTrends"), icon: Clock },
     { href: "/admin/database", label: t("navDatabase"), icon: Database },
     { href: "/admin/invitation-codes", label: t("navInviteCodes"), icon: Key },
     { href: "/admin/audit", label: t("navAuditLog"), icon: ClipboardList },
