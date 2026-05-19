@@ -8,7 +8,6 @@ import { auth } from "@/lib/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import VideoActions from "./video-actions";
-import { CommentForm } from "@/components/watch/comment-form";
 import { SubscribeButton } from "@/components/watch/subscribe-button";
 import { Comments } from "@/components/watch/comments";
 import type { Comment } from "@/types/comment";
@@ -130,14 +129,12 @@ export default async function WatchPage({ params }: WatchPageProps) {
 
           <div className="mt-2 flex flex-wrap items-center gap-4">
             <div className="text-sm text-muted-foreground">
-              {formatViews(video.viewCount)} views &middot; {formatRelativeTimeRu(video.publishedAt || video.createdAt)}
+              {formatViews(video.viewCount)} просмотров &middot; {formatRelativeTimeRu(video.publishedAt || video.createdAt)}
             </div>
 
             <VideoActions
               videoId={video.id}
               channelId={video.channel.id}
-              likes={video.likeCount}
-              initialLiked={false}
               initialLikes={video.likeCount}
               initialDislikes={0}
             />
@@ -159,12 +156,12 @@ export default async function WatchPage({ params }: WatchPageProps) {
               {video.channel.isVerified && (
                 <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary flex items-center gap-1">
                   <Check className="h-3 w-3" />
-                  Verified
+                  Подтверждён
                 </span>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              {formatViews(video.channel._count.subscriptions)} subscribers
+              {formatViews(video.channel._count.subscriptions)} подписчиков
             </p>
             <div className="mt-2">
               {!isSubscribed && (
@@ -187,17 +184,14 @@ export default async function WatchPage({ params }: WatchPageProps) {
         )}
 
         {/* Comments section */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold mb-4">Comments</h3>
-          <Comments videoId={video.id} />
-        </div>
+        <Comments videoId={video.id} />
       </div>
 
       {/* Sidebar - Recommended videos */}
       <div className="w-full lg:w-80 xl:w-96 shrink-0">
         <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
           <PlaySquare className="h-5 w-5" />
-          Recommended
+          Рекомендации
         </h3>
         <div className="space-y-4">
           {allRecommended.map((rec) => (
@@ -233,7 +227,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
             </Link>
           ))}
           {allRecommended.length === 0 && (
-            <p className="text-sm text-muted-foreground">No recommendations available.</p>
+            <p className="text-sm text-muted-foreground">Нет рекомендаций</p>
           )}
         </div>
       </div>

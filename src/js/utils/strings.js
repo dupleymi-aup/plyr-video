@@ -4,9 +4,15 @@
 
 import is from './is';
 
-// Generate a random ID
+// Generate a unique ID
 export function generateId(prefix) {
-  return `${prefix}-${Math.floor(Math.random() * 10000)}`;
+  // Use crypto.randomUUID if available (browser environment)
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
+  }
+  // Fallback: use higher entropy random string
+  const randomPart = Math.random().toString(36).slice(2, 10);
+  return `${prefix}-${randomPart}`;
 }
 
 // Format string
@@ -27,6 +33,11 @@ export function getPercentage(current, max) {
 
 // Replace all occurrences of a string in a string
 export function replaceAll(input = '', find = '', replace = '') {
+  // Use native replaceAll if available (ES2021+)
+  if (typeof input.replaceAll === 'function') {
+    return input.replaceAll(find.toString(), replace.toString());
+  }
+  // Fallback for older environments
   return input.replace(new RegExp(find.toString().replace(/([.*+?^=!:${}()|[\]/\\])/g, '\\$1'), 'g'), replace.toString());
 }
 
@@ -65,11 +76,18 @@ export function toCamelCase(input = '') {
 
 // Remove HTML from a string
 export function stripHTML(source) {
-  const fragment = document.createDocumentFragment();
-  const element = document.createElement('div');
-  fragment.appendChild(element);
-  element.innerHTML = source;
-  return fragment.firstChild.textContent;
+  // Use regex to strip tags safely without executing scripts
+  return source
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<[^>]+>/g, '')
+    // Decode common HTML entities
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, '\'')
+    .replace(/&apos;/g, '\'');
 }
 
 // Like outerHTML, but also works for DocumentFragment

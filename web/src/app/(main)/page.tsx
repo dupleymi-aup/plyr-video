@@ -29,7 +29,7 @@ export default async function HomePage() {
     title: video.title,
     thumbnail: video.thumbnailKey || "",
     duration: video.duration ? formatDuration(video.duration) : undefined,
-    channelName: video.channel?.name || "Unknown",
+    channelName: video.channel?.name || "Неизвестен",
     channelAvatar: video.channel?.avatar || "",
     views: video.viewCount || 0,
     createdAt: video.publishedAt?.toISOString() || video.createdAt.toISOString(),

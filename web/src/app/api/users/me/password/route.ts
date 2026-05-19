@@ -2,7 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { resetPasswordSchema } from "@/lib/validation";
+import { changePasswordSchema } from "@/lib/validation";
 
 export async function PATCH(request: NextRequest) {
   const session = await auth();
@@ -11,7 +11,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const body = await request.json();
-  const validation = resetPasswordSchema.safeParse(body);
+  const validation = changePasswordSchema.safeParse(body);
 
   if (!validation.success) {
     return NextResponse.json(
@@ -20,13 +20,19 @@ export async function PATCH(request: NextRequest) {
     );
   }
 
-  const { password, confirmPassword } = validation.data;
+  const { currentPassword, password } = validation.data;
 
-  if (password !== confirmPassword) {
-    return NextResponse.json(
-      { error: "Пароли не совпадают" },
-      { status: 400 }
-    );
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+  });
+
+  if (!user || !user.passwordHash) {
+    return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+  }
+
+  const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isValid) {
+    return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

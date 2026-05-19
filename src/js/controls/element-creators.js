@@ -153,6 +153,16 @@ class ElementCreators {
         props.iconPressed = 'sun';
         break;
 
+      case 'screenshot':
+        props.label = 'screenshot';
+        props.icon = 'screenshot';
+        break;
+
+      case 'share':
+        props.label = 'share';
+        props.icon = 'share';
+        break;
+
       default:
         if (is.empty(props.label)) {
           props.label = type;

@@ -400,7 +400,7 @@ class Plyr {
   /**
    * Play the media, or play the advertisement (if they are not blocked)
    */
-  play = () => {
+  play() {
     if (!is.function(this.media.play)) {
       return null;
     }
@@ -412,18 +412,18 @@ class Plyr {
 
     // Return the promise (for HTML5)
     return this.media.play();
-  };
+  }
 
   /**
    * Pause the media
    */
-  pause = () => {
+  pause() {
     if (!this.playing || !is.function(this.media.pause)) {
       return null;
     }
 
     return this.media.pause();
-  };
+  }
 
   /**
    * Get playing state
@@ -457,7 +457,7 @@ class Plyr {
    * Toggle playback based on current status
    * @param {boolean} input
    */
-  togglePlay = (input) => {
+  togglePlay(input) {
     // Toggle based on current state if nothing passed
     const toggle = is.boolean(input) ? input : !this.playing;
 
@@ -466,12 +466,12 @@ class Plyr {
     }
 
     return this.pause();
-  };
+  }
 
   /**
    * Stop playback
    */
-  stop = () => {
+  stop() {
     if (this.isHTML5) {
       this.pause();
       this.restart();
@@ -479,30 +479,204 @@ class Plyr {
     else if (is.function(this.media.stop)) {
       this.media.stop();
     }
-  };
+  }
 
   /**
    * Restart playback
    */
-  restart = () => {
+  restart() {
     this.currentTime = 0;
-  };
+  }
 
   /**
    * Rewind
    * @param {number} seekTime - how far to rewind in seconds. Defaults to the config.seekTime
    */
-  rewind = (seekTime) => {
+  rewind(seekTime) {
     this.currentTime -= is.number(seekTime) ? seekTime : this.config.seekTime;
-  };
+  }
 
   /**
    * Fast forward
    * @param {number} seekTime - how far to fast forward in seconds. Defaults to the config.seekTime
    */
-  forward = (seekTime) => {
+  forward(seekTime) {
     this.currentTime += is.number(seekTime) ? seekTime : this.config.seekTime;
-  };
+  }
+
+  /**
+   * Step backward one frame
+   */
+  stepBack() {
+    if (!this.isHTML5) return;
+    this.currentTime -= this.config.frameStep || (1 / 30);
+  }
+
+  /**
+   * Step forward one frame
+   */
+  stepForward() {
+    if (!this.isHTML5) return;
+    this.currentTime += this.config.frameStep || (1 / 30);
+  }
+
+  /**
+   * Capture current frame as image (HTML5 only)
+   * @param {object} options - Optional: { type: 'image/png', quality: 0.92, download: true }
+   * @returns {Promise<Blob|null>}
+   */
+  screenshot(options = {}) {
+    if (!this.isHTML5 || !this.isVideo) {
+      this.debug.warn('Screenshot is only supported for HTML5 video');
+      return Promise.resolve(null);
+    }
+
+    const { type = 'image/png', quality = 0.92, download = true, filename = null } = options;
+
+    const video = this.media;
+
+    // Create canvas and draw current frame
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    // Convert to blob
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          this.debug.warn('Failed to capture screenshot');
+          resolve(null);
+          return;
+        }
+
+        // Trigger download if requested
+        if (download) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename || `plyr-screenshot-${Date.now()}.png`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        // Fire event for custom handling
+        triggerEvent.call(this, this.media, 'screenshot', { blob, type, canvas });
+
+        resolve(blob);
+      }, type, quality);
+    });
+  }
+
+  /**
+   * Share the current video with timestamp
+   * @param {object} options - Optional: { url, time }
+   * @returns {object} Share popup element
+   */
+  share(options = {}) {
+    const { url = window.location.href, time = this.currentTime } = options;
+
+    // Build share URL with timestamp
+    const shareUrl = new URL(url);
+    if (time > 0) {
+      shareUrl.hash = `t=${Math.floor(time)}`;
+    }
+
+    // Create share popup
+    const popup = createElement('div', {
+      class: 'plyr__share-popup',
+      role: 'dialog',
+      'aria-label': i18n.get('share', this.config),
+    });
+
+    const title = createElement('h4', null, i18n.get('share', this.config));
+    popup.appendChild(title);
+
+    // Copy link button
+    const copyBtn = createElement('button', {
+      type: 'button',
+      class: 'plyr__share-btn',
+      'data-action': 'copy',
+    }, i18n.get('shareCopyLink', this.config));
+
+    copyBtn.addEventListener('click', async () => {
+      try {
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(shareUrl.toString());
+        }
+        else {
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = shareUrl.toString();
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+        }
+        copyBtn.textContent = i18n.get('shareCopied', this.config);
+        setTimeout(() => {
+          copyBtn.textContent = i18n.get('shareCopyLink', this.config);
+        }, 2000);
+      }
+      catch (e) {
+        this.debug.warn('Failed to copy link:', e.message);
+      }
+    });
+
+    popup.appendChild(copyBtn);
+
+    // Social share buttons
+    const socials = [
+      { name: 'twitter', label: i18n.get('shareTwitter', this.config), icon: 'twitter', urlFn: u => `https://twitter.com/intent/tweet?url=${encodeURIComponent(u)}` },
+      { name: 'facebook', label: i18n.get('shareFacebook', this.config), icon: 'facebook', urlFn: u => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}` },
+      { name: 'telegram', label: i18n.get('shareTelegram', this.config), icon: 'telegram', urlFn: u => `https://t.me/share/url?url=${encodeURIComponent(u)}` },
+    ];
+
+    socials.forEach(({ label, urlFn }) => {
+      const btn = createElement('a', {
+        href: urlFn(shareUrl.toString()),
+        target: '_blank',
+        rel: 'noopener noreferrer',
+        class: `plyr__share-btn plyr__share-btn--${label.toLowerCase().replace(/\s+/g, '-')}`,
+      }, label);
+      popup.appendChild(btn);
+    });
+
+    // Close button
+    const closeBtn = createElement('button', {
+      type: 'button',
+      class: 'plyr__share-close',
+      'aria-label': 'Close',
+    }, '×');
+
+    closeBtn.addEventListener('click', () => {
+      popup.remove();
+    });
+
+    popup.appendChild(closeBtn);
+
+    // Position popup
+    const container = this.elements.container;
+    container.appendChild(popup);
+
+    // Close on outside click
+    const outsideClick = (e) => {
+      if (!popup.contains(e.target)) {
+        popup.remove();
+        document.removeEventListener('click', outsideClick);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', outsideClick), 0);
+
+    // Fire event
+    triggerEvent.call(this, this.media, 'share', { url: shareUrl.toString(), time });
+
+    return popup;
+  }
 
   /**
    * Seek to a time
@@ -641,18 +815,18 @@ class Plyr {
    * Increase volume
    * @param {number} step - How much to increase by (between 0 and 1)
    */
-  increaseVolume = (step) => {
+  increaseVolume(step) {
     const volume = this.media.muted ? 0 : this.volume;
     this.volume = volume + (is.number(step) ? step : 0);
-  };
+  }
 
   /**
    * Decrease volume
    * @param {number} step - How much to decrease by (between 0 and 1)
    */
-  decreaseVolume = (step) => {
+  decreaseVolume(step) {
     this.increaseVolume(-step);
-  };
+  }
 
   /**
    * Set muted state
@@ -989,7 +1163,9 @@ class Plyr {
       return;
     }
 
-    ui.setPoster.call(this, input, false).catch(() => {});
+    ui.setPoster.call(this, input, false).catch((error) => {
+      this.debug.warn('Failed to set poster:', error.message);
+    });
   }
 
   /**
@@ -1243,14 +1419,14 @@ class Plyr {
   /**
    * Toggle dark mode
    */
-  toggleDarkMode = (input) => {
+  toggleDarkMode(input) {
     if (is.boolean(input)) {
       this.darkMode = input;
     }
     else {
       this.darkMode = !this.config.darkMode.enabled;
     }
-  };
+  }
 
   /**
    * Sets the preview thumbnails for the current source
@@ -1272,18 +1448,18 @@ class Plyr {
   /**
    * Trigger the airplay dialog on supported devices (Safari/macOS)
    */
-  airplay = () => {
+  airplay() {
     // Show dialog if supported
     if (support.airplay) {
       this.media.webkitShowPlaybackTargetPicker();
     }
-  };
+  }
 
   /**
    * Toggle the player controls
    * @param {boolean} [toggle] - Whether to show the controls
    */
-  toggleControls = (toggle) => {
+  toggleControls(toggle) {
     // Don't toggle if missing UI support or if it's audio
     if (this.supported.ui && !this.isAudio) {
       // Get state before change
@@ -1313,34 +1489,34 @@ class Plyr {
     }
 
     return false;
-  };
+  }
 
   /**
    * Add event listeners
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  on = (event, callback) => {
+  on(event, callback) {
     addListener.call(this, this.elements.container, event, callback);
-  };
+  }
 
   /**
    * Add event listeners once
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  once = (event, callback) => {
+  once(event, callback) {
     onceListener.call(this, this.elements.container, event, callback);
-  };
+  }
 
   /**
    * Remove event listeners
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  off = (event, callback) => {
+  off(event, callback) {
     removeListener(this.elements.container, event, callback);
-  };
+  }
 
   /**
    * Destroy an instance
@@ -1349,7 +1525,7 @@ class Plyr {
    * @param {Function} callback - Callback for when destroy is complete
    * @param {boolean} soft - Whether it's a soft destroy (for source changes etc)
    */
-  destroy = (callback, soft = false) => {
+  destroy(callback, soft = false) {
     if (!this.ready) {
       return;
     }
@@ -1520,7 +1696,9 @@ class Plyr {
    * Check for support for a mime type (HTML5 only)
    * @param {string} type - Mime type
    */
-  supports = type => support.mime.call(this, type);
+  supports(type) {
+    return support.mime.call(this, type);
+  }
 
   /**
    * Check for support

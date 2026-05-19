@@ -143,6 +143,20 @@ const ru = {
   transcriptionOff: 'Выкл',
   darkModeOn: 'Включить тёмную тему',
   darkModeOff: 'Выключить тёмную тему',
+  shortcutDarkMode: 'Переключить тёмную тему',
+  shortcutScreenshot: 'Сделать снимок экрана',
+  shortcutStepBack: 'Кадр назад',
+  shortcutStepForward: 'Кадр вперёд',
+  screenshot: 'Скриншот',
+  tooltipScreenshot: 'Сохранить текущий кадр как изображение',
+  share: 'Поделиться',
+  shareCopyLink: 'Копировать ссылку',
+  shareCopied: 'Скопировано!',
+  shareTwitter: 'Поделиться в X',
+  shareFacebook: 'Поделиться в Facebook',
+  shareTelegram: 'Поделиться в Telegram',
+  tooltipShare: 'Поделиться этим видео',
+  pip: 'PIP',
 };
 
 export default ru;

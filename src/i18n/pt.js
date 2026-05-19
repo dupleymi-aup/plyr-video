@@ -139,6 +139,20 @@ const pt = {
   transcriptionOff: 'Desligado',
   darkModeOn: 'Ativar modo escuro',
   darkModeOff: 'Desativar modo escuro',
+  shortcutDarkMode: 'Alternar modo escuro',
+  shortcutScreenshot: 'Capturar tela',
+  shortcutStepBack: 'Retroceder um quadro',
+  shortcutStepForward: 'Avançar um quadro',
+  screenshot: 'Captura de tela',
+  tooltipScreenshot: 'Capturar quadro atual como imagem',
+  share: 'Compartilhar',
+  shareCopyLink: 'Copiar link',
+  shareCopied: 'Copiado!',
+  shareTwitter: 'Compartilhar no X',
+  shareFacebook: 'Compartilhar no Facebook',
+  shareTelegram: 'Compartilhar no Telegram',
+  tooltipShare: 'Compartilhar este vídeo',
+  pip: 'PIP',
 };
 
 export default pt;

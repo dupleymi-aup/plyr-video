@@ -247,6 +247,29 @@
     "published": "Published",
     "archived": "Archived"
   },
+  "catalog": {
+    "title": "Course Catalog",
+    "subtitle": "Browse and enroll in available courses",
+    "noCourses": "No courses available yet",
+    "enroll": "Enroll",
+    "enrolled": "Enrolled",
+    "lessons": "lessons",
+    "students": "students",
+    "teacher": "Teacher",
+    "viewCourse": "View Course"
+  },
+  "learn": {
+    "backToCatalog": "Back to Catalog",
+    "lessons": "lessons",
+    "video": "Video",
+    "text": "Text",
+    "quiz": "Quiz",
+    "assignment": "Assignment",
+    "startLesson": "Start this lesson",
+    "completed": "completed",
+    "notEnrolled": "You are not enrolled in this course",
+    "enrollNow": "Enroll Now"
+  },
   "adminUsers": {
     "title": "User Management",
     "subtitle": "Search, edit and manage users",
@@ -363,6 +386,7 @@
     "home": "Home",
     "trending": "Trending",
     "subscriptions": "Subscriptions",
+    "courses": "Courses",
     "dashboard": "Dashboard",
     "videos": "Videos",
     "upload": "Upload",

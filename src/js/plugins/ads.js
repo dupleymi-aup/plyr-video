@@ -519,7 +519,9 @@ class Ads {
           this.onAdError(adError);
         }
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.player.debug.warn('Ads request failed:', error);
+      });
   };
 
   /**
@@ -592,7 +594,9 @@ class Ads {
         // Now request some new advertisements
         this.requestAds();
       })
-      .catch(() => {});
+      .catch((error) => {
+        this.player.debug.warn('Ads reload failed:', error);
+      });
   };
 
   /**

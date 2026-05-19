@@ -143,6 +143,20 @@ const de = {
   transcriptionOff: 'Aus',
   darkModeOn: 'Dark Mode aktivieren',
   darkModeOff: 'Dark Mode deaktivieren',
+  shortcutDarkMode: 'Dark Mode umschalten',
+  shortcutScreenshot: 'Screenshot aufnehmen',
+  shortcutStepBack: 'Einzelbild zurück',
+  shortcutStepForward: 'Einzelbild vor',
+  screenshot: 'Screenshot',
+  tooltipScreenshot: 'Aktuelles Bild als Bild speichern',
+  share: 'Teilen',
+  shareCopyLink: 'Link kopieren',
+  shareCopied: 'Kopiert!',
+  shareTwitter: 'Auf X teilen',
+  shareFacebook: 'Auf Facebook teilen',
+  shareTelegram: 'Auf Telegram teilen',
+  tooltipShare: 'Dieses Video teilen',
+  pip: 'PIP',
 };
 
 export default de;

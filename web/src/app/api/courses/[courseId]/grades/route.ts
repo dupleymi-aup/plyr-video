@@ -50,7 +50,7 @@ export async function POST(
 
   const { courseId } = await params;
   const body = await request.json();
-  const { studentId, value, scale, letterGrade, note } = body;
+  const { studentId, value, letterGrade, note } = body;
 
   if (studentId == null || value == null) {
     return NextResponse.json({ error: "studentId and value are required" }, { status: 400 });
@@ -61,16 +61,16 @@ export async function POST(
     return NextResponse.json({ error: "Grade value must be a number" }, { status: 400 });
   }
 
-  const scale = body.scale || "PERCENT";
+  const gradeScale = body.scale || "PERCENT";
   const scaleLimits: Record<string, { min: number; max: number }> = {
     PERCENT: { min: 0, max: 100 },
     POINTS: { min: 0, max: 1000 },
     LETTER: { min: 0, max: 4 },
   };
-  const limits = scaleLimits[scale];
+  const limits = scaleLimits[gradeScale];
   if (limits && (numericValue < limits.min || numericValue > limits.max)) {
     return NextResponse.json(
-      { error: `Grade value must be between ${limits.min} and ${limits.max} for ${scale} scale` },
+      { error: `Grade value must be between ${limits.min} and ${limits.max} for ${gradeScale} scale` },
       { status: 400 }
     );
   }
@@ -87,9 +87,9 @@ export async function POST(
       enrollmentId: enrollment.id,
       studentId,
       value: numericValue,
-      scale,
-      letterGrade: body.letterGrade || null,
-      note: body.note || null,
+      scale: gradeScale,
+      letterGrade: letterGrade || null,
+      note: note || null,
     },
     include: {
       enrollment: {

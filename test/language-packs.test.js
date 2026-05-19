@@ -96,7 +96,7 @@ describe('i18n language packs', () => {
     it('has loop translations', () => {
       expect(itPack.loop).toBe('Ripeti');
       expect(itPack.loopOn).toBe('Attivo');
-      expect(itPack.loopOff).toBe('Disattivo');
+      expect(itPack.loopOff).toBe('Disattivato');
       expect(itPack.loopAll).toBe('Ripeti tutto');
     });
   });

@@ -1,106 +1,127 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
+import { rateLimit } from "@/lib/rate-limit";
+
+// Max 10 enrollments per minute per user
+const LIMIT = { limit: 10, windowMs: 60 * 1000 };
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const { courseId } = await params;
-
-  // Verify course exists and check access
-  const course = await prisma.course.findUnique({ where: { id: courseId } });
-  if (!course) {
-    return NextResponse.json({ error: "Course not found" }, { status: 404 });
-  }
-
-  // Only course teacher, enrolled students, or admin can view enrollments
-  if (
-    session.user.role !== "ADMIN" &&
-    course.teacherId !== session.user.id
-  ) {
-    const enrollment = await prisma.courseEnrollment.findUnique({
-      where: { courseId_studentId: { courseId, studentId: session.user.id } },
-    });
-    if (!enrollment) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-  }
 
-  const enrollments = await prisma.courseEnrollment.findMany({
-    where: { courseId },
-    include: {
-      student: { select: { id: true, name: true } },
-      _count: {
-        select: { grades: true },
+    const { courseId } = await params;
+
+    // Verify course exists and check access
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    // Only course teacher, enrolled students, or admin can view enrollments
+    if (
+      session.user.role !== "ADMIN" &&
+      course.teacherId !== session.user.id
+    ) {
+      const enrollment = await prisma.courseEnrollment.findUnique({
+        where: { courseId_studentId: { courseId, studentId: session.user.id } },
+      });
+      if (!enrollment) {
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      }
+    }
+
+    const enrollments = await prisma.courseEnrollment.findMany({
+      where: { courseId },
+      include: {
+        student: { select: { id: true, name: true } },
+        _count: {
+          select: { grades: true },
+        },
       },
-    },
-    orderBy: { enrolledAt: "desc" },
-  });
+      orderBy: { enrolledAt: "desc" },
+    });
 
-  return NextResponse.json(enrollments);
+    return NextResponse.json(enrollments);
+  } catch (error) {
+    return handleApiError(error, "enrollments");
+  }
 }
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-  const { courseId } = await params;
-  const body = await request.json();
-  const { studentId } = body;
+    const limit = rateLimit(`enroll:${session.user.id}`, LIMIT.limit, LIMIT.windowMs);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many enrollment requests. Please wait before trying again." },
+        { status: 429 }
+      );
+    }
 
-  // Verify course exists
-  const course = await prisma.course.findUnique({ where: { id: courseId } });
-  if (!course) {
-    return NextResponse.json({ error: "Course not found" }, { status: 404 });
-  }
+    const { courseId } = await params;
+    const body = await request.json();
+    const { studentId } = body;
 
-  // ADMIN can enroll anyone, TEACHER can enroll in their own courses, STUDENT can self-enroll
-  if (session.user.role === "STUDENT") {
-    // Self-enrollment
-    const targetId = session.user.id;
+    // Verify course exists
+    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    if (!course) {
+      return NextResponse.json({ error: "Course not found" }, { status: 404 });
+    }
+
+    // ADMIN can enroll anyone, TEACHER can enroll in their own courses, STUDENT can self-enroll
+    if (session.user.role === "STUDENT") {
+      // Self-enrollment
+      const targetId = session.user.id;
+      const existing = await prisma.courseEnrollment.findUnique({
+        where: { courseId_studentId: { courseId, studentId: targetId } },
+      });
+      if (existing) {
+        return NextResponse.json({ error: "Already enrolled" }, { status: 409 });
+      }
+      const enrollment = await prisma.courseEnrollment.create({
+        data: { courseId, studentId: targetId },
+        include: { student: { select: { id: true, name: true, email: true } } },
+      });
+      return NextResponse.json(enrollment, { status: 201 });
+    }
+
+    if (session.user.role === "TEACHER" && course.teacherId !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!studentId) {
+      return NextResponse.json({ error: "studentId is required" }, { status: 400 });
+    }
+
     const existing = await prisma.courseEnrollment.findUnique({
-      where: { courseId_studentId: { courseId, studentId: targetId } },
+      where: { courseId_studentId: { courseId, studentId } },
     });
     if (existing) {
       return NextResponse.json({ error: "Already enrolled" }, { status: 409 });
     }
+
     const enrollment = await prisma.courseEnrollment.create({
-      data: { courseId, studentId: targetId },
+      data: { courseId, studentId },
       include: { student: { select: { id: true, name: true, email: true } } },
     });
+
     return NextResponse.json(enrollment, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, "enrollments");
   }
-
-  if (session.user.role === "TEACHER" && course.teacherId !== session.user.id) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  if (!studentId) {
-    return NextResponse.json({ error: "studentId is required" }, { status: 400 });
-  }
-
-  const existing = await prisma.courseEnrollment.findUnique({
-    where: { courseId_studentId: { courseId, studentId } },
-  });
-  if (existing) {
-    return NextResponse.json({ error: "Already enrolled" }, { status: 409 });
-  }
-
-  const enrollment = await prisma.courseEnrollment.create({
-    data: { courseId, studentId },
-    include: { student: { select: { id: true, name: true, email: true } } },
-  });
-
-  return NextResponse.json(enrollment, { status: 201 });
 }

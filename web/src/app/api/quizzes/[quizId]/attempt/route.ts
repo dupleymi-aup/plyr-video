@@ -1,15 +1,29 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
+import { rateLimit } from "@/lib/rate-limit";
+
+// Max 5 quiz attempts per minute per user
+const LIMIT = { limit: 5, windowMs: 60 * 1000 };
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ quizId: string }> }
 ) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const limit = rateLimit(`quiz-attempt:${session.user.id}`, LIMIT.limit, LIMIT.windowMs);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many quiz attempts. Please wait before trying again." },
+        { status: 429 }
+      );
+    }
 
   const { quizId } = await params;
   const body = await request.json();
@@ -83,4 +97,7 @@ export async function POST(
   });
 
   return NextResponse.json(attempt, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, "quiz-attempt");
+  }
 }

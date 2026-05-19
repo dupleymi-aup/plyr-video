@@ -133,7 +133,9 @@ const youtube = {
             player.elements.poster.style.backgroundSize = 'cover';
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          player.debug.warn('Failed to load YouTube poster at any quality');
+        });
     }
 
     // Setup instance

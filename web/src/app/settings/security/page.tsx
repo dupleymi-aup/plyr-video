@@ -28,8 +28,8 @@ export default function SecurityPage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setError("Новый пароль должен быть не менее 6 символов");
+    if (newPassword.length < 8) {
+      setError("Новый пароль должен быть не менее 8 символов");
       setLoading(false);
       return;
     }
@@ -37,7 +37,7 @@ export default function SecurityPage() {
     const res = await fetch("/api/users/me/password", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password: newPassword, confirmPassword }),
+      body: JSON.stringify({ currentPassword, password: newPassword, confirmPassword }),
     });
 
     const data = await res.json();

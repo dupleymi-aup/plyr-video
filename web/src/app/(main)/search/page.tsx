@@ -25,7 +25,7 @@ export default function SearchPage() {
     title: v.title,
     thumbnail: v.thumbnailKey || "",
     duration: v.duration || 0,
-    channelName: v.channel?.name || "Unknown",
+    channelName: v.channel?.name || "Неизвестен",
     channelAvatar: v.channel?.avatar || "",
     views: v.viewCount || 0,
     createdAt: v.publishedAt?.toISOString() || v.createdAt,

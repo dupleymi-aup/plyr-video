@@ -71,7 +71,7 @@ class SettingsMenu {
       return;
     }
 
-    label.innerHTML = this.getLabel(setting, value);
+    label.textContent = this.getLabel(setting, value);
 
     // Find the radio option and check it
     const target = list && list.querySelector(`[value="${value}"]`);
@@ -85,7 +85,7 @@ class SettingsMenu {
   getLabel(setting, value) {
     switch (setting) {
       case 'speed':
-        return value === 1 ? i18n.get('normal', this.player.config) : `${value}&times;`;
+        return value === 1 ? i18n.get('normal', this.player.config) : `${value}×`;
 
       case 'quality':
         if (is.number(value)) {

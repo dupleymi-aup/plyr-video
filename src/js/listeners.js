@@ -93,6 +93,9 @@ class Listeners {
         'l',
         'm',
         'd',
+        ',',
+        '.',
+        's',
       ];
 
       // If the key is found prevent default (e.g. prevent scrolling for arrows)
@@ -163,6 +166,20 @@ class Listeners {
         case 'd':
           if (!repeat) {
             player.toggleDarkMode();
+          }
+          break;
+
+        case ',':
+          player.stepBack();
+          break;
+
+        case '.':
+          player.stepForward();
+          break;
+
+        case 's':
+          if (!repeat && player.isHTML5 && player.isVideo) {
+            player.screenshot();
           }
           break;
 
@@ -636,6 +653,12 @@ class Listeners {
         );
       });
     }
+
+    // Screenshot
+    this.bind(elements.buttons.screenshot, 'click', () => player.screenshot(), 'screenshot');
+
+    // Share
+    this.bind(elements.buttons.share, 'click', () => player.share(), 'share');
 
     // Download
     this.bind(

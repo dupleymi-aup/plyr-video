@@ -1,44 +1,60 @@
 import { VideoGrid } from "@/components/video/video-grid";
+import { prisma } from "@/lib/prisma";
+import { formatDuration } from "@/lib/utils";
+import { notFound } from "next/navigation";
 
-const trendingVideos = [
-  {
-    id: "1",
-    title: "Most Popular Video of the Month",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 240,
-    channelName: "Trending Channel",
-    views: 1520000,
-    createdAt: "2024-06-01T10:00:00Z",
-  },
-  {
-    id: "2",
-    title: "Breaking News: Latest Tech Updates",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 180,
-    channelName: "Tech News",
-    views: 892000,
-    createdAt: "2024-06-10T14:00:00Z",
-  },
-  {
-    id: "3",
-    title: "Epic Gameplay Highlights",
-    thumbnail: "https://cdn.plyr.io/static/demo/thumbs/View_From_A_Blue_Moon_Trailer-HD.jpg",
-    duration: 600,
-    channelName: "Gaming Pro",
-    views: 654000,
-    createdAt: "2024-06-12T09:00:00Z",
-  },
-];
+export default async function TrendingPage() {
+  const videos = await prisma.video.findMany({
+    where: {
+      status: "READY",
+      visibility: "PUBLIC",
+    },
+    include: {
+      channel: {
+        select: {
+          name: true,
+          slug: true,
+          avatar: true,
+        },
+      },
+    },
+    orderBy: { viewCount: "desc" },
+    take: 20,
+  });
 
-export default function TrendingPage() {
+  if (videos.length === 0) {
+    return (
+      <div className="p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold">В тренде</h1>
+          <p className="text-muted-foreground">Самые популярные видео</p>
+        </div>
+        <div className="rounded-lg border p-8 text-center text-muted-foreground">
+          Пока нет видео
+        </div>
+      </div>
+    );
+  }
+
+  const mappedVideos = videos.map((video) => ({
+    id: video.id,
+    title: video.title,
+    thumbnail: video.thumbnailKey || "",
+    duration: video.duration ? formatDuration(video.duration) : undefined,
+    channelName: video.channel?.name || "Неизвестен",
+    channelAvatar: video.channel?.avatar || "",
+    views: video.viewCount || 0,
+    createdAt: video.publishedAt?.toISOString() || video.createdAt.toISOString(),
+  }));
+
   return (
     <div className="p-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Trending</h1>
-        <p className="text-muted-foreground">The most popular videos right now</p>
+        <h1 className="text-2xl font-bold">В тренде</h1>
+        <p className="text-muted-foreground">Самые популярные видео</p>
       </div>
 
-      <VideoGrid videos={trendingVideos} columns={3} />
+      <VideoGrid videos={mappedVideos} columns={3} />
     </div>
   );
 }

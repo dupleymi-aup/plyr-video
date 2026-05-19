@@ -97,8 +97,8 @@ class MenuItems {
 
     const flex = createElement('span');
 
-    // We have to set as HTML incase of special characters
-    flex.innerHTML = title;
+    // Use textContent for XSS safety - title comes from i18n which returns plain text
+    flex.textContent = title;
 
     if (is.element(badge)) {
       flex.appendChild(badge);

@@ -151,7 +151,9 @@ const vimeo = {
         }
 
         // Set and show poster
-        ui.setPoster.call(player, response.thumbnail_url).catch(() => {});
+        ui.setPoster.call(player, response.thumbnail_url).catch((error) => {
+          player.debug.warn('Failed to set Vimeo poster:', error.message);
+        });
       });
     }
 

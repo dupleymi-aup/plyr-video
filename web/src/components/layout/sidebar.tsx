@@ -16,6 +16,7 @@ import {
   Video,
   Shield,
   MessageSquare,
+  BookOpen,
 } from "lucide-react";
 
 export function Sidebar() {
@@ -30,6 +31,7 @@ export function Sidebar() {
     { href: "/", label: t("home"), icon: Home },
     { href: "/trending", label: t("trending"), icon: TrendingUp },
     { href: "/subscriptions", label: t("subscriptions"), icon: PlaySquare },
+    { href: "/courses", label: t("courses"), icon: BookOpen },
   ];
 
   const studioNav = [

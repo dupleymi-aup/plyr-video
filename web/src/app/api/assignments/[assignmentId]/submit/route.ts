@@ -64,10 +64,13 @@ export async function POST(
       fileUrl: fileUrl || null,
     },
     include: {
-      assignment: { select: { id: true, title: true, maxScore: true } },
+      assignment: { select: { id: true, title: true, maxScore: true, dueDate: true } },
       student: { select: { id: true, name: true, email: true } },
     },
   });
 
-  return NextResponse.json(submission, { status: 201 });
+  // Flag late submissions
+  const isLate = assignment.dueDate && new Date() > assignment.dueDate;
+
+  return NextResponse.json({ ...submission, isLate }, { status: 201 });
 }

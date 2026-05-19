@@ -92,6 +92,9 @@ model User {
   lessonCompletions LessonCompletion[]
   grades            Grade[]
 
+  notificationPreferences NotificationPreference?
+  remindersSent           ReminderSent[]
+
   @@index([email])
   @@index([username])
 }
@@ -295,6 +298,9 @@ model Notification {
   videoId   String?
   channelId String?
   commentId String?
+  assignmentId String?
+  quizId       String?
+  courseId     String?
 
   @@index([userId, isRead])
   @@index([createdAt])
@@ -307,6 +313,12 @@ enum NotificationType {
   VIDEO_PUBLISHED
   VIDEO_LIKED
   SYSTEM
+  ASSIGNMENT_DUE
+  QUIZ_DUE
+  GRADE_RELEASED
+  COURSE_DEADLINE
+  OVERDUE_ASSIGNMENT
+  OVERDUE_QUIZ
 }
 
 model PasswordResetToken {
@@ -527,6 +539,7 @@ model Quiz {
   weight      Float    @default(1.0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  dueDate     DateTime?
 
   courseId    String
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -577,4 +590,37 @@ model LessonCompletion {
 
   @@unique([lessonId, studentId])
   @@index([studentId])
+}
+
+model NotificationPreference {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // In-app
+  assignmentReminder  Boolean  @default(true)
+  quizReminder        Boolean  @default(true)
+  gradeNotification   Boolean  @default(true)
+  courseDeadline      Boolean  @default(true)
+  overdueNotification Boolean  @default(true)
+
+  // Email
+  emailAssignment     Boolean  @default(false)
+  emailQuiz           Boolean  @default(false)
+  emailGrade          Boolean  @default(false)
+
+  updatedAt DateTime @updatedAt
+}
+
+model ReminderSent {
+  id           String   @id @default(cuid())
+  userId       String
+  itemId       String   // assignmentId or quizId
+  itemType     String   // "ASSIGNMENT" | "QUIZ"
+  reminderType String   // "DUE_SOON" | "OVERDUE" | "GRADE_RELEASED"
+  interval     String   // "7d" | "3d" | "1d" | "1h" | "once"
+  sentAt       DateTime @default(now())
+
+  @@unique([userId, itemId, itemType, reminderType, interval])
+  @@index([userId, sentAt])
 }

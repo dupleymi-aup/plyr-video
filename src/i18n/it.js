@@ -1,3 +1,7 @@
+// ==========================================================================
+// Plyr i18n
+// ==========================================================================
+
 const it = {
   restart: 'Ricomincia',
   rewind: 'Indietro {seektime}s',
@@ -27,7 +31,7 @@ const it = {
   quality: 'Qualità',
   loop: 'Ripeti',
   loopOn: 'Attivo',
-  loopOff: 'Disattivo',
+  loopOff: 'Disattivato',
   loopAll: 'Ripeti tutto',
   loopMarkStart: 'Segna inizio',
   loopMarkEnd: 'Segna fine',
@@ -134,11 +138,25 @@ const it = {
   transcriptionNotSupported: 'Il riconoscimento vocale non è supportato dal tuo browser. Prova Chrome, Edge o Safari.',
   translationHelp: 'La traduzione invia il testo dei sottotitoli a un servizio esterno. La qualità della traduzione può variare.',
   captionsHelp: 'I sottotitoli includono dialoghi ed effetti sonori. Le didascalie mostrano solo i dialoghi.',
-  captionsOff: 'Disattivi',
+  captionsOff: 'Disattivato',
   translationOff: 'Disattivi',
   transcriptionOff: 'Disattivi',
   darkModeOn: 'Attiva modalità scura',
   darkModeOff: 'Disattiva modalità scura',
+  shortcutDarkMode: 'Attiva/disattiva modalità scura',
+  shortcutScreenshot: 'Cattura schermata',
+  shortcutStepBack: 'Indietro di un fotogramma',
+  shortcutStepForward: 'Avanti di un fotogramma',
+  screenshot: 'Screenshot',
+  tooltipScreenshot: 'Cattura il fotogramma corrente come immagine',
+  share: 'Condividi',
+  shareCopyLink: 'Copia link',
+  shareCopied: 'Copiato!',
+  shareTwitter: 'Condividi su X',
+  shareFacebook: 'Condividi su Facebook',
+  shareTelegram: 'Condividi su Telegram',
+  tooltipShare: 'Condividi questo video',
+  pip: 'PIP',
 };
 
 export default it;

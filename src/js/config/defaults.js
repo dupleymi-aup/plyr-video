@@ -137,6 +137,9 @@ const defaults = {
   // Default time to skip when rewind/fast forward
   seekTime: 10,
 
+  // Time to step by one frame (default 1/30s)
+  frameStep: null,
+
   // Default volume
   volume: 1,
   muted: false,
@@ -433,6 +436,24 @@ const defaults = {
     transcriptionOff: 'Off',
     darkModeOn: 'Enable dark mode',
     darkModeOff: 'Disable dark mode',
+    // New shortcuts and features
+    shortcutDarkMode: 'Toggle dark mode',
+    shortcutScreenshot: 'Capture screenshot',
+    shortcutStepBack: 'Step back one frame',
+    shortcutStepForward: 'Step forward one frame',
+    // Screenshot
+    screenshot: 'Screenshot',
+    tooltipScreenshot: 'Capture current frame as image',
+    // Share
+    share: 'Share',
+    shareCopyLink: 'Copy link',
+    shareCopied: 'Copied!',
+    shareTwitter: 'Share on X',
+    shareFacebook: 'Share on Facebook',
+    shareTelegram: 'Share on Telegram',
+    tooltipShare: 'Share this video',
+    // pip
+    pip: 'PIP',
   },
 
   // URLs

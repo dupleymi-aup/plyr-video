@@ -139,6 +139,20 @@ const zh = {
   transcriptionOff: '关',
   darkModeOn: '开启深色模式',
   darkModeOff: '关闭深色模式',
+  shortcutDarkMode: '切换深色模式',
+  shortcutScreenshot: 'Jiequ dangqian huamian',
+  shortcutStepBack: '后退一帧',
+  shortcutStepForward: '前进一帧',
+  screenshot: '截图',
+  tooltipScreenshot: '将当前帧保存为图片',
+  share: '分享',
+  shareCopyLink: '复制链接',
+  shareCopied: '已复制！',
+  shareTwitter: '分享到 X',
+  shareFacebook: '分享到 Facebook',
+  shareTelegram: '分享到 Telegram',
+  tooltipShare: '分享此视频',
+  pip: '画中画',
 };
 
 export default zh;

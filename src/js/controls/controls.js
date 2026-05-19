@@ -415,6 +415,16 @@ class Controls {
         container.appendChild(this.createButton('dark-mode', defaultAttributes));
       }
 
+      // Screenshot button (HTML5 only)
+      if (control === 'screenshot' && this.player.isHTML5) {
+        container.appendChild(this.createButton('screenshot', defaultAttributes));
+      }
+
+      // Share button
+      if (control === 'share') {
+        container.appendChild(this.createButton('share', defaultAttributes));
+      }
+
       // Settings button / menu
       if (control === 'settings' && !is.empty(this.player.config.settings)) {
         const wrapper = createElement(
@@ -480,10 +490,7 @@ class Controls {
 
           const value = createElement('span', {
             class: this.player.config.classNames.menu.value,
-          });
-
-          // Speed contains HTML entities
-          value.innerHTML = data[type];
+          }, String(data[type] ?? ''));
 
           flex.appendChild(value);
           menuItem.appendChild(flex);
@@ -664,7 +671,10 @@ class Controls {
           { key: 'f', i18n: 'shortcutFullscreen' },
           { key: 'c', i18n: 'shortcutCaptions' },
           { key: 'l', i18n: 'shortcutLoop' },
-          { key: 'Escape', i18n: 'shortcutHideControls' },
+          { key: 'd', i18n: 'shortcutDarkMode' },
+          { key: 's', i18n: 'shortcutScreenshot' },
+          { key: ',', i18n: 'shortcutStepBack' },
+          { key: '.', i18n: 'shortcutStepForward' },
         ];
 
         shortcuts.forEach(({ key, i18n: i18nKey }) => {
@@ -877,13 +887,48 @@ class Controls {
     // Setup tooltips
     if (this.player.config.tooltips.controls) {
       const { classNames, selectors } = this.player.config;
-      const selector = `${selectors.controls.wrapper} ${selectors.labels} .${classNames.hidden}`;
-      const labels = getElements.call(this.player, selector);
 
-      Array.from(labels).forEach((label) => {
-        toggleClass(label, this.player.config.classNames.hidden, false);
-        toggleClass(label, this.player.config.classNames.tooltip, true);
+      // Map button data-plyr types to tooltip i18n keys
+      const tooltipKeyMap = {
+        'play': 'tooltipPlay',
+        'restart': 'tooltipRewind',
+        'rewind': 'tooltipRewind',
+        'fast-forward': 'tooltipForward',
+        'mute': 'tooltipMute',
+        'captions': 'tooltipCaptions',
+        'settings': 'tooltipSettings',
+        'pip': 'tooltipPiP',
+        'airplay': 'tooltipAirPlay',
+        'fullscreen': 'tooltipFullscreen',
+        'download': 'download',
+        'volume': 'tooltipVolume',
+      };
+
+      // Find all control buttons by their data-plyr attribute
+      const controlButtons = document.querySelectorAll('[data-plyr]');
+      Array.from(controlButtons).forEach((button) => {
+        const plyrType = button.getAttribute('data-plyr');
+        const tooltipKey = tooltipKeyMap[plyrType];
+        if (!tooltipKey) return;
+
+        const label = button.querySelector('span[class*="label"]');
+        if (!label) return;
+
+        const tooltipText = i18n.get(tooltipKey, this.player.config);
+        if (tooltipText && tooltipText.length) {
+          label.textContent = tooltipText;
+          toggleClass(label, classNames.hidden, false);
+          toggleClass(label, classNames.tooltip, true);
+        }
       });
+
+      // Also handle seek tooltip
+      const seekTooltip = this.player.elements.display?.seekTooltip;
+      if (seekTooltip) {
+        seekTooltip.textContent = i18n.get('tooltipSeek', this.player.config);
+        toggleClass(seekTooltip, classNames.hidden, false);
+        toggleClass(seekTooltip, classNames.tooltip, true);
+      }
     }
   }
 }
