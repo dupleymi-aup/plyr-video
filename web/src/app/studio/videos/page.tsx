@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Video, Eye, ThumbsUp, MessageSquare } from "lucide-react";
 import { formatViews, formatDateRu } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 const statusLabels: Record<string, string> = {
   READY: "Готово",

@@ -1675,7 +1675,7 @@ class Plyr {
       };
 
       if (this.embed !== null) {
-        this.embed.unload().then(doneOnce);
+        this.embed.unload().then(doneOnce).catch(doneOnce);
       }
 
       // Vimeo does not always return

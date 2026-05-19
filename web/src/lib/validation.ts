@@ -114,7 +114,11 @@ export const quizQuestionSchema = z.object({
   question: z.string().min(1, "Question text is required").max(2000),
   type: z.enum(["MULTIPLE_CHOICE", "TRUE_FALSE", "SHORT_ANSWER"]).default("MULTIPLE_CHOICE"),
   options: z.array(z.string()).default([]),
-  correctAnswer: z.unknown(),
+  correctAnswer: z.union([
+    z.array(z.number()),  // MULTIPLE_CHOICE: array of indices
+    z.boolean(),           // TRUE_FALSE
+    z.string(),            // SHORT_ANSWER
+  ]),
   points: z.number().min(0).default(1.0),
   position: z.number().int().min(0).optional(),
 });

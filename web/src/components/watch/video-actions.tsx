@@ -6,7 +6,10 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { ThumbsUp, ThumbsDown, Share2, Check } from "lucide-react";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 interface VideoActionsProps {
   videoId: string;
@@ -23,7 +26,6 @@ export function VideoActions({ videoId, channelId, initialLikes, initialDislikes
   const [dislikeCount, setDislikeCount] = useState(initialDislikes);
   const [copied, setCopied] = useState(false);
 
-  // Check like status on mount
   useSWR(
     session ? `/api/videos/${videoId}/like` : null,
     fetcher,
@@ -37,17 +39,32 @@ export function VideoActions({ videoId, channelId, initialLikes, initialDislikes
   const handleLike = async () => {
     if (!session) return;
 
+    const wasLiked = liked;
+    const wasDisliked = disliked;
+
     if (liked) {
-      await fetch(`/api/videos/${videoId}/like`, { method: "DELETE" });
-      setLiked(false);
-      setLikeCount((c) => c - 1);
+      try {
+        const res = await fetch(`/api/videos/${videoId}/like`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed");
+        setLiked(false);
+        setLikeCount((c) => Math.max(0, c - 1));
+      } catch {
+        setLiked(wasLiked);
+        setDisliked(wasDisliked);
+      }
     } else {
-      await fetch(`/api/videos/${videoId}/like`, { method: "POST" });
-      setLiked(true);
-      setLikeCount((c) => c + 1);
-      if (disliked) {
-        setDisliked(false);
-        setDislikeCount((c) => c - 1);
+      try {
+        const res = await fetch(`/api/videos/${videoId}/like`, { method: "POST" });
+        if (!res.ok) throw new Error("Failed");
+        setLiked(true);
+        setLikeCount((c) => c + 1);
+        if (disliked) {
+          setDisliked(false);
+          setDislikeCount((c) => Math.max(0, c - 1));
+        }
+      } catch {
+        setLiked(wasLiked);
+        setDisliked(wasDisliked);
       }
     }
   };
@@ -55,23 +72,31 @@ export function VideoActions({ videoId, channelId, initialLikes, initialDislikes
   const handleDislike = async () => {
     if (!session) return;
 
+    const wasLiked = liked;
+    const wasDisliked = disliked;
+
     if (disliked) {
       setDisliked(false);
-      setDislikeCount((c) => c - 1);
+      setDislikeCount((c) => Math.max(0, c - 1));
     } else {
       setDisliked(true);
       setDislikeCount((c) => c + 1);
       if (liked) {
         setLiked(false);
-        setLikeCount((c) => c - 1);
+        setLikeCount((c) => Math.max(0, c - 1));
       }
     }
   };
 
   const handleShare = async () => {
-    await navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      const url = window.location.href;
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard not available
+    }
   };
 
   return (

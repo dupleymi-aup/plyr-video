@@ -22,20 +22,29 @@ export function SubscribeButton({ channelId, isSubscribed: initialSubscribed = f
     if (!session) return;
     setLoading(true);
 
-    if (subscribed) {
-      await fetch(`/api/subscriptions/${channelId}`, { method: "DELETE" });
-      setSubscribed(false);
-      setSubscribers((s) => Math.max(0, s - 1));
-    } else {
-      await fetch("/api/subscriptions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ channelId }),
-      });
-      setSubscribed(true);
-      setSubscribers((s) => s + 1);
+    const wasSubscribed = subscribed;
+
+    try {
+      if (subscribed) {
+        const res = await fetch(`/api/subscriptions/${channelId}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("Failed to unsubscribe");
+        setSubscribed(false);
+        setSubscribers((s) => Math.max(0, s - 1));
+      } else {
+        const res = await fetch("/api/subscriptions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ channelId }),
+        });
+        if (!res.ok) throw new Error("Failed to subscribe");
+        setSubscribed(true);
+        setSubscribers((s) => s + 1);
+      }
+    } catch {
+      setSubscribed(wasSubscribed);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
     router.refresh();
   };
 

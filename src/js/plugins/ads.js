@@ -126,9 +126,13 @@ class Ads {
     this.startSafetyTimer(12000, 'ready()');
 
     // Clear the safety timer
-    this.managerPromise.then(() => {
-      this.clearSafetyTimer('onAdsManagerLoaded()');
-    });
+    this.managerPromise
+      .then(() => {
+        this.clearSafetyTimer('onAdsManagerLoaded()');
+      })
+      .catch(() => {
+        this.clearSafetyTimer('managerPromise rejected');
+      });
 
     // Set listeners on the Plyr instance
     this.listeners();

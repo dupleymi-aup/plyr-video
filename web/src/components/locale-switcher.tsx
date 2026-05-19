@@ -14,12 +14,17 @@ export function LocaleSwitcher() {
   );
 
   const switchLocale = async (newLocale: "ru" | "en") => {
+    try {
+      const res = await fetch("/api/locale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale: newLocale }),
+      });
+      if (!res.ok) return;
+    } catch {
+      return;
+    }
     setLocale(newLocale);
-    await fetch("/api/locale", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ locale: newLocale }),
-    });
     window.location.reload();
   };
 

@@ -8,7 +8,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { PlaySquare, Users } from "lucide-react";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 export default function SubscriptionsPage() {
   const { data: session, status } = useSession();

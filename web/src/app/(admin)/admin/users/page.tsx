@@ -10,7 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Users, Search, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { formatDateRu } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 const roleLabels: Record<string, string> = {
   USER: "Пользователь",

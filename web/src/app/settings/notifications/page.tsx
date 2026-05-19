@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { formatRelativeTimeRu, formatDateRu } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 const notificationIcons: Record<string, React.ReactNode> = {
   NEW_SUBSCRIBER: <Users className="h-4 w-4 text-blue-500" />,

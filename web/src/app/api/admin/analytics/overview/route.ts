@@ -13,7 +13,7 @@ import type {
 
 export async function GET(request: Request) {
   const session = await auth();
-  if (session?.user?.role !== "ADMIN") {
+  if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

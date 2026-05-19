@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,11 +37,15 @@ export default function UploadPage() {
 
   const handleUpload = async () => {
     setUploading(true);
-    // Simulate upload progress
+    setUploadProgress(0);
+  };
+
+  // Handle upload progress in useEffect for proper cleanup
+  useEffect(() => {
+    if (!uploading) return;
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
         if (prev >= 100) {
-          clearInterval(interval);
           setUploading(false);
           router.push("/studio/videos");
           return 100;
@@ -49,7 +53,8 @@ export default function UploadPage() {
         return prev + 10;
       });
     }, 500);
-  };
+    return () => clearInterval(interval);
+  }, [uploading, router]);
 
   return (
     <div className="p-6 max-w-4xl">
@@ -134,7 +139,7 @@ export default function UploadPage() {
                 id="visibility"
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={visibility}
-                onChange={(e) => setVisibility(e.target.value as any)}
+                onChange={(e) => setVisibility(e.target.value as "PRIVATE" | "UNLISTED" | "PUBLIC")}
               >
                 <option value="PRIVATE">Private</option>
                 <option value="UNLISTED">Unlisted</option>

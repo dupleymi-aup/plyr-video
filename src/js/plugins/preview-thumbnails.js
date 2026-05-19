@@ -505,7 +505,10 @@ class PreviewThumbnails {
     // Each step here has a short time delay, and only continues if still hovering/seeking the same spot. This is to protect slow connections from overloading
     this.preloadNearby(thumbNum, true)
       .then(() => this.preloadNearby(thumbNum, false))
-      .then(() => this.getHigherQuality(qualityIndex, previewImage, frame, thumbFilename));
+      .then(() => this.getHigherQuality(qualityIndex, previewImage, frame, thumbFilename))
+      .catch(() => {
+        this.player.debug.warn('Failed to preload nearby thumbnail');
+      });
   };
 
   // Remove all preview images that aren't the designated current image

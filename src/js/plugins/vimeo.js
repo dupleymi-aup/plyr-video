@@ -145,16 +145,20 @@ const vimeo = {
 
     // Get poster image
     if (!config.customControls) {
-      fetch(format(player.config.urls.vimeo.api, src)).then((response) => {
-        if (is.empty(response) || !response.thumbnail_url) {
-          return;
-        }
+      fetch(format(player.config.urls.vimeo.api, src))
+        .then((response) => {
+          if (is.empty(response) || !response.thumbnail_url) {
+            return;
+          }
 
-        // Set and show poster
-        ui.setPoster.call(player, response.thumbnail_url).catch((error) => {
-          player.debug.warn('Failed to set Vimeo poster:', error.message);
+          // Set and show poster
+          ui.setPoster.call(player, response.thumbnail_url).catch((error) => {
+            player.debug.warn('Failed to set Vimeo poster:', error.message);
+          });
+        })
+        .catch((error) => {
+          player.debug.warn('Failed to fetch Vimeo metadata:', error.message);
         });
-      });
     }
 
     // Setup instance

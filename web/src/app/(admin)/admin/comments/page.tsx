@@ -8,7 +8,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { MessageSquare, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatRelativeTimeRu } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 export default function AdminCommentsPage() {
   const [page, setPage] = useState(1);

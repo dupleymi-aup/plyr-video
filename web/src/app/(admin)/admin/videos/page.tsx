@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Video, Trash2, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { formatViews, formatDateRu, formatDuration } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 const statusLabels: Record<string, string> = {
   READY: "Готово",
