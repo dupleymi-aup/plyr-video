@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { checkRoleAccess } from "@/lib/permissions";
+import { handleApiError } from "@/lib/api-errors";
 
 export async function GET(req: Request) {
+  try {
   const session = await auth();
   const forbidden = checkRoleAccess(session?.user?.role, "ADMIN");
   if (forbidden) return forbidden;
@@ -42,4 +44,7 @@ export async function GET(req: Request) {
   ]);
 
   return NextResponse.json({ logs, total, page, totalPages: Math.ceil(total / limit) });
+  } catch (error) {
+    return handleApiError(error, "admin-audit");
+  }
 }

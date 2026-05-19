@@ -391,7 +391,11 @@
     "videos": "Videos",
     "upload": "Upload",
     "settings": "Settings",
-    "account": "Account"
+    "account": "Account",
+    "adminOverview": "Overview",
+    "adminUsers": "Users",
+    "adminVideos": "Videos",
+    "adminComments": "Comments"
   },
   "common": {
     "save": "Save",

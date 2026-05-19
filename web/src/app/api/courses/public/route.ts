@@ -1,8 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
 
 // Public endpoint - no auth required
 export async function GET(request: Request) {
+  try {
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1");
   const limit = parseInt(searchParams.get("limit") || "12");
@@ -35,4 +37,7 @@ export async function GET(request: Request) {
     page,
     totalPages: Math.ceil(total / limit),
   });
+  } catch (error) {
+    return handleApiError(error, "courses-public");
+  }
 }

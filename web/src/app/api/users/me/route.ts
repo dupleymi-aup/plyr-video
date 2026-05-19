@@ -12,9 +12,28 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        role: true,
+        bio: true,
+        location: true,
+        website: true,
+        theme: true,
+        language: true,
+        banned: true,
+        createdAt: true,
+        updatedAt: true,
         channels: {
-          include: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            description: true,
+            createdAt: true,
             _count: {
               select: {
                 videos: true,
@@ -41,8 +60,6 @@ export async function GET() {
 
     return NextResponse.json({
       ...user,
-      passwordHash: undefined,
-      twoFactorSecret: undefined,
       totalViews: totalViews._sum.viewCount || 0,
     });
   } catch (error) {
@@ -71,13 +88,25 @@ export async function PATCH(request: NextRequest) {
         ...(theme !== undefined && { theme }),
         ...(language !== undefined && { language }),
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        role: true,
+        bio: true,
+        location: true,
+        website: true,
+        theme: true,
+        language: true,
+        banned: true,
+        createdAt: true,
+        updatedAt: true,
+      },
     });
 
-    return NextResponse.json({
-      ...updated,
-      passwordHash: undefined,
-      twoFactorSecret: undefined,
-    });
+    return NextResponse.json(updated);
   } catch (error) {
     return handleApiError(error, "users-me");
   }

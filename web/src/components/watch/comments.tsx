@@ -8,7 +8,10 @@ import { Avatar } from "@/components/ui/avatar";
 import { ThumbsUp, ThumbsDown, MessageSquare } from "lucide-react";
 import { formatRelativeTimeRu } from "@/lib/utils";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => {
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+});
 
 interface CommentData {
   id: string;
@@ -40,11 +43,16 @@ export function Comments({ videoId }: { videoId: string }) {
     const text = parentId ? replyContent : content;
     if (!text.trim() || !session) return;
 
-    await fetch("/api/comments", {
+    const res = await fetch("/api/comments", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ content: text, videoId, parentId }),
     });
+
+    if (!res.ok) {
+      console.error("Failed to submit comment");
+      return;
+    }
 
     if (parentId) {
       setReplyingTo(null);
@@ -80,6 +88,7 @@ export function Comments({ videoId }: { videoId: string }) {
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Написать комментарий..."
+                aria-label="Написать комментарий"
                 className="w-full rounded-md border bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                 rows={2}
               />
@@ -133,6 +142,7 @@ export function Comments({ videoId }: { videoId: string }) {
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder="Написать ответ..."
+                    aria-label="Написать ответ"
                     className="flex-1 rounded-md border bg-background px-3 py-1.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary"
                     rows={2}
                     autoFocus

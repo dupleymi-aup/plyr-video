@@ -11,6 +11,17 @@ import type {
   ExportAtRiskStats,
 } from "@/types/analytics";
 
+interface ExportGradeStats {
+  name: string | null;
+  email: string | null;
+  courseTitle: string | null;
+  grade: number | string;
+  scale: string | null;
+  letterGrade: string | null;
+  note: string | null;
+  date: string | null;
+}
+
 function escapeCsv(value: unknown): string {
   const str = String(value ?? "");
   return `"${str.replace(/"/g, '""')}"`;
@@ -154,7 +165,7 @@ export async function POST(request: Request) {
       `;
 
       headers = ["Student", "Email", "Course", "Grade", "Scale", "Letter", "Note", "Date"];
-      rows = (grades as any[]).map((g) => [
+      rows = (grades as ExportGradeStats[]).map((g) => [
         g.name || "",
         g.email || "",
         g.courseTitle || "",

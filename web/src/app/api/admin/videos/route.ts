@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
 
 async function requireAdmin() {
   const session = await auth();
@@ -11,86 +12,87 @@ async function requireAdmin() {
 }
 
 export async function GET(request: NextRequest) {
-  const authResult = await requireAdmin();
-  if ("error" in authResult) return authResult.error;
+  try {
+    const authResult = await requireAdmin();
+    if ("error" in authResult) return authResult.error;
 
-  const { searchParams } = request.nextUrl;
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "20");
-  const skip = (page - 1) * limit;
-  const status = searchParams.get("status");
+    const { searchParams } = request.nextUrl;
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "20");
+    const skip = (page - 1) * limit;
+    const status = searchParams.get("status");
 
-  const where: Record<string, unknown> = {};
-  if (status) where.status = status;
+    const where: Record<string, unknown> = {};
+    if (status) where.status = status;
 
-  const [videos, total] = await Promise.all([
-    prisma.video.findMany({
-      where,
-      include: {
-        channel: { select: { name: true, slug: true } },
-      },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.video.count({ where }),
-  ]);
+    const [videos, total] = await Promise.all([
+      prisma.video.findMany({
+        where,
+        include: { channel: { select: { name: true, slug: true } } },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.video.count({ where }),
+    ]);
 
-  return NextResponse.json({
-    videos,
-    pagination: {
-      page,
-      limit,
-      total,
-      pages: Math.ceil(total / limit),
-    },
-  });
+    return NextResponse.json({
+      videos,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
+    });
+  } catch (error) {
+    return handleApiError(error, "admin-videos-GET");
+  }
 }
 
 export async function PATCH(request: NextRequest) {
-  const authResult = await requireAdmin();
-  if ("error" in authResult) return authResult.error;
+  try {
+    const authResult = await requireAdmin();
+    if ("error" in authResult) return authResult.error;
 
-  const body = await request.json();
-  const { videoId, visibility } = body;
+    const body = await request.json();
+    const { videoId, visibility } = body;
 
-  if (!videoId) {
-    return NextResponse.json({ error: "videoId is required" }, { status: 400 });
+    if (!videoId) {
+      return NextResponse.json({ error: "videoId is required" }, { status: 400 });
+    }
+
+    const data: Record<string, unknown> = {};
+    if (visibility && ["PUBLIC", "UNLISTED", "PRIVATE"].includes(visibility)) {
+      data.visibility = visibility;
+    }
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
+    await prisma.video.update({ where: { id: videoId }, data });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error, "admin-videos-PATCH");
   }
-
-  const data: Record<string, unknown> = {};
-  if (visibility && ["PUBLIC", "UNLISTED", "PRIVATE"].includes(visibility)) {
-    data.visibility = visibility;
-  }
-
-  if (Object.keys(data).length === 0) {
-    return NextResponse.json(
-      { error: "No valid fields to update" },
-      { status: 400 }
-    );
-  }
-
-  await prisma.video.update({ where: { id: videoId }, data });
-
-  return NextResponse.json({ success: true });
 }
 
 export async function DELETE(request: NextRequest) {
-  const authResult = await requireAdmin();
-  if ("error" in authResult) return authResult.error;
+  try {
+    const authResult = await requireAdmin();
+    if ("error" in authResult) return authResult.error;
 
-  const body = await request.json();
-  const { videoId } = body;
+    const body = await request.json();
+    const { videoId } = body;
 
-  if (!videoId) {
-    return NextResponse.json({ error: "videoId is required" }, { status: 400 });
+    if (!videoId) {
+      return NextResponse.json({ error: "videoId is required" }, { status: 400 });
+    }
+
+    await prisma.video.update({
+      where: { id: videoId },
+      data: { status: "DELETED" },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    return handleApiError(error, "admin-videos-DELETE");
   }
-
-  // Soft delete by updating status
-  await prisma.video.update({
-    where: { id: videoId },
-    data: { status: "DELETED" },
-  });
-
-  return NextResponse.json({ success: true });
 }

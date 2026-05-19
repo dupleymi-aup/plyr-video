@@ -9,27 +9,56 @@ export async function GET(
   const { userId } = await params;
   const session = await auth();
 
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    include: {
-      channels: {
-        include: {
-          _count: {
-            select: {
-              videos: true,
-              subscriptions: true,
-            },
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Users can only view their own stats unless they're admin
+  const isAdmin = session.user.role === "ADMIN";
+  if (userId !== session.user.id && !isAdmin) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const [user, channels] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        emailVerified: true,
+        image: true,
+        role: true,
+        bio: true,
+        location: true,
+        website: true,
+        theme: true,
+        language: true,
+        banned: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    }),
+    prisma.channel.findMany({
+      where: { ownerId: userId },
+      select: {
+        id: true,
+        name: true,
+        _count: {
+          select: {
+            videos: true,
+            subscriptions: true,
           },
         },
       },
-    },
-  });
+    }),
+  ]);
 
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const channelIds = user.channels.map((ch) => ch.id);
+  const channelIds = channels.map((ch) => ch.id);
 
   const [
     totalViews,
@@ -69,9 +98,8 @@ export async function GET(
   ]);
 
   return NextResponse.json({
-    ...user,
-    passwordHash: undefined,
-    twoFactorSecret: undefined,
+    user,
+    channels,
     stats: {
       totalViews: totalViews._sum.viewCount || 0,
       totalWatchTimeSeconds: watchTime._sum.watchedSeconds || 0,

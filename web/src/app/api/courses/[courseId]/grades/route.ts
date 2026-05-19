@@ -1,11 +1,13 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
+  try {
   const session = await auth();
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -37,12 +39,16 @@ export async function GET(
   });
 
   return NextResponse.json(grades);
+  } catch (error) {
+    return handleApiError(error, "course-grades-GET");
+  }
 }
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ courseId: string }> }
 ) {
+  try {
   const session = await auth();
   if (!session?.user || (session.user.role !== "TEACHER" && session.user.role !== "ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -101,4 +107,7 @@ export async function POST(
   });
 
   return NextResponse.json(grade, { status: 201 });
+  } catch (error) {
+    return handleApiError(error, "course-grades-POST");
+  }
 }

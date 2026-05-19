@@ -1,8 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { handleApiError } from "@/lib/api-errors";
 
 export async function GET() {
+  try {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -92,4 +94,7 @@ export async function GET() {
   ].sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
   return NextResponse.json({ deadlines });
+  } catch (error) {
+    return handleApiError(error, "deadlines-upcoming");
+  }
 }

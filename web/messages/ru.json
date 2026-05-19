@@ -391,7 +391,11 @@
     "videos": "Видео",
     "upload": "Загрузить",
     "settings": "Настройки",
-    "account": "Аккаунт"
+    "account": "Аккаунт",
+    "adminOverview": "Обзор",
+    "adminUsers": "Пользователи",
+    "adminVideos": "Видео",
+    "adminComments": "Комментарии"
   },
   "common": {
     "save": "Сохранить",

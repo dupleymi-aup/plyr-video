@@ -63,6 +63,7 @@ export function Header() {
 
               <div className="relative">
                 <button
+                  type="button"
                   onClick={() => setUserMenuOpen(!userMenuOpen)}
                   className="rounded-full focus:outline-none focus:ring-2 focus:ring-ring"
                   aria-label={t("userMenu")}
