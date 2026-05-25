@@ -1302,7 +1302,7 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   off = (event, callback) => {
-    removeListener(this.elements.container, event, callback);
+    removeListener.call(this, this.elements.container, event, callback);
   };
 
   /**
