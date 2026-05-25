@@ -337,20 +337,25 @@ const ui = {
 
   // Migrate any custom properties from the media to the parent
   migrateStyles() {
-    // Loop through values (as they are the keys when the object is spread 🤔)
-    Object.values({ ...this.media.style })
-      // We're only fussed about Plyr specific properties
-      .filter(key => !is.empty(key) && is.string(key) && key.startsWith('--plyr'))
-      .forEach((key) => {
-        // Set on the container
-        this.elements.container.style.setProperty(key, this.media.style.getPropertyValue(key));
+    const { style } = this.media;
 
-        // Clean up from media element
-        this.media.style.removeProperty(key);
-      });
+    // Collect custom property names that start with --plyr
+    const plyrProperties = [];
+    for (let i = 0; i < style.length; i++) {
+      const name = style.item(i);
+      if (name.startsWith('--plyr')) {
+        plyrProperties.push(name);
+      }
+    }
+
+    // Migrate each Plyr-specific property to the container
+    plyrProperties.forEach((key) => {
+      this.elements.container.style.setProperty(key, style.getPropertyValue(key));
+      style.removeProperty(key);
+    });
 
     // Remove attribute if empty
-    if (is.empty(this.media.style)) {
+    if (!style.cssText) {
       this.media.removeAttribute('style');
     }
   },
