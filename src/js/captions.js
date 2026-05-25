@@ -342,7 +342,7 @@ class Captions {
           }
         })
         .catch((error) => {
-          console.warn('Translation failed:', error);
+          this.plyr.debug.warn('Translation failed:', error.message);
           if (this.elements.translation) {
             this.elements.translation.innerHTML = '';
           }
@@ -555,7 +555,7 @@ class Captions {
             }
           })
           .catch((error) => {
-            console.warn('Translation failed:', error);
+            this.plyr.debug.warn('Translation failed:', error.message);
             if (this.elements.translation) {
               this.elements.translation.innerHTML = ''; // Clear on error
             }

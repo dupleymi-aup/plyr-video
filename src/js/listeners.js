@@ -597,7 +597,7 @@ class Listeners {
       elements.buttons.pip,
       'click',
       () => {
-        player.pip = 'toggle';
+        player.pip = !player.pip;
       },
       'pip',
     );

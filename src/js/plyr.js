@@ -1080,7 +1080,7 @@ class Plyr {
               }
             })
             .catch((error) => {
-              console.warn('Translation failed:', error);
+              this.debug.warn('Translation failed:', error.message);
               if (this.elements.translation) {
                 this.elements.translation.innerHTML = '';
               }
