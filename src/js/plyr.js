@@ -1071,18 +1071,18 @@ class Plyr {
       this.storage.set({ translationLanguage: input });
       // If translation is active, re-translate current captions
       if (this.captions.translation.active && this.elements.captions) {
-        const content = this.elements.captions.innerHTML;
+        const content = this.elements.captions.textContent;
         if (content) {
           translate(content, input)
             .then((translated) => {
               if (this.elements.translation) {
-                this.elements.translation.innerHTML = translated;
+                this.elements.translation.textContent = translated;
               }
             })
             .catch((error) => {
               this.debug.warn('Translation failed:', error.message);
               if (this.elements.translation) {
-                this.elements.translation.innerHTML = '';
+                this.elements.translation.textContent = '';
               }
             });
         }
