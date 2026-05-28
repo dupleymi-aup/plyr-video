@@ -50,6 +50,9 @@ const vimeo = {
   setup() {
     const player = this;
 
+    // Store reference to destroy function for cleanup during player.destroy()
+    player._vimeoDestroy = vimeo.destroy.bind(player);
+
     // Add embed class for responsive
     toggleClass(player.elements.wrapper, player.config.classNames.embed, true);
 
@@ -435,6 +438,34 @@ const vimeo = {
     if (config.customControls) {
       setTimeout(() => ui.build.call(player), 0);
     }
+  },
+
+  // Cleanup event listeners to prevent memory leaks
+  destroy() {
+    const player = this;
+
+    if (!player.embed || !is.function(player.embed.off)) {
+      return;
+    }
+
+    // Remove all event listeners registered via player.embed.on()
+    const events = [
+      'cuechange',
+      'loaded',
+      'bufferstart',
+      'bufferend',
+      'play',
+      'pause',
+      'timeupdate',
+      'progress',
+      'seeked',
+      'ended',
+      'error',
+    ];
+
+    events.forEach((event) => {
+      player.embed.off(event);
+    });
   },
 };
 

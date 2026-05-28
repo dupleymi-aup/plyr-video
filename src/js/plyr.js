@@ -1443,6 +1443,11 @@ class Plyr {
       done();
     }
     else if (this.isVimeo) {
+      // Clean up Vimeo plugin event listeners
+      if (is.function(this._vimeoDestroy)) {
+        this._vimeoDestroy();
+      }
+
       // Destroy Vimeo API
       // then clean up (wait, to prevent postmessage errors)
       let vimeoDone = false;
