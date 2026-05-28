@@ -351,7 +351,7 @@ export function handleCaptionList(player, data) {
 
 // Shared message handler for player:cueChange
 export function handleCueChange(player, data) {
-  if (data && data.cues) {
+  if (data && data.cues && player.captions) {
     const strippedCues = data.cues.map((cue) => {
       if (is.string(cue)) {
         return cue.replace(/<[^>]*>/g, '');

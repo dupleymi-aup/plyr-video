@@ -8,7 +8,7 @@ import { triggerEvent } from './events';
  * @param {boolean} play - Whether the media should be playing
  */
 export function assurePlaybackState(play) {
-  if (play && !this.embed.hasPlayed) {
+  if (play && this.embed && !this.embed.hasPlayed) {
     this.embed.hasPlayed = true;
   }
 
