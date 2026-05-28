@@ -5,7 +5,7 @@
 import controls from './controls';
 import support from './support';
 import transcription from './transcription';
-import { getElement, toggleClass, toggleHidden } from './utils/elements';
+import { getElement, toggleClass } from './utils/elements';
 import { ready, triggerEvent } from './utils/events';
 import i18n from './utils/i18n';
 import is from './utils/is';
@@ -126,9 +126,7 @@ const ui = {
 
     // Assure the poster image is set, if the property was added before the element was created
     if (this.poster) {
-      ui.setPoster.call(this, this.poster, false).catch((error) => {
-        this.debug.warn('Failed to set poster on build:', error.message);
-      });
+      ui.setPoster.call(this, this.poster, false).catch(() => {});
     }
 
     // Manually set the duration if user has overridden it.
@@ -307,83 +305,6 @@ const ui = {
     toggleClass(this.elements.container, this.config.classNames.loading, false);
   },
 
-  // Show user-facing error message
-  showError(errorCode, errorMessage) {
-    if (!this.supported.ui) {
-      return;
-    }
-
-    // Map error code to i18n key
-    const errorKeyMap = {
-      1: 'errorNetwork',
-      11: 'errorMediaNotFound',
-      12: 'errorMediaUnavailable',
-      13: 'errorGeoblocked',
-      14: 'errorMediaRemoved',
-      15: 'errorMediaPrivate',
-      21: 'errorPlayerInit',
-      23: 'errorEmbedBlocked',
-      31: 'errorDRM',
-      32: 'errorDRM',
-    };
-
-    const i18nKey = errorKeyMap[errorCode] || 'errorUnknown';
-    const title = i18n.get('errorTitle', this.config);
-    const message = errorMessage || i18n.get(i18nKey, this.config);
-    const retryText = i18n.get('errorRetry', this.config);
-
-    // Create error element if it doesn't exist
-    if (!is.element(this.elements.error)) {
-      const errorContainer = document.createElement('div');
-      errorContainer.className = 'plyr__error';
-      errorContainer.setAttribute('role', 'alert');
-      errorContainer.setAttribute('aria-live', 'assertive');
-      errorContainer.innerHTML = `
-        <div class="plyr__error__icon">&#9888;</div>
-        <div class="plyr__error__content">
-          <h3 class="plyr__error__title">${title}</h3>
-          <p class="plyr__error__message"></p>
-          <button class="plyr__error__retry" type="button" aria-label="${retryText}">${retryText}</button>
-        </div>
-      `;
-
-      // Bind retry button
-      const retryButton = errorContainer.querySelector('.plyr__error__retry');
-      retryButton.addEventListener('click', () => {
-        this.hideError();
-        if (this.isHTML5) {
-          this.media.load();
-        }
-        else {
-          this.restart();
-        }
-      });
-
-      this.elements.container.appendChild(errorContainer);
-      this.elements.error = errorContainer;
-    }
-
-    // Update message
-    const messageEl = this.elements.error.querySelector('.plyr__error__message');
-    if (messageEl) {
-      messageEl.textContent = message;
-    }
-
-    // Show error
-    toggleClass(this.elements.container, 'plyr--has-error', true);
-    toggleHidden(this.elements.error, false);
-  },
-
-  // Hide error message
-  hideError() {
-    if (!is.element(this.elements.error)) {
-      return;
-    }
-
-    toggleClass(this.elements.container, 'plyr--has-error', false);
-    toggleHidden(this.elements.error, true);
-  },
-
   // Update preloader progress bar
   updatePreloaderProgress(buffered) {
     if (!this.supported.ui || !is.element(this.elements.preloader)) {
@@ -416,20 +337,25 @@ const ui = {
 
   // Migrate any custom properties from the media to the parent
   migrateStyles() {
-    // Loop through values (as they are the keys when the object is spread 🤔)
-    Object.values({ ...this.media.style })
-      // We're only fussed about Plyr specific properties
-      .filter(key => !is.empty(key) && is.string(key) && key.startsWith('--plyr'))
-      .forEach((key) => {
-        // Set on the container
-        this.elements.container.style.setProperty(key, this.media.style.getPropertyValue(key));
+    const { style } = this.media;
 
-        // Clean up from media element
-        this.media.style.removeProperty(key);
-      });
+    // Collect custom property names that start with --plyr
+    const plyrProperties = [];
+    for (let i = 0; i < style.length; i++) {
+      const name = style.item(i);
+      if (name.startsWith('--plyr')) {
+        plyrProperties.push(name);
+      }
+    }
+
+    // Migrate each Plyr-specific property to the container
+    plyrProperties.forEach((key) => {
+      this.elements.container.style.setProperty(key, style.getPropertyValue(key));
+      style.removeProperty(key);
+    });
 
     // Remove attribute if empty
-    if (is.empty(this.media.style)) {
+    if (!style.cssText) {
       this.media.removeAttribute('style');
     }
   },

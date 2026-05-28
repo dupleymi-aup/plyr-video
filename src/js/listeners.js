@@ -10,7 +10,6 @@ import { getElement, getElements, matches, toggleClass } from './utils/elements'
 import { off, on, once, toggleListener, triggerEvent } from './utils/events';
 import is from './utils/is';
 import { silencePromise } from './utils/promise';
-import providerErrors, { errorCodes } from './utils/provider-errors';
 import { getAspectRatio, getViewportSize, supportsCSS } from './utils/style';
 
 class Listeners {
@@ -92,10 +91,6 @@ class Listeners {
         'k',
         'l',
         'm',
-        'd',
-        ',',
-        '.',
-        's',
       ];
 
       // If the key is found prevent default (e.g. prevent scrolling for arrows)
@@ -166,20 +161,6 @@ class Listeners {
         case 'd':
           if (!repeat) {
             player.toggleDarkMode();
-          }
-          break;
-
-        case ',':
-          player.stepBack();
-          break;
-
-        case '.':
-          player.stepForward();
-          break;
-
-        case 's':
-          if (!repeat && player.isHTML5 && player.isVideo) {
-            player.screenshot();
           }
           break;
 
@@ -308,8 +289,8 @@ class Listeners {
         target.style.height = overflow ? '100%' : 'auto';
       }
       else {
-        target.style.maxWidth = overflow ? `${(viewportHeight / videoHeight) * videoWidth}px` : '';
-        target.style.margin = overflow ? '0 auto' : '';
+        target.style.maxWidth = overflow ? `${(viewportHeight / videoHeight) * videoWidth}px` : null;
+        target.style.margin = overflow ? '0 auto' : null;
       }
     };
 
@@ -349,22 +330,6 @@ class Listeners {
     // Time change on media
     on.call(player, player.media, 'timeupdate seeking seeked', event => controls.timeUpdate.call(player, event));
 
-    // Enforce loop boundaries
-    on.call(player, player.media, 'timeupdate', () => {
-      // Only enforce with active loop and defined end point
-      if (!player.config.loop.active) {
-        return;
-      }
-
-      const { start, end } = player.config.loop;
-      const currentTime = player.currentTime;
-
-      // If end point is set and we've passed it, seek back to start
-      if (is.number(end) && currentTime >= end) {
-        player.currentTime = is.number(start) ? start : 0;
-      }
-    });
-
     // Display duration
     on.call(player, player.media, 'durationchange loadeddata loadedmetadata', event =>
       controls.durationUpdate.call(player, event));
@@ -394,22 +359,6 @@ class Listeners {
 
     // Loading state
     on.call(player, player.media, 'waiting canplay seeked playing', event => ui.checkLoading.call(player, event));
-
-    // Detect outside picture-in-picture changes (Chrome/Edge enterpictureinpicture / leavepictureinpicture)
-    on.call(player, player.media, 'enterpictureinpicture', () => {
-      ui.checkPlaying.call(player, { type: 'enterpictureinpicture' });
-      triggerEvent.call(player, player.media, 'pipchange');
-    });
-
-    on.call(player, player.media, 'leavepictureinpicture', () => {
-      ui.checkPlaying.call(player, { type: 'leavepictureinpicture' });
-      triggerEvent.call(player, player.media, 'pipchange');
-    });
-
-    // Safari PiP via webkitpresentationmodechanged
-    on.call(player, player.media, 'webkitpresentationmodechanged', () => {
-      triggerEvent.call(player, player.media, 'pipchange');
-    });
 
     // Preloader: show on loadstart/waiting, hide on canplay/playing
     on.call(player, player.media, 'loadstart waiting', () => {
@@ -520,25 +469,9 @@ class Listeners {
     on.call(player, player.media, proxyEvents, (event) => {
       let { detail = {} } = event;
 
-      // Get error details from media and show user-friendly error UI
+      // Get error details from media
       if (event.type === 'error') {
         detail = player.media.error;
-
-        // Map HTML5 media error to provider error codes
-        if (player.isHTML5 && detail) {
-          const code = detail.code || errorCodes.UNKNOWN;
-          const severity = providerErrors.getSeverity(code);
-
-          // Only show UI for fatal errors
-          if (severity === providerErrors.severity.FATAL) {
-            const mappedCode = providerErrors.mapCode(player.provider, code);
-            player.ui.showError(mappedCode, detail.message);
-          }
-        }
-        // For embed providers, use provider-specific errors
-        else if (detail && detail.code) {
-          player.ui.showError(detail.code, detail.message);
-        }
       }
 
       triggerEvent.call(player, elements.container, event.type, true, detail);
@@ -639,27 +572,6 @@ class Listeners {
     // Captions toggle
     this.bind(elements.buttons.captions, 'click', () => player.toggleCaptions());
 
-    // Dark mode toggle
-    if (elements.buttons.darkMode) {
-      Array.from(elements.buttons.darkMode).forEach((button) => {
-        this.bind(
-          button,
-          'click',
-          () => {
-            player.toggleDarkMode();
-          },
-          null,
-          false,
-        );
-      });
-    }
-
-    // Screenshot
-    this.bind(elements.buttons.screenshot, 'click', () => player.screenshot(), 'screenshot');
-
-    // Share
-    this.bind(elements.buttons.share, 'click', () => player.share(), 'share');
-
     // Download
     this.bind(
       elements.buttons.download,
@@ -685,13 +597,23 @@ class Listeners {
       elements.buttons.pip,
       'click',
       () => {
-        player.pip = 'toggle';
+        player.pip = !player.pip;
       },
       'pip',
     );
 
     // Airplay
     this.bind(elements.buttons.airplay, 'click', player.airplay, 'airplay');
+
+    // Dark mode toggle
+    this.bind(
+      elements.buttons.darkMode,
+      'click',
+      () => {
+        player.toggleDarkMode();
+      },
+      'darkMode',
+    );
 
     // Settings menu - click toggle
     this.bind(
@@ -814,6 +736,7 @@ class Listeners {
       controls.updateSeekTooltip.call(player, event));
 
     // Preview thumbnails plugin
+    // TODO: Really need to work on some sort of plug-in wide event bus or pub-sub for this
     this.bind(elements.progress, 'mousemove touchmove', (event) => {
       const { previewThumbnails } = player;
 
@@ -875,11 +798,7 @@ class Listeners {
       elements.inputs.volume,
       inputEvent,
       (event) => {
-        const volume = Number(event.target.value);
-        // Only set if it's a valid number
-        if (!Number.isNaN(volume)) {
-          player.volume = volume;
-        }
+        player.volume = event.target.value;
       },
       'volume',
     );

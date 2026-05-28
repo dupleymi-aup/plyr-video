@@ -5,8 +5,6 @@
 // License: The MIT License (MIT)
 // ==========================================================================
 
-// i18n language packs
-import * as i18n from '../i18n';
 import Captions from './captions';
 import defaults from './config/defaults';
 import { pip } from './config/states';
@@ -18,7 +16,6 @@ import html5 from './html5';
 import Listeners from './listeners';
 import media from './media';
 import Ads from './plugins/ads';
-import Analytics from './plugins/analytics';
 import PreviewThumbnails from './plugins/preview-thumbnails';
 import source from './source';
 import Storage from './storage';
@@ -35,10 +32,11 @@ import { cloneDeep, extend } from './utils/objects';
 import { silencePromise } from './utils/promise';
 import { getAspectRatio, reduceAspectRatio, setAspectRatio, validateAspectRatio } from './utils/style';
 import { translate } from './utils/translate';
-
 import { parseUrl } from './utils/urls';
 
 // Private properties
+// TODO: Use a WeakMap for private globals
+// const globals = new WeakMap();
 
 // Plyr instance
 class Plyr {
@@ -123,6 +121,7 @@ class Plyr {
     };
 
     // Debugging
+    // TODO: move to globals
     this.debug = new Console(this.config.debug);
 
     // Log config options and support
@@ -196,10 +195,11 @@ class Plyr {
               this.config.loop.active = true;
             }
 
+            // TODO: replace fullscreen.iosNative with this playsinline config option
             // YouTube requires the playsinline in the URL
             if (this.isYouTube) {
               this.config.playsinline = truthy.includes(url.searchParams.get('playsinline'));
-              this.config.youtube.hl = this.config.language || url.searchParams.get('hl') || '';
+              this.config.youtube.hl = url.searchParams.get('hl'); // TODO: Should this be setting language?
             }
             else {
               this.config.playsinline = true;
@@ -271,12 +271,6 @@ class Plyr {
     // Setup local storage for user settings
     this.storage = new Storage(this);
 
-    // Load dark mode preference from storage
-    const storedDarkMode = this.storage.get('darkMode');
-    if (is.boolean(storedDarkMode)) {
-      this.config.darkMode.enabled = storedDarkMode;
-    }
-
     // Store reference
     this.media.plyr = this;
 
@@ -286,16 +280,11 @@ class Plyr {
       wrap(this.media, this.elements.container);
     }
 
-    // Migrate custom properties from media to container (so they work)
+    // Migrate custom properties from media to container (so they work 😉)
     ui.migrateStyles.call(this);
 
     // Add style hook
     ui.addStyleHook.call(this);
-
-    // Apply dark mode class if enabled from storage
-    if (this.config.darkMode.enabled) {
-      toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, true);
-    }
 
     // Setup media
     media.setup.call(this);
@@ -338,11 +327,6 @@ class Plyr {
     // Setup preview thumbnails if enabled
     if (this.config.previewThumbnails.enabled) {
       this.previewThumbnails = new PreviewThumbnails(this);
-    }
-
-    // Setup analytics if enabled
-    if (this.config.analytics.enabled) {
-      this.analytics = new Analytics(this);
     }
   }
 
@@ -400,7 +384,7 @@ class Plyr {
   /**
    * Play the media, or play the advertisement (if they are not blocked)
    */
-  play() {
+  play = () => {
     if (!is.function(this.media.play)) {
       return null;
     }
@@ -412,18 +396,18 @@ class Plyr {
 
     // Return the promise (for HTML5)
     return this.media.play();
-  }
+  };
 
   /**
    * Pause the media
    */
-  pause() {
+  pause = () => {
     if (!this.playing || !is.function(this.media.pause)) {
       return null;
     }
 
     return this.media.pause();
-  }
+  };
 
   /**
    * Get playing state
@@ -457,7 +441,7 @@ class Plyr {
    * Toggle playback based on current status
    * @param {boolean} input
    */
-  togglePlay(input) {
+  togglePlay = (input) => {
     // Toggle based on current state if nothing passed
     const toggle = is.boolean(input) ? input : !this.playing;
 
@@ -466,12 +450,12 @@ class Plyr {
     }
 
     return this.pause();
-  }
+  };
 
   /**
    * Stop playback
    */
-  stop() {
+  stop = () => {
     if (this.isHTML5) {
       this.pause();
       this.restart();
@@ -479,204 +463,30 @@ class Plyr {
     else if (is.function(this.media.stop)) {
       this.media.stop();
     }
-  }
+  };
 
   /**
    * Restart playback
    */
-  restart() {
+  restart = () => {
     this.currentTime = 0;
-  }
+  };
 
   /**
    * Rewind
    * @param {number} seekTime - how far to rewind in seconds. Defaults to the config.seekTime
    */
-  rewind(seekTime) {
+  rewind = (seekTime) => {
     this.currentTime -= is.number(seekTime) ? seekTime : this.config.seekTime;
-  }
+  };
 
   /**
    * Fast forward
    * @param {number} seekTime - how far to fast forward in seconds. Defaults to the config.seekTime
    */
-  forward(seekTime) {
+  forward = (seekTime) => {
     this.currentTime += is.number(seekTime) ? seekTime : this.config.seekTime;
-  }
-
-  /**
-   * Step backward one frame
-   */
-  stepBack() {
-    if (!this.isHTML5) return;
-    this.currentTime -= this.config.frameStep || (1 / 30);
-  }
-
-  /**
-   * Step forward one frame
-   */
-  stepForward() {
-    if (!this.isHTML5) return;
-    this.currentTime += this.config.frameStep || (1 / 30);
-  }
-
-  /**
-   * Capture current frame as image (HTML5 only)
-   * @param {object} options - Optional: { type: 'image/png', quality: 0.92, download: true }
-   * @returns {Promise<Blob|null>} Promise resolving to the captured screenshot blob or null if failed
-   */
-  screenshot(options = {}) {
-    if (!this.isHTML5 || !this.isVideo) {
-      this.debug.warn('Screenshot is only supported for HTML5 video');
-      return Promise.resolve(null);
-    }
-
-    const { type = 'image/png', quality = 0.92, download = true, filename = null } = options;
-
-    const video = this.media;
-
-    // Create canvas and draw current frame
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert to blob
-    return new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          this.debug.warn('Failed to capture screenshot');
-          resolve(null);
-          return;
-        }
-
-        // Trigger download if requested
-        if (download) {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = filename || `plyr-screenshot-${Date.now()}.png`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-        }
-
-        // Fire event for custom handling
-        triggerEvent.call(this, this.media, 'screenshot', { blob, type, canvas });
-
-        resolve(blob);
-      }, type, quality);
-    });
-  }
-
-  /**
-   * Share the current video with timestamp
-   * @param {object} options - Optional: { url, time }
-   * @returns {object} Share popup element
-   */
-  share(options = {}) {
-    const { url = window.location.href, time = this.currentTime } = options;
-
-    // Build share URL with timestamp
-    const shareUrl = new URL(url);
-    if (time > 0) {
-      shareUrl.hash = `t=${Math.floor(time)}`;
-    }
-
-    // Create share popup
-    const popup = createElement('div', {
-      'class': 'plyr__share-popup',
-      'role': 'dialog',
-      'aria-label': i18n.get('share', this.config),
-    });
-
-    const title = createElement('h4', null, i18n.get('share', this.config));
-    popup.appendChild(title);
-
-    // Copy link button
-    const copyBtn = createElement('button', {
-      'type': 'button',
-      'class': 'plyr__share-btn',
-      'data-action': 'copy',
-    }, i18n.get('shareCopyLink', this.config));
-
-    copyBtn.addEventListener('click', async () => {
-      try {
-        if (navigator.clipboard) {
-          await navigator.clipboard.writeText(shareUrl.toString());
-        }
-        else {
-          // Fallback for older browsers
-          const textArea = document.createElement('textarea');
-          textArea.value = shareUrl.toString();
-          document.body.appendChild(textArea);
-          textArea.select();
-          document.execCommand('copy');
-          document.body.removeChild(textArea);
-        }
-        copyBtn.textContent = i18n.get('shareCopied', this.config);
-        setTimeout(() => {
-          copyBtn.textContent = i18n.get('shareCopyLink', this.config);
-        }, 2000);
-      }
-      catch (e) {
-        this.debug.warn('Failed to copy link:', e.message);
-      }
-    });
-
-    popup.appendChild(copyBtn);
-
-    // Social share buttons
-    const socials = [
-      { name: 'twitter', label: i18n.get('shareTwitter', this.config), icon: 'twitter', urlFn: u => `https://twitter.com/intent/tweet?url=${encodeURIComponent(u)}` },
-      { name: 'facebook', label: i18n.get('shareFacebook', this.config), icon: 'facebook', urlFn: u => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}` },
-      { name: 'telegram', label: i18n.get('shareTelegram', this.config), icon: 'telegram', urlFn: u => `https://t.me/share/url?url=${encodeURIComponent(u)}` },
-    ];
-
-    socials.forEach(({ label, urlFn }) => {
-      const btn = createElement('a', {
-        href: urlFn(shareUrl.toString()),
-        target: '_blank',
-        rel: 'noopener noreferrer',
-        class: `plyr__share-btn plyr__share-btn--${label.toLowerCase().replace(/\s+/g, '-')}`,
-      }, label);
-      popup.appendChild(btn);
-    });
-
-    // Close button
-    const closeBtn = createElement('button', {
-      'type': 'button',
-      'class': 'plyr__share-close',
-      'aria-label': 'Close',
-    }, '×');
-
-    closeBtn.addEventListener('click', () => {
-      popup.remove();
-    });
-
-    popup.appendChild(closeBtn);
-
-    // Position popup
-    const container = this.elements.container;
-    container.appendChild(popup);
-
-    // Close on outside click
-    const outsideClick = (e) => {
-      if (!popup.contains(e.target)) {
-        popup.remove();
-        document.removeEventListener('click', outsideClick);
-      }
-    };
-    setTimeout(() => document.addEventListener('click', outsideClick), 0);
-
-    // Fire event
-    triggerEvent.call(this, this.media, 'share', { url: shareUrl.toString(), time });
-
-    return popup;
-  }
+  };
 
   /**
    * Seek to a time
@@ -707,8 +517,6 @@ class Plyr {
 
   /**
    * Get buffered
-   * Returns a number (0-1) for single-range buffering (YouTube/Vimeo/simple HTML5)
-   * or an array of {start, end} objects when multiple buffered chunks exist
    */
   get buffered() {
     const { buffered } = this.media;
@@ -718,22 +526,11 @@ class Plyr {
       return buffered;
     }
 
-    // HTML5 with multiple buffered ranges
+    // HTML5
+    // TODO: Handle buffered chunks of the media
+    // (i.e. seek to another section buffers only that section)
     if (buffered && buffered.length && this.duration > 0) {
-      // If only one range, return the simple fraction for backwards compatibility
-      if (buffered.length === 1) {
-        return buffered.end(0) / this.duration;
-      }
-
-      // Multiple ranges — return array of normalized {start, end} pairs
-      const ranges = [];
-      for (let i = 0; i < buffered.length; i++) {
-        ranges.push({
-          start: buffered.start(i) / this.duration,
-          end: buffered.end(i) / this.duration,
-        });
-      }
-      return ranges;
+      return buffered.end(0) / this.duration;
     }
 
     return 0;
@@ -815,18 +612,18 @@ class Plyr {
    * Increase volume
    * @param {number} step - How much to increase by (between 0 and 1)
    */
-  increaseVolume(step) {
+  increaseVolume = (step) => {
     const volume = this.media.muted ? 0 : this.volume;
     this.volume = volume + (is.number(step) ? step : 0);
-  }
+  };
 
   /**
    * Decrease volume
    * @param {number} step - How much to decrease by (between 0 and 1)
    */
-  decreaseVolume(step) {
+  decreaseVolume = (step) => {
     this.increaseVolume(-step);
-  }
+  };
 
   /**
    * Set muted state
@@ -1017,12 +814,6 @@ class Plyr {
 
     if (!options.includes(quality)) {
       const value = closest(options, quality);
-
-      // Bail if no fallback quality available
-      if (value === undefined) {
-        return;
-      }
-
       this.debug.warn(`Unsupported quality option: ${quality}, using ${value} instead`);
       quality = value;
 
@@ -1051,62 +842,56 @@ class Plyr {
 
   /**
    * Toggle loop
-   * @param {string|boolean} input - 'start' sets loop start point, 'end' sets loop end point,
-   *   'all' loops entire video, 'toggle' toggles loop on/off, or boolean for simple on/off
+   * TODO: Finish fancy new logic. Set the indicator on load as user may pass loop as config
+   * @param {boolean} input - Whether to loop or not
    */
   set loop(input) {
-    // Simple boolean toggle
-    if (is.boolean(input)) {
-      this.config.loop.active = input;
-      this.config.loop.start = input ? 0 : null;
-      this.config.loop.end = null;
-      this.media.loop = input;
-      return;
-    }
+    const toggle = is.boolean(input) ? input : this.config.loop.active;
+    this.config.loop.active = toggle;
+    this.media.loop = toggle;
 
-    // Advanced mode with start/end/all/toggle
-    const type = ['start', 'end', 'all', 'toggle'].includes(input) ? input : 'toggle';
+    // Set default to be a true toggle
+    /* const type = ['start', 'end', 'all', 'none', 'toggle'].includes(input) ? input : 'toggle';
 
-    switch (type) {
-      case 'start':
-        if (this.config.loop.end && this.config.loop.end <= this.currentTime) {
-          this.config.loop.end = null;
-        }
-        this.config.loop.start = this.currentTime;
-        this.config.loop.active = true;
-        break;
+        switch (type) {
+            case 'start':
+                if (this.config.loop.end && this.config.loop.end <= this.currentTime) {
+                    this.config.loop.end = null;
+                }
+                this.config.loop.start = this.currentTime;
+                // this.config.loop.indicator.start = this.elements.display.played.value;
+                break;
 
-      case 'end':
-        if (this.config.loop.start === null || this.config.loop.start >= this.currentTime) {
-          return;
-        }
-        this.config.loop.end = this.currentTime;
-        this.config.loop.active = true;
-        break;
+            case 'end':
+                if (this.config.loop.start >= this.currentTime) {
+                    return this;
+                }
+                this.config.loop.end = this.currentTime;
+                // this.config.loop.indicator.end = this.elements.display.played.value;
+                break;
 
-      case 'all':
-        this.config.loop.start = 0;
-        this.config.loop.end = null;
-        this.config.loop.active = true;
-        this.media.loop = true;
-        break;
+            case 'all':
+                this.config.loop.start = 0;
+                this.config.loop.end = this.duration - 2;
+                this.config.loop.indicator.start = 0;
+                this.config.loop.indicator.end = 100;
+                break;
 
-      case 'toggle':
-      default:
-        if (this.config.loop.active) {
-          this.config.loop.start = null;
-          this.config.loop.end = null;
-          this.config.loop.active = false;
-          this.media.loop = false;
-        }
-        else {
-          this.config.loop.start = 0;
-          this.config.loop.end = null;
-          this.config.loop.active = true;
-          this.media.loop = true;
-        }
-        break;
-    }
+            case 'toggle':
+                if (this.config.loop.active) {
+                    this.config.loop.start = 0;
+                    this.config.loop.end = null;
+                } else {
+                    this.config.loop.start = 0;
+                    this.config.loop.end = this.duration - 2;
+                }
+                break;
+
+            default:
+                this.config.loop.start = 0;
+                this.config.loop.end = null;
+                break;
+        } */
   }
 
   /**
@@ -1163,9 +948,7 @@ class Plyr {
       return;
     }
 
-    ui.setPoster.call(this, input, false).catch((error) => {
-      this.debug.warn('Failed to set poster:', error.message);
-    });
+    ui.setPoster.call(this, input, false).catch(() => {});
   }
 
   /**
@@ -1288,18 +1071,18 @@ class Plyr {
       this.storage.set({ translationLanguage: input });
       // If translation is active, re-translate current captions
       if (this.captions.translation.active && this.elements.captions) {
-        const content = this.elements.captions.textContent;
+        const content = this.elements.captions.innerHTML;
         if (content) {
           translate(content, input)
             .then((translated) => {
               if (this.elements.translation) {
-                this.elements.translation.textContent = translated;
+                this.elements.translation.innerHTML = translated;
               }
             })
             .catch((error) => {
-              this.debug.warn('Translation failed:', error);
+              this.debug.warn('Translation failed:', error.message);
               if (this.elements.translation) {
-                this.elements.translation.textContent = '';
+                this.elements.translation.innerHTML = '';
               }
             });
         }
@@ -1339,6 +1122,8 @@ class Plyr {
 
   /**
    * Toggle picture-in-picture playback on WebKit/MacOS
+   * TODO: update player with state, support, enabled
+   * TODO: detect outside changes
    */
   set pip(input) {
     // Bail if no support
@@ -1384,51 +1169,6 @@ class Plyr {
   }
 
   /**
-   * Set dark mode state
-   */
-  set darkMode(input) {
-    const toggle = is.boolean(input) ? input : !this.config.darkMode.enabled;
-
-    this.config.darkMode.enabled = toggle;
-
-    toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, toggle);
-
-    // Save to storage
-    if (this.config.darkMode.persistent) {
-      this.storage.set({ darkMode: toggle });
-    }
-
-    // Trigger event
-    triggerEvent.call(this, this.media, toggle ? 'darkmodeenabled' : 'darkmodedisabled');
-
-    // Update button pressed state
-    if (this.elements.buttons.darkMode) {
-      Array.from(this.elements.buttons.darkMode).forEach((button) => {
-        button.pressed = toggle;
-      });
-    }
-  }
-
-  /**
-   * Get current dark mode state
-   */
-  get darkMode() {
-    return this.config.darkMode.enabled;
-  }
-
-  /**
-   * Toggle dark mode
-   */
-  toggleDarkMode(input) {
-    if (is.boolean(input)) {
-      this.darkMode = input;
-    }
-    else {
-      this.darkMode = !this.config.darkMode.enabled;
-    }
-  }
-
-  /**
    * Sets the preview thumbnails for the current source
    */
   setPreviewThumbnails(thumbnailSource) {
@@ -1446,20 +1186,67 @@ class Plyr {
   }
 
   /**
-   * Trigger the airplay dialog on supported devices (Safari/macOS)
+   * Trigger the airplay dialog
+   * TODO: update player with state, support, enabled
    */
-  airplay() {
+  airplay = () => {
     // Show dialog if supported
     if (support.airplay) {
       this.media.webkitShowPlaybackTargetPicker();
     }
+  };
+
+  /**
+   * Set dark mode state
+   * @param {boolean} input - Whether to enable dark mode
+   */
+  set darkMode(input) {
+    const toggle = is.boolean(input) ? input : this.config.darkMode.enabled;
+
+    this.config.darkMode.enabled = toggle;
+
+    // Toggle class on container
+    toggleClass(this.elements.container, this.config.classNames.darkMode.enabled, toggle);
+
+    // Store preference if persistent
+    if (this.config.darkMode.persistent && this.storage) {
+      this.storage.set({ darkMode: toggle });
+    }
+
+    // Update button pressed state
+    const buttons = this.elements.buttons.darkMode;
+    if (buttons) {
+      Array.from(buttons).forEach((btn) => {
+        btn.setAttribute('aria-pressed', toggle);
+        toggleClass(btn, this.config.classNames.controlPressed, toggle);
+      });
+    }
+
+    // Trigger event
+    triggerEvent.call(this, this.media, toggle ? 'darkmodeenabled' : 'darkmodedisabled');
   }
+
+  /**
+   * Get current dark mode state
+   */
+  get darkMode() {
+    return Boolean(this.config.darkMode.enabled);
+  }
+
+  /**
+   * Toggle dark mode
+   * @param {boolean} input - Whether to enable or disable dark mode
+   */
+  toggleDarkMode = (input) => {
+    const toggle = is.boolean(input) ? input : !this.darkMode;
+    this.darkMode = toggle;
+  };
 
   /**
    * Toggle the player controls
    * @param {boolean} [toggle] - Whether to show the controls
    */
-  toggleControls(toggle) {
+  toggleControls = (toggle) => {
     // Don't toggle if missing UI support or if it's audio
     if (this.supported.ui && !this.isAudio) {
       // Get state before change
@@ -1489,34 +1276,34 @@ class Plyr {
     }
 
     return false;
-  }
+  };
 
   /**
    * Add event listeners
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  on(event, callback) {
+  on = (event, callback) => {
     addListener.call(this, this.elements.container, event, callback);
-  }
+  };
 
   /**
    * Add event listeners once
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  once(event, callback) {
+  once = (event, callback) => {
     onceListener.call(this, this.elements.container, event, callback);
-  }
+  };
 
   /**
    * Remove event listeners
    * @param {string} event - Event type
    * @param {Function} callback - Callback for when event occurs
    */
-  off(event, callback) {
-    removeListener(this.elements.container, event, callback);
-  }
+  off = (event, callback) => {
+    removeListener.call(this, this.elements.container, event, callback);
+  };
 
   /**
    * Destroy an instance
@@ -1525,7 +1312,7 @@ class Plyr {
    * @param {Function} callback - Callback for when destroy is complete
    * @param {boolean} soft - Whether it's a soft destroy (for source changes etc)
    */
-  destroy(callback, soft = false) {
+  destroy = (callback, soft = false) => {
     if (!this.ready) {
       return;
     }
@@ -1606,21 +1393,10 @@ class Plyr {
       this.previewThumbnails = null;
     }
 
-    // Destroy analytics plugin if active
-    if (this.analytics) {
-      this.analytics.destroy();
-      this.analytics = null;
-    }
-
     // Destroy ads plugin if active
     if (this.ads && this.ads.manager) {
       this.ads.destroy();
       this.ads = null;
-    }
-
-    // Destroy captions plugin to clean up textTrack listeners
-    if (this.captions) {
-      this.captions.destroy();
     }
 
     // Remove global window/document listeners
@@ -1675,7 +1451,7 @@ class Plyr {
       };
 
       if (this.embed !== null) {
-        this.embed.unload().then(doneOnce).catch(doneOnce);
+        this.embed.unload().then(doneOnce);
       }
 
       // Vimeo does not always return
@@ -1696,9 +1472,7 @@ class Plyr {
    * Check for support for a mime type (HTML5 only)
    * @param {string} type - Mime type
    */
-  supports(type) {
-    return support.mime.call(this, type);
-  }
+  supports = type => support.mime.call(this, type);
 
   /**
    * Check for support
@@ -1745,6 +1519,5 @@ class Plyr {
 }
 
 Plyr.defaults = cloneDeep(defaults);
-Plyr.i18n = i18n;
 
 export default Plyr;

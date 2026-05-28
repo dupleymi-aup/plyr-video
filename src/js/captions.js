@@ -2,7 +2,6 @@
 // Plyr Captions
 // ==========================================================================
 
-import { getLabel as getLabelFromUtils } from './captions-utils';
 import controls from './controls';
 import { dedupe } from './utils/arrays';
 import browser from './utils/browser';
@@ -58,12 +57,6 @@ class Captions {
     this.isRutube = plyr.isRutube;
     this.isYandexCloud = plyr.isYandexCloud;
     this.isYouTube = plyr.isYouTube;
-
-    // Track listener references for cleanup
-    this._listeners = {
-      textTracks: null,
-      tracks: new Map(),
-    };
   }
 
   // Get embed reference dynamically (embed is set up after Captions constructor runs)
@@ -102,9 +95,6 @@ class Captions {
     if (!is.element(this.elements.captions)) {
       this.elements.captions = createElement('div', getAttributesFromSelector(this.config.selectors.captions));
       this.elements.captions.setAttribute('dir', 'auto');
-      this.elements.captions.setAttribute('role', 'log');
-      this.elements.captions.setAttribute('aria-live', 'polite');
-      this.elements.captions.setAttribute('aria-label', i18n.get('captions', this.config));
 
       insertAfter(this.elements.captions, this.elements.wrapper);
     }
@@ -113,9 +103,6 @@ class Captions {
     if (!is.element(this.elements.translation)) {
       this.elements.translation = createElement('div', getAttributesFromSelector(this.config.selectors.translation));
       this.elements.translation.setAttribute('dir', 'auto');
-      this.elements.translation.setAttribute('role', 'log');
-      this.elements.translation.setAttribute('aria-live', 'polite');
-      this.elements.translation.setAttribute('aria-label', i18n.get('translate', this.config));
       insertAfter(this.elements.translation, this.elements.wrapper);
     }
 
@@ -183,9 +170,7 @@ class Captions {
     // Watch changes to textTracks and update captions menu
     if (this.isHTML5) {
       const trackEvents = this.config.captions.update ? 'addtrack removetrack' : 'removetrack';
-      const boundUpdate = this.update.bind(this);
-      this._listeners.textTracks = boundUpdate;
-      on.call(this.plyr, this.media.textTracks, trackEvents, boundUpdate);
+      on.call(this.plyr, this.media.textTracks, trackEvents, this.update.bind(this));
     }
 
     // Update available languages in list next tick (the event must not be triggered before the listeners)
@@ -220,9 +205,7 @@ class Captions {
           }
 
           // Add event listener for cue changes
-          const boundCueChange = () => this.updateCues();
-          this._listeners.tracks.set(track, boundCueChange);
-          on.call(this.plyr, track, 'cuechange', boundCueChange);
+          on.call(this.plyr, track, 'cuechange', () => this.updateCues());
         });
     }
 
@@ -350,24 +333,24 @@ class Captions {
     }
 
     // Update translation container immediately
-    if (translationActive && this.elements.translation && this.elements.captions && this.elements.captions.textContent) {
+    if (translationActive && this.elements.translation && this.elements.captions && this.elements.captions.innerHTML) {
       // Translate current captions
-      translate(this.elements.captions.textContent, this.translation.language)
+      translate(this.elements.captions.innerHTML, this.translation.language)
         .then((translated) => {
           if (this.elements.translation) {
-            this.elements.translation.textContent = translated;
+            this.elements.translation.innerHTML = translated;
           }
         })
         .catch((error) => {
-          this.debug.warn('Translation failed:', error);
+          this.plyr.debug.warn('Translation failed:', error.message);
           if (this.elements.translation) {
-            this.elements.translation.textContent = '';
+            this.elements.translation.innerHTML = '';
           }
         });
     }
     else if (this.elements.translation) {
       // Clear translation container if not active
-      this.elements.translation.textContent = '';
+      this.elements.translation.innerHTML = '';
     }
   }
 
@@ -500,7 +483,25 @@ class Captions {
 
   // Get UI label for track
   getLabel(track) {
-    return getLabelFromUtils(this, track);
+    let currentTrack = track;
+
+    if (!is.track(currentTrack) && this.supported.textTracks && this.toggled) {
+      currentTrack = this.getCurrentTrack();
+    }
+
+    if (is.track(currentTrack)) {
+      if (!is.empty(currentTrack.label)) {
+        return currentTrack.label;
+      }
+
+      if (!is.empty(currentTrack.language)) {
+        return currentTrack.language.toUpperCase();
+      }
+
+      return i18n.get('enabled', this.config);
+    }
+
+    return i18n.get('disabled', this.config);
   }
 
   // Update captions using current track's active cues
@@ -550,44 +551,24 @@ class Captions {
         translate(content, this.translation.language)
           .then((translated) => {
             if (this.elements.translation) {
-              this.elements.translation.textContent = translated;
+              this.elements.translation.innerHTML = translated;
             }
           })
           .catch((error) => {
-            this.debug.warn('Translation failed:', error);
+            this.plyr.debug.warn('Translation failed:', error.message);
             if (this.elements.translation) {
-              this.elements.translation.textContent = '';
+              this.elements.translation.innerHTML = ''; // Clear on error
             }
           });
       }
       else if (this.elements.translation && !(this.plyr.transcription && this.plyr.transcription.active)) {
         // Clear translation container if not active (and transcription is not active)
-        this.elements.translation.textContent = '';
+        this.elements.translation.innerHTML = '';
       }
 
       // Trigger event
       triggerEvent.call(this.plyr, this.media, 'cuechange');
     }
-  }
-
-  // Destroy - clean up event listeners to prevent memory leaks
-  destroy() {
-    // Remove textTracks listener
-    if (this._listeners.textTracks && this.media && this.media.textTracks) {
-      const trackEvents = this.config.captions.update ? 'addtrack removetrack' : 'removetrack';
-      this.media.textTracks.removeEventListener(trackEvents, this._listeners.textTracks);
-    }
-
-    // Remove individual track cuechange listeners
-    this._listeners.tracks.forEach((listener, track) => {
-      if (track) {
-        track.removeEventListener('cuechange', listener);
-      }
-    });
-
-    // Clear references
-    this._listeners.textTracks = null;
-    this._listeners.tracks.clear();
   }
 }
 

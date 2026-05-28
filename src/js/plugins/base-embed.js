@@ -56,7 +56,7 @@ export function createEmbed(provider, options) {
   iframe.setAttribute('src', `${embedUrl}${query}`);
 
   const wrapper = createElement('div', {
-    'className': player.config.classNames.embedContainer,
+    'class': player.config.classNames.embedContainer,
     'data-poster': player.poster,
   });
   wrapper.appendChild(iframe);
@@ -81,6 +81,7 @@ export function createEmbed(provider, options) {
   player.media.duration = 0;
   player.media.seeking = false;
   player.media.buffered = 0;
+  player.media.lastBuffered = null;
 
   // Setup postMessage listener
   player.embed.messageHandler = (event) => {
@@ -342,7 +343,7 @@ export function handleCaptionList(player, data) {
     }));
     player.media.textTracks = player.embed.captionTracks;
     player.debug.log('Available caption tracks:', player.embed.captionTracks.length);
-    if (player.embed.captionTracks.length > 0 && player.captions) {
+    if (player.embed.captionTracks.length > 0) {
       player.captions.setup();
     }
   }
@@ -360,9 +361,7 @@ export function handleCueChange(player, data) {
       }
       return cue;
     });
-    if (player.captions) {
-      player.captions.updateCues(strippedCues);
-    }
+    player.captions.updateCues(strippedCues);
   }
 }
 
