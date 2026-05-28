@@ -2,7 +2,7 @@
 // Plyr Analytics Plugin
 // ==========================================================================
 
-import { on } from '../utils/events';
+import { off, on } from '../utils/events';
 
 const STORAGE_KEY = 'plyr_viewer_id';
 
@@ -81,23 +81,44 @@ class Analytics {
   _bindListeners() {
     const { player } = this;
 
-    on.call(player, player.elements.container, 'ready', () => this._onReady());
-    on.call(player, player.elements.container, 'play', () => this._onPlay());
-    on.call(player, player.elements.container, 'pause', () => this._onPause());
-    on.call(player, player.elements.container, 'ended', () => this._onEnded());
-    on.call(player, player.elements.container, 'seeking', () => this._onSeeking());
-    on.call(player, player.elements.container, 'seeked', () => this._onSeeked());
-    on.call(player, player.elements.container, 'timeupdate', () => this._onTimeupdate());
-    on.call(player, player.elements.container, 'qualitychange', e => this._onQualityChange(e));
-    on.call(player, player.elements.container, 'ratechange', e => this._onRateChange(e));
-    on.call(player, player.elements.container, 'volumechange', () => this._onVolumeChange());
-    on.call(player, player.elements.container, 'waiting', () => this._onWaiting());
-    on.call(player, player.elements.container, 'canplay', () => this._onCanPlay());
-    on.call(player, player.elements.container, 'error', e => this._onError(e));
-    on.call(player, player.elements.container, 'enterfullscreen', () => this._onFullscreenEnter());
-    on.call(player, player.elements.container, 'exitfullscreen', () => this._onFullscreenExit());
-    on.call(player, player.elements.container, 'controlshidden', () => this._onControlsHidden());
-    on.call(player, player.elements.container, 'controlsshown', () => this._onControlsShown());
+    // Store bound handler references for cleanup in destroy()
+    this._handlers = {
+      ready: () => this._onReady(),
+      play: () => this._onPlay(),
+      pause: () => this._onPause(),
+      ended: () => this._onEnded(),
+      seeking: () => this._onSeeking(),
+      seeked: () => this._onSeeked(),
+      timeupdate: () => this._onTimeupdate(),
+      qualitychange: e => this._onQualityChange(e),
+      ratechange: e => this._onRateChange(e),
+      volumechange: () => this._onVolumeChange(),
+      waiting: () => this._onWaiting(),
+      canplay: () => this._onCanPlay(),
+      error: e => this._onError(e),
+      enterfullscreen: () => this._onFullscreenEnter(),
+      exitfullscreen: () => this._onFullscreenExit(),
+      controlshidden: () => this._onControlsHidden(),
+      controlsshown: () => this._onControlsShown(),
+    };
+
+    on.call(player, player.elements.container, 'ready', this._handlers.ready);
+    on.call(player, player.elements.container, 'play', this._handlers.play);
+    on.call(player, player.elements.container, 'pause', this._handlers.pause);
+    on.call(player, player.elements.container, 'ended', this._handlers.ended);
+    on.call(player, player.elements.container, 'seeking', this._handlers.seeking);
+    on.call(player, player.elements.container, 'seeked', this._handlers.seeked);
+    on.call(player, player.elements.container, 'timeupdate', this._handlers.timeupdate);
+    on.call(player, player.elements.container, 'qualitychange', this._handlers.qualitychange);
+    on.call(player, player.elements.container, 'ratechange', this._handlers.ratechange);
+    on.call(player, player.elements.container, 'volumechange', this._handlers.volumechange);
+    on.call(player, player.elements.container, 'waiting', this._handlers.waiting);
+    on.call(player, player.elements.container, 'canplay', this._handlers.canplay);
+    on.call(player, player.elements.container, 'error', this._handlers.error);
+    on.call(player, player.elements.container, 'enterfullscreen', this._handlers.enterfullscreen);
+    on.call(player, player.elements.container, 'exitfullscreen', this._handlers.exitfullscreen);
+    on.call(player, player.elements.container, 'controlshidden', this._handlers.controlshidden);
+    on.call(player, player.elements.container, 'controlsshown', this._handlers.controlsshown);
   }
 
   _onReady() {
@@ -543,6 +564,28 @@ class Analytics {
       this._unloadHandler = null;
     }
 
+    // Remove all bound event listeners
+    if (this._handlers && this.player) {
+      const { player } = this;
+      off.call(player, player.elements.container, 'ready', this._handlers.ready);
+      off.call(player, player.elements.container, 'play', this._handlers.play);
+      off.call(player, player.elements.container, 'pause', this._handlers.pause);
+      off.call(player, player.elements.container, 'ended', this._handlers.ended);
+      off.call(player, player.elements.container, 'seeking', this._handlers.seeking);
+      off.call(player, player.elements.container, 'seeked', this._handlers.seeked);
+      off.call(player, player.elements.container, 'timeupdate', this._handlers.timeupdate);
+      off.call(player, player.elements.container, 'qualitychange', this._handlers.qualitychange);
+      off.call(player, player.elements.container, 'ratechange', this._handlers.ratechange);
+      off.call(player, player.elements.container, 'volumechange', this._handlers.volumechange);
+      off.call(player, player.elements.container, 'waiting', this._handlers.waiting);
+      off.call(player, player.elements.container, 'canplay', this._handlers.canplay);
+      off.call(player, player.elements.container, 'error', this._handlers.error);
+      off.call(player, player.elements.container, 'enterfullscreen', this._handlers.enterfullscreen);
+      off.call(player, player.elements.container, 'exitfullscreen', this._handlers.exitfullscreen);
+      off.call(player, player.elements.container, 'controlshidden', this._handlers.controlshidden);
+      off.call(player, player.elements.container, 'controlsshown', this._handlers.controlsshown);
+    }
+
     // Clear references
     this.player = null;
     this.config = null;
@@ -552,6 +595,7 @@ class Analytics {
     this.speedChanges = [];
     this.errors = [];
     this._heatmapBuckets = [];
+    this._handlers = null;
   }
 
   // ===========================
