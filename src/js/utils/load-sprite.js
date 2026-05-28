@@ -7,7 +7,7 @@ import fetch from './fetch';
 import is from './is';
 
 // Load an external SVG sprite
-export default function loadSprite(url, id) {
+export default function loadSprite(url, id, debug) {
   if (!is.string(url)) {
     return;
   }
@@ -69,14 +69,14 @@ export default function loadSprite(url, id) {
           }
           catch (e) {
             // Storage quota exceeded or private browsing
-            console.warn('Plyr: Failed to cache sprite:', e.message);
+            if (debug) debug.warn('Failed to cache sprite:', e.message);
           }
         }
 
         update(container, result);
       })
       .catch((e) => {
-        console.warn('Plyr: Failed to load sprite:', e.message);
+        if (debug) debug.warn('Failed to load sprite:', e.message);
       });
   }
 }

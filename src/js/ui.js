@@ -126,7 +126,9 @@ const ui = {
 
     // Assure the poster image is set, if the property was added before the element was created
     if (this.poster) {
-      ui.setPoster.call(this, this.poster, false).catch(() => {});
+      ui.setPoster.call(this, this.poster, false).catch((e) => {
+        this.debug.warn('Failed to set poster:', e.message);
+      });
     }
 
     // Manually set the duration if user has overridden it.

@@ -948,7 +948,9 @@ class Plyr {
       return;
     }
 
-    ui.setPoster.call(this, input, false).catch(() => {});
+    ui.setPoster.call(this, input, false).catch((e) => {
+      this.debug.warn('Failed to set poster:', e.message);
+    });
   }
 
   /**

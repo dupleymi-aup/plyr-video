@@ -9,6 +9,7 @@ class Storage {
   constructor(player) {
     this.enabled = player.config.storage.enabled;
     this.key = player.config.storage.key;
+    this.debug = player.debug;
   }
 
   // Check for actual support (see if we can use it)
@@ -63,7 +64,9 @@ class Storage {
     try {
       window.localStorage.setItem(this.key, JSON.stringify(storage));
     }
-    catch { }
+    catch (e) {
+      this.debug.warn('Failed to save to localStorage:', e.message);
+    }
   };
 }
 

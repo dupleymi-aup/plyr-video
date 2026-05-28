@@ -51,10 +51,8 @@ describe('translate', () => {
       }),
     );
 
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await translate('Hello', 'de');
     expect(result).toBe('Hello');
-    expect(consoleSpy).toHaveBeenCalled();
   });
 
   it('should fallback to original text on invalid JSON response', async () => {
@@ -65,19 +63,15 @@ describe('translate', () => {
       }),
     );
 
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await translate('Hello', 'it');
     expect(result).toBe('Hello');
-    expect(consoleSpy).toHaveBeenCalled();
   });
 
   it('should fallback to original text on network error', async () => {
     globalThis.fetch = vi.fn(() => Promise.reject(new Error('Network error')));
 
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const result = await translate('Hello', 'pt');
     expect(result).toBe('Hello');
-    expect(consoleSpy).toHaveBeenCalled();
   });
 
   it('should use default target language "en"', async () => {

@@ -766,7 +766,7 @@ class Controls {
 
       // Only load external sprite using AJAX
       if (icon.cors) {
-        loadSprite(icon.url, 'sprite-plyr');
+        loadSprite(icon.url, 'sprite-plyr', this.player.debug);
       }
     }
 

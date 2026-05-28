@@ -52,9 +52,8 @@ export function translate(text, to = 'en', from = 'auto', config = {}) {
       }
       throw new Error('Invalid response from translation service');
     })
-    .catch((error) => {
-      // Log error and return original text as fallback
-      console.warn('Translation failed:', error);
+    .catch((_error) => {
+      // Return original text as fallback
       return text; // Fallback to original text
     });
 }
