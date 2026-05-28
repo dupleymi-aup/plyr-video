@@ -523,7 +523,7 @@ class Plyr {
   /**
    * Capture current frame as image (HTML5 only)
    * @param {object} options - Optional: { type: 'image/png', quality: 0.92, download: true }
-   * @returns {Promise<Blob|null>}
+   * @returns {Promise<Blob|null>} Promise resolving to the captured screenshot blob or null if failed
    */
   screenshot(options = {}) {
     if (!this.isHTML5 || !this.isVideo) {
@@ -588,8 +588,8 @@ class Plyr {
 
     // Create share popup
     const popup = createElement('div', {
-      class: 'plyr__share-popup',
-      role: 'dialog',
+      'class': 'plyr__share-popup',
+      'role': 'dialog',
       'aria-label': i18n.get('share', this.config),
     });
 
@@ -598,8 +598,8 @@ class Plyr {
 
     // Copy link button
     const copyBtn = createElement('button', {
-      type: 'button',
-      class: 'plyr__share-btn',
+      'type': 'button',
+      'class': 'plyr__share-btn',
       'data-action': 'copy',
     }, i18n.get('shareCopyLink', this.config));
 
@@ -648,8 +648,8 @@ class Plyr {
 
     // Close button
     const closeBtn = createElement('button', {
-      type: 'button',
-      class: 'plyr__share-close',
+      'type': 'button',
+      'class': 'plyr__share-close',
       'aria-label': 'Close',
     }, '×');
 

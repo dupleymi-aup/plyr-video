@@ -886,7 +886,7 @@ class Controls {
 
     // Setup tooltips
     if (this.player.config.tooltips.controls) {
-      const { classNames, selectors } = this.player.config;
+      const { classNames } = this.player.config;
 
       // Map button data-plyr types to tooltip i18n keys
       const tooltipKeyMap = {

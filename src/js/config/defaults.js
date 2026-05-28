@@ -452,8 +452,6 @@ const defaults = {
     shareFacebook: 'Share on Facebook',
     shareTelegram: 'Share on Telegram',
     tooltipShare: 'Share this video',
-    // pip
-    pip: 'PIP',
   },
 
   // URLs
