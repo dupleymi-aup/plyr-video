@@ -99,6 +99,13 @@ class PreviewThumbnails {
       scrubbing: {},
     };
 
+    // Timer IDs for cleanup on destroy
+    this._timers = {
+      removeImages: [],
+      preloadNearby: null,
+      getHigherQuality: null,
+    };
+
     this.load();
   }
 
@@ -376,6 +383,14 @@ class PreviewThumbnails {
   };
 
   destroy = () => {
+    // Clear pending timers to prevent callbacks on destroyed instance
+    clearTimeout(this._timers.preloadNearby);
+    clearTimeout(this._timers.getHigherQuality);
+    this._timers.removeImages.forEach(id => clearTimeout(id));
+    this._timers.removeImages = [];
+    this._timers.preloadNearby = null;
+    this._timers.getHigherQuality = null;
+
     // Remove player event listeners
     if (this._onPlay) {
       this.player.off('play', this._onPlay);
@@ -530,10 +545,11 @@ class PreviewThumbnails {
         // This has to be set before the timeout - to prevent issues switching between hover and scrub
         const { currentImageContainer } = this;
 
-        setTimeout(() => {
+        const timerId = setTimeout(() => {
           currentImageContainer.removeChild(image);
           this.player.debug.log(`Removing thumb: ${image.dataset.filename}`);
         }, removeDelay);
+        this._timers.removeImages.push(timerId);
       }
     });
   };
@@ -542,7 +558,8 @@ class PreviewThumbnails {
   // This will only preload the lowest quality
   preloadNearby = (thumbNum, forward = true) => {
     return new Promise((resolve) => {
-      setTimeout(() => {
+      this._timers.preloadNearby = setTimeout(() => {
+        this._timers.preloadNearby = null;
         const oldThumbFilename = this.thumbnails[0].frames[thumbNum].text;
 
         if (this.showingThumbFilename === oldThumbFilename) {
@@ -602,7 +619,8 @@ class PreviewThumbnails {
 
       if (previewImageHeight < this.thumbContainerHeight) {
         // Recurse back to the loadImage function - show a higher quality one, but only if the viewer is on this frame for a while
-        setTimeout(() => {
+        this._timers.getHigherQuality = setTimeout(() => {
+          this._timers.getHigherQuality = null;
           // Make sure the mouse hasn't already moved on and started hovering at another image
           if (this.showingThumbFilename === thumbFilename) {
             this.player.debug.log(`Showing higher quality thumb for: ${thumbFilename}`);
