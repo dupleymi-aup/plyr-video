@@ -1402,6 +1402,11 @@ class Plyr {
       this.ads = null;
     }
 
+    // Stop transcription SpeechRecognition if active to prevent privacy issues
+    if (this.transcription && this.transcription.active) {
+      transcription.toggle.call(this, false);
+    }
+
     // Remove global window/document listeners
     if (this.listeners) {
       this.listeners.global(false);
