@@ -334,7 +334,7 @@ export function handleCurrentTime(player, data) {
 
 // Shared message handler for player:captionList
 export function handleCaptionList(player, data) {
-  if (data && Array.isArray(data.list)) {
+  if (data && Array.isArray(data.list) && player.embed) {
     player.embed.captionTracks = data.list.map((track, index) => ({
       id: track.id || index,
       language: track.language || track.srclang || 'unknown',
