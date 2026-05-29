@@ -290,7 +290,7 @@ class Captions {
     // Wait for the call stack to clear before setting mode='hidden'
     // on the active track - forcing the browser to download it
     setTimeout(() => {
-      if (active && this.toggled && this.currentTrackNode) {
+      if (active && this.toggled && this.currentTrackNode && this.plyr.ready && document.contains(this.media)) {
         this.currentTrackNode.mode = 'hidden';
       }
     });
