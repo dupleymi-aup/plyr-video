@@ -232,7 +232,7 @@ const mailru = {
 
     // Rebuild UI
     if (config.customControls) {
-      setTimeout(() => ui.build.call(player), 0);
+      player.timers.build = setTimeout(() => ui.build.call(player), 0);
     }
   },
 

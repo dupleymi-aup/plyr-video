@@ -1386,6 +1386,7 @@ class Plyr {
     clearTimeout(this.timers.loading);
     clearTimeout(this.timers.controls);
     clearTimeout(this.timers.resized);
+    clearTimeout(this.timers.build);
     clearInterval(this.timers.buffering);
     clearInterval(this.timers.playing);
 

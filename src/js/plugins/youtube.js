@@ -339,7 +339,7 @@ const youtube = {
 
           // Rebuild UI
           if (config.customControls) {
-            setTimeout(() => ui.build.call(player), 50);
+            player.timers.build = setTimeout(() => ui.build.call(player), 50);
           }
         },
         onStateChange(event) {
