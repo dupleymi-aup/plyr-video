@@ -87,6 +87,9 @@ const vk = {
     const player = this;
     fetch(`https://vk.ru/al_video.php?act=show&al=1&video=${oid}_${videoId}`, 'text', false, 8000)
       .then((html) => {
+        if (!player || !player.config) {
+          return;
+        }
         if (is.string(html)) {
           const ogMatch = html.match(/<meta\s+property=["']og:title["']\s+content=["']([^"']+)["']/i);
           if (ogMatch && ogMatch[1]) {
@@ -103,6 +106,9 @@ const vk = {
         }
       })
       .catch((err) => {
+        if (!player || !player.config) {
+          return;
+        }
         if (player.config.debug) {
           player.debug.warn('VK Video: Failed to fetch title:', err.message);
         }
