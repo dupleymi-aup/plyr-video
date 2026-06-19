@@ -389,6 +389,7 @@ class Plyr {
 
   /**
    * Play the media, or play the advertisement (if they are not blocked)
+   * @returns {Promise<void>|null} Promise for HTML5, null for embeds without play API
    */
   play = () => {
     if (!is.function(this.media.play)) {
@@ -728,72 +729,44 @@ class Plyr {
    * Get the minimum allowed speed
    */
   get minimumSpeed() {
+    // YouTube uses options.speed array
     if (this.isYouTube) {
-      // https://developers.google.com/youtube/iframe_api_reference#setPlaybackRate
       return Math.min(...this.options.speed);
     }
 
-    if (this.isVimeo) {
-      // https://github.com/vimeo/player.js/#setplaybackrateplaybackrate-number-promisenumber-rangeerrorerror
-      return 0.5;
-    }
+    // Lookup table for provider-specific speed limits
+    const min = {
+      vimeo: 0.5,
+      rutube: 0.25,
+      yandex: 0.25,
+      mtslink: 0.5,
+      vk: 1,
+      mailru: 1,
+    };
 
-    if (this.isRutube) {
-      // Rutube supports 0.25x-2x
-      return 0.25;
-    }
-
-    if (this.isYandexCloud) {
-      return 0.25;
-    }
-
-    if (this.isMTSLink) {
-      return 0.5;
-    }
-
-    if (this.isVK || this.isMailRu) {
-      // VK and Mail.ru don't support speed control via API
-      return 1;
-    }
-
-    // https://stackoverflow.com/a/32320020/1191319
-    return 0.0625;
+    return min[this.provider] ?? 0.0625;
   }
 
   /**
    * Get the maximum allowed speed
    */
   get maximumSpeed() {
+    // YouTube uses options.speed array
     if (this.isYouTube) {
-      // https://developers.google.com/youtube/iframe_api_reference#setPlaybackRate
       return Math.max(...this.options.speed);
     }
 
-    if (this.isVimeo) {
-      // https://github.com/vimeo/player.js/#setplaybackrateplaybackrate-number-promisenumber-rangeerrorerror
-      return 2;
-    }
+    // Lookup table for provider-specific speed limits
+    const max = {
+      vimeo: 2,
+      rutube: 2,
+      yandex: 2,
+      mtslink: 2,
+      vk: 1,
+      mailru: 1,
+    };
 
-    if (this.isRutube) {
-      // Rutube supports up to 2x
-      return 2;
-    }
-
-    if (this.isYandexCloud) {
-      return 2;
-    }
-
-    if (this.isMTSLink) {
-      return 2;
-    }
-
-    if (this.isVK || this.isMailRu) {
-      // VK and Mail.ru don't support speed control via API
-      return 1;
-    }
-
-    // https://stackoverflow.com/a/32320020/1191319
-    return 16;
+    return max[this.provider] ?? 16;
   }
 
   /**
@@ -1292,6 +1265,10 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   on = (event, callback) => {
+    if (!this.ready) {
+      return;
+    }
+
     addListener.call(this, this.elements.container, event, callback);
   };
 
@@ -1301,6 +1278,10 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   once = (event, callback) => {
+    if (!this.ready) {
+      return;
+    }
+
     onceListener.call(this, this.elements.container, event, callback);
   };
 
@@ -1310,6 +1291,10 @@ class Plyr {
    * @param {Function} callback - Callback for when event occurs
    */
   off = (event, callback) => {
+    if (!this.ready) {
+      return;
+    }
+
     removeListener.call(this, this.elements.container, event, callback);
   };
 
