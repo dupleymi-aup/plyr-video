@@ -426,7 +426,7 @@ class Plyr {
    * Get paused state
    */
   get paused() {
-    return Boolean(this.media.paused);
+    return this.media ? Boolean(this.media.paused) : true;
   }
 
   /**
@@ -440,7 +440,7 @@ class Plyr {
    * Get ended state
    */
   get ended() {
-    return Boolean(this.media.ended);
+    return this.media ? Boolean(this.media.ended) : false;
   }
 
   /**
@@ -546,7 +546,7 @@ class Plyr {
    * Get seeking status
    */
   get seeking() {
-    return Boolean(this.media.seeking);
+    return this.media ? Boolean(this.media.seeking) : false;
   }
 
   /**
@@ -611,24 +611,24 @@ class Plyr {
    * Get the current player volume
    */
   get volume() {
-    return Number(this.media.volume);
+    return this.media ? Number(this.media.volume) : 1;
   }
 
   /**
    * Increase volume
-   * @param {number} step - How much to increase by (between 0 and 1)
+   * @param {number} step - How much to increase by (between 0 and 1, defaults to 0.1)
    */
   increaseVolume = (step) => {
     const volume = this.media.muted ? 0 : this.volume;
-    this.volume = volume + (is.number(step) ? step : 0);
+    this.volume = volume + (is.number(step) ? step : 0.1);
   };
 
   /**
    * Decrease volume
-   * @param {number} step - How much to decrease by (between 0 and 1)
+   * @param {number} step - How much to decrease by (between 0 and 1, defaults to 0.1)
    */
   decreaseVolume = (step) => {
-    this.increaseVolume(-step);
+    this.increaseVolume(is.number(step) ? -step : -0.1);
   };
 
   /**
@@ -721,7 +721,7 @@ class Plyr {
    * Get current playback speed
    */
   get speed() {
-    return Number(this.media.playbackRate);
+    return this.media ? Number(this.media.playbackRate) : 1;
   }
 
   /**
@@ -1442,10 +1442,6 @@ class Plyr {
       done();
     }
     else if (this.isYouTube) {
-      // Clear timers
-      clearInterval(this.timers.buffering);
-      clearInterval(this.timers.playing);
-
       // Destroy YouTube API
       if (this.embed !== null && is.function(this.embed.destroy)) {
         this.embed.destroy();
