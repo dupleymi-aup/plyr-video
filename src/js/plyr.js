@@ -175,6 +175,12 @@ class Plyr {
         if (is.element(iframe)) {
           // Detect provider
           url = parseUrl(iframe.getAttribute('src'));
+
+          if (!url) {
+            this.debug.error('Setup failed: Invalid iframe src');
+            return;
+          }
+
           this.provider = getProviderByUrl(url.toString());
 
           // Rework elements
