@@ -389,9 +389,9 @@ class Plyr {
       return null;
     }
 
-    // Intecept play with ads
+    // Intercept play with ads — ad system controls when content starts
     if (this.ads && this.ads.enabled) {
-      this.ads.managerPromise.then(() => this.ads.play()).catch(() => silencePromise(this.media.play()));
+      return this.ads.managerPromise.then(() => this.ads.play()).catch(() => silencePromise(this.media.play()));
     }
 
     // Return the promise (for HTML5)
