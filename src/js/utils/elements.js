@@ -207,32 +207,13 @@ export function hasClass(element, className) {
 }
 
 // Element matches selector
-const matchesMethod = Element.prototype.matches
-  || Element.prototype.webkitMatchesSelector
-  || Element.prototype.mozMatchesSelector
-  || Element.prototype.msMatchesSelector;
-
 export function matches(element, selector) {
-  return matchesMethod
-    ? matchesMethod.call(element, selector)
-    : Array.from(document.querySelectorAll(selector)).includes(element);
+  return Element.prototype.matches.call(element, selector);
 }
 
 // Closest ancestor element matching selector (also tests element itself)
-const closestMethod = Element.prototype.closest;
-
 export function closest(element, selector) {
-  if (closestMethod) {
-    return closestMethod.call(element, selector);
-  }
-
-  // https://developer.mozilla.org/en-US/docs/Web/API/Element/closest#Polyfill
-  let el = element;
-  do {
-    if (matches(el, selector)) return el;
-    el = el.parentElement || el.parentNode;
-  } while (el !== null && el.nodeType === 1);
-  return null;
+  return Element.prototype.closest.call(element, selector);
 }
 
 // Find all elements
