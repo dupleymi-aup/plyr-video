@@ -505,7 +505,7 @@ class Plyr {
     }
 
     // Validate input
-    const inputIsValid = is.number(input) && input > 0;
+    const inputIsValid = is.number(input) && input >= 0;
 
     // Set
     this.media.currentTime = inputIsValid ? Math.min(input, this.duration) : 0;
