@@ -191,6 +191,22 @@ declare class Plyr {
   forward(seekTime?: number): void;
 
   /**
+   * Step backward by one frame (~1/30s). HTML5 video only.
+   */
+  stepBackward(): void;
+
+  /**
+   * Step forward by one frame (~1/30s). HTML5 video only.
+   */
+  stepForward(): void;
+
+  /**
+   * Capture a screenshot of the current video frame.
+   * @returns Data URL of the captured frame (PNG), or null if not supported.
+   */
+  screenshot(): string | null;
+
+  /**
    * Increase volume by the specified step. If no parameter is passed, the default step will be used.
    */
   increaseVolume(step?: number): void;
