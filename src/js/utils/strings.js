@@ -19,7 +19,10 @@ export function generateId(prefix) {
 export function format(input, ...args) {
   if (is.empty(input)) return input;
 
-  return input.toString().replace(/\{(\d+)\}/g, (_, i) => args[i].toString());
+  return input.toString().replace(/\{(\d+)\}/g, (_, i) => {
+    const arg = args[i];
+    return arg != null ? String(arg) : `{${i}}`;
+  });
 }
 
 // Get percentage

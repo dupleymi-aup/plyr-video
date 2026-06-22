@@ -42,8 +42,8 @@ describe('string utils', () => {
       expect(format('')).toBe('');
     });
 
-    it('should throw for unmatched placeholders with missing args', () => {
-      expect(() => format('Hello {0} {1}', 'World')).toThrow();
+    it('should keep placeholder when arg is missing', () => {
+      expect(format('Hello {0} {1}', 'World')).toBe('Hello World {1}');
     });
   });
 
