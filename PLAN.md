@@ -85,6 +85,12 @@
 - `format('Hello {0} {1}', 'World')` выбрасывал TypeError вместо корректной обработки
 - Теперь отсутствующий аргумент сохраняет плейсхолдер как есть: `Hello World {1}`
 
+## 16. ✅ Исправить баг: focusFirstMenuItem падал TypeError при невидимых панелях
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/controls/settings-menu.js:129-143`
+- `target.querySelector(...)` падал TypeError если `find()` вернул `undefined`
+- Добавлен null-guard: `if (!is.element(target)) return;`
+
 ---
 
 **Итого:** Все пункты выполнены. 543 тестов, 29 файлов.
