@@ -67,6 +67,12 @@
 - Файл: `src/js/support.js:67`
 - `defaultCodecs[input]` → `defaultCodecs[type]` — переменная `type` используется на строке выше для проверки ключа, должна использоваться и для доступа к значению
 
+## 13. ✅ Добавить типы для stepBackward/stepForward/screenshot в plyr.d.ts
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/plyr.d.ts`
+- TypeScript-типы не содержали новые методы `stepBackward()`, `stepForward()`, `screenshot()`
+- Добавлены JSDoc-комментарии и правильные сигнатуры: `stepBackward(): void`, `stepForward(): void`, `screenshot(): string | null`
+
 ---
 
 **Итого:** Все пункты выполнены. 543 тестов, 29 файлов.
