@@ -73,6 +73,12 @@
 - TypeScript-типы не содержали новые методы `stepBackward()`, `stepForward()`, `screenshot()`
 - Добавлены JSDoc-комментарии и правильные сигнатуры: `stepBackward(): void`, `stepForward(): void`, `screenshot(): string | null`
 
+## 14. ✅ Исправить баг: меню транскрипции использовало языки перевода
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/controls/submenu-builders.js:214`
+- `this.player.config.translation.languages` → `this.player.config.transcription.languages`
+- Меню транскрипции показывало список языков перевода вместо списка языков транскрипции
+
 ---
 
 **Итого:** Все пункты выполнены. 543 тестов, 29 файлов.
