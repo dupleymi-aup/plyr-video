@@ -211,7 +211,7 @@ class SubmenuBuilders {
     }
 
     const type = 'transcription';
-    const languages = this.player.config.translation.languages;
+    const languages = this.player.config.transcription.languages;
 
     this.buildMenu({
       type,
