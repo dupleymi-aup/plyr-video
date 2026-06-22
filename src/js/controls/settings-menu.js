@@ -137,6 +137,10 @@ class SettingsMenu {
       target = Object.values(this.player.elements.settings.panels).find(p => !p.hidden);
     }
 
+    if (!is.element(target)) {
+      return;
+    }
+
     const firstItem = target.querySelector('[role^="menuitem"]');
 
     setFocus.call(this.player, firstItem, focusVisible);
