@@ -49,4 +49,17 @@ describe('Console', () => {
     expect(spy).not.toHaveBeenCalled();
     spy.mockRestore();
   });
+
+  it('should return the same function reference on repeated access (cached)', () => {
+    const c = new Console(true);
+    expect(c.log).toBe(c.log);
+    expect(c.warn).toBe(c.warn);
+    expect(c.error).toBe(c.error);
+  });
+
+  it('should return noop references when disabled', () => {
+    const c = new Console(false);
+    expect(c.log).toBe(c.warn);
+    expect(c.warn).toBe(c.error);
+  });
 });
