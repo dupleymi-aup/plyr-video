@@ -87,10 +87,14 @@ class Listeners {
         '9',
 
         'c',
+        'd',
         'f',
         'k',
         'l',
         'm',
+        's',
+        ',',
+        '.',
       ];
 
       // If the key is found prevent default (e.g. prevent scrolling for arrows)
@@ -162,6 +166,20 @@ class Listeners {
           if (!repeat) {
             player.toggleDarkMode();
           }
+          break;
+
+        case 's':
+          if (!repeat) {
+            player.screenshot();
+          }
+          break;
+
+        case ',':
+          player.stepBackward();
+          break;
+
+        case '.':
+          player.stepForward();
           break;
 
         default:

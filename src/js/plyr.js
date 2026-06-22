@@ -496,6 +496,54 @@ class Plyr {
   };
 
   /**
+   * Step backward by one frame (~1/30s)
+   */
+  stepBackward = () => {
+    if (this.isHTML5) {
+      this.currentTime -= 1 / 30;
+    }
+  };
+
+  /**
+   * Step forward by one frame (~1/30s)
+   */
+  stepForward = () => {
+    if (this.isHTML5) {
+      this.currentTime += 1 / 30;
+    }
+  };
+
+  /**
+   * Capture a screenshot of the current video frame
+   * @returns {string|null} Data URL of the captured frame, or null if not supported
+   */
+  screenshot = () => {
+    if (!this.isHTML5 || !this.isVideo) {
+      this.debug.warn('Screenshot is only supported for HTML5 video');
+      return null;
+    }
+
+    const { videoWidth, videoHeight } = this.media;
+    if (!videoWidth || !videoHeight) {
+      this.debug.warn('Cannot capture screenshot: video not loaded');
+      return null;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = videoWidth;
+    canvas.height = videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(this.media, 0, 0, videoWidth, videoHeight);
+
+    const dataUrl = canvas.toDataURL('image/png');
+
+    // Trigger event so consumers can handle the screenshot
+    triggerEvent.call(this, this.media, 'screenshot', false, { dataUrl });
+
+    return dataUrl;
+  };
+
+  /**
    * Seek to a time
    * @param {number} input - where to seek to in seconds. Defaults to 0 (the start)
    */
