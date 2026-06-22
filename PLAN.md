@@ -79,6 +79,12 @@
 - `this.player.config.translation.languages` → `this.player.config.transcription.languages`
 - Меню транскрипции показывало список языков перевода вместо списка языков транскрипции
 
+## 15. ✅ Исправить баг: format() падал при отсутствии аргумента
+- Статус: ВЫПОЛНЕНО
+- Файлы: `src/js/utils/strings.js`, `test/utils/strings.test.js`
+- `format('Hello {0} {1}', 'World')` выбрасывал TypeError вместо корректной обработки
+- Теперь отсутствующий аргумент сохраняет плейсхолдер как есть: `Hello World {1}`
+
 ---
 
 **Итого:** Все пункты выполнены. 543 тестов, 29 файлов.
