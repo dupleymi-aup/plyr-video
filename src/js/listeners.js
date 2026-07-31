@@ -12,6 +12,36 @@ import is from './utils/is';
 import { silencePromise } from './utils/promise';
 import { getAspectRatio, getViewportSize, supportsCSS } from './utils/style';
 
+// Keys that should prevent default browser behavior
+const PREVENT_DEFAULT_KEYS = new Set([
+  ' ',
+  'ArrowLeft',
+  'ArrowUp',
+  'ArrowRight',
+  'ArrowDown',
+
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+
+  'c',
+  'd',
+  'f',
+  'k',
+  'l',
+  'm',
+  's',
+  ',',
+  '.',
+]);
+
 class Listeners {
   constructor(player) {
     this.player = player;
@@ -68,37 +98,10 @@ class Listeners {
       }
 
       // Which keys should we prevent default
-      const preventDefault = [
-        ' ',
-        'ArrowLeft',
-        'ArrowUp',
-        'ArrowRight',
-        'ArrowDown',
-
-        '0',
-        '1',
-        '2',
-        '3',
-        '4',
-        '5',
-        '6',
-        '7',
-        '8',
-        '9',
-
-        'c',
-        'd',
-        'f',
-        'k',
-        'l',
-        'm',
-        's',
-        ',',
-        '.',
-      ];
+      const preventDefaultKeys = PREVENT_DEFAULT_KEYS;
 
       // If the key is found prevent default (e.g. prevent scrolling for arrows)
-      if (preventDefault.includes(key)) {
+      if (preventDefaultKeys.has(key)) {
         event.preventDefault();
         event.stopPropagation();
       }

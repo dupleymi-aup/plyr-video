@@ -221,13 +221,18 @@ const transcription = {
     if (this.transcription.active && this.config.translation.active && content) {
       translate(content, this.config.translation.language)
         .then((translated) => {
+          // Guard: player may have been destroyed during async translation
+          if (!this.elements || !this.elements.translation) {
+            return;
+          }
           if (this.elements.translation) {
             this.elements.translation.textContent = translated;
           }
         })
         .catch((error) => {
           this.debug.warn('Translation failed:', error);
-          if (this.elements.translation) {
+          // Guard: player may have been destroyed during async translation
+          if (this.elements && this.elements.translation) {
             this.elements.translation.textContent = content; // Fallback to original transcript
           }
         });

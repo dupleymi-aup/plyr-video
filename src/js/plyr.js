@@ -1472,7 +1472,7 @@ class Plyr {
       });
     }
 
-    // Provider specific stuff
+// Provider-specific cleanup
     if (this.isHTML5) {
       // Cancel any pending quality change
       if (this._pendingQualityChange) {
@@ -1482,15 +1482,6 @@ class Plyr {
 
       // Restore native video controls
       ui.toggleNativeControls.call(this, true);
-
-      // Clean up
-      done();
-    }
-    else if (this.isYouTube) {
-      // Destroy YouTube API
-      if (this.embed !== null && is.function(this.embed.destroy)) {
-        this.embed.destroy();
-      }
 
       // Clean up
       done();
@@ -1517,8 +1508,9 @@ class Plyr {
       // Vimeo does not always return
       setTimeout(doneOnce, 200);
     }
-    else if (this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink) {
-      // Destroy postMessage-based embed providers
+    else {
+      // YouTube, Rutube, Yandex Cloud, VK, Mail.ru, MTS Link
+      // All embed providers use the same embed.destroy() pattern
       if (this.embed !== null && is.function(this.embed.destroy)) {
         this.embed.destroy();
       }

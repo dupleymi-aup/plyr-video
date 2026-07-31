@@ -337,13 +337,18 @@ class Captions {
       // Translate current captions
       translate(this.elements.captions.textContent, this.translation.language)
         .then((translated) => {
+          // Guard: player may have been destroyed during async translation
+          if (!this.elements || !this.elements.translation) {
+            return;
+          }
           if (this.elements.translation) {
             this.elements.translation.textContent = translated;
           }
         })
         .catch((error) => {
           this.plyr.debug.warn('Translation failed:', error.message);
-          if (this.elements.translation) {
+          // Guard: player may have been destroyed during async translation
+          if (this.elements && this.elements.translation) {
             this.elements.translation.textContent = '';
           }
         });
@@ -550,13 +555,18 @@ class Captions {
       if (this.translation.active && !(this.plyr.transcription && this.plyr.transcription.active)) {
         translate(content, this.translation.language)
           .then((translated) => {
+            // Guard: player may have been destroyed during async translation
+            if (!this.elements || !this.elements.translation) {
+              return;
+            }
             if (this.elements.translation) {
               this.elements.translation.textContent = translated;
             }
           })
           .catch((error) => {
             this.plyr.debug.warn('Translation failed:', error.message);
-            if (this.elements.translation) {
+            // Guard: player may have been destroyed during async translation
+            if (this.elements && this.elements.translation) {
               this.elements.translation.textContent = ''; // Clear on error
             }
           });
