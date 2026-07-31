@@ -170,6 +170,10 @@ const transcription = {
         this.transcription.active = transcriptionActive;
         this.storage.set({ transcriptionActive });
       }
+      else {
+        // Still update internal state for passive toggles
+        this.transcription.active = transcriptionActive;
+      }
 
       // Toggle button if it's enabled
       if (this.elements.buttons.transcription) {
@@ -178,8 +182,6 @@ const transcription = {
 
       // Add class hook
       toggleClass(this.elements.container, activeClass, transcriptionActive);
-
-      this.transcription.active = transcriptionActive;
 
       // Update settings menu
       controls.updateSetting.call(this, 'transcription');

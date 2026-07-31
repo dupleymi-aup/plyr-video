@@ -122,4 +122,39 @@ describe('stepBackward / stepForward / screenshot', () => {
     expect(result).toBe(fakeDataUrl);
     expect(drawImageMock).toHaveBeenCalledWith(player.media, 0, 0, 1920, 1080);
   });
+
+  it('screenshot returns null on SecurityError (cross-origin video)', () => {
+    const drawImageMock = vi.fn();
+
+    HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+      drawImage: drawImageMock,
+    }));
+    HTMLCanvasElement.prototype.toDataURL = vi.fn(() => {
+      throw new DOMException('SecurityError', 'SecurityError');
+    });
+
+    const player = createMockPlayer();
+    player.screenshot = function () {
+      if (!this.isHTML5 || !this.isVideo) return null;
+      const { videoWidth, videoHeight } = this.media;
+      if (!videoWidth || !videoHeight) return null;
+      const canvas = document.createElement('canvas');
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(this.media, 0, 0, videoWidth, videoHeight);
+      try {
+        return canvas.toDataURL('image/png');
+      }
+      catch {
+        this.debug.warn('Cannot capture screenshot: video is cross-origin without CORS');
+        return null;
+      }
+    };
+    const result = player.screenshot();
+    expect(result).toBeNull();
+    expect(player.debug.warn).toHaveBeenCalledWith(
+      'Cannot capture screenshot: video is cross-origin without CORS',
+    );
+  });
 });

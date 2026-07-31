@@ -90,5 +90,15 @@ describe('time utils', () => {
     it('should default to 0 when no argument provided', () => {
       expect(formatTime()).toBe('00:00');
     });
+
+    it('should handle negative values by displaying with minus sign', () => {
+      expect(formatTime(-5)).toBe('-00:05');
+      expect(formatTime(-60)).toBe('-01:00');
+      expect(formatTime(-3600, true)).toBe('-1:00:00');
+    });
+
+    it('should not show minus for zero even when negative', () => {
+      expect(formatTime(-0)).toBe('00:00');
+    });
   });
 });

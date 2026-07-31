@@ -535,7 +535,15 @@ class Plyr {
     const ctx = canvas.getContext('2d');
     ctx.drawImage(this.media, 0, 0, videoWidth, videoHeight);
 
-    const dataUrl = canvas.toDataURL('image/png');
+    let dataUrl;
+    try {
+      dataUrl = canvas.toDataURL('image/png');
+    }
+    catch {
+      // SecurityError is thrown when the video is cross-origin without proper CORS headers
+      this.debug.warn('Cannot capture screenshot: video is cross-origin without CORS');
+      return null;
+    }
 
     // Trigger event so consumers can handle the screenshot
     triggerEvent.call(this, this.media, 'screenshot', false, { dataUrl });
@@ -708,7 +716,7 @@ class Plyr {
    * Get current muted state
    */
   get muted() {
-    return Boolean(this.media.muted);
+    return this.media ? Boolean(this.media.muted) : false;
   }
 
   /**
@@ -722,6 +730,10 @@ class Plyr {
 
     if (this.isAudio) {
       return true;
+    }
+
+    if (!this.media) {
+      return false;
     }
 
     // Get audio tracks
@@ -864,7 +876,7 @@ class Plyr {
    * Get current quality level
    */
   get quality() {
-    return this.media.quality;
+    return this.media ? this.media.quality : null;
   }
 
   /**
@@ -925,7 +937,7 @@ class Plyr {
    * Get current loop state
    */
   get loop() {
-    return Boolean(this.media.loop);
+    return this.media ? Boolean(this.media.loop) : false;
   }
 
   /**

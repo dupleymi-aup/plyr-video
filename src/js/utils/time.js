@@ -5,9 +5,9 @@
 import is from './is';
 
 // Time helpers
-export const getHours = value => Math.trunc((value / 60 / 60) % 60, 10);
-export const getMinutes = value => Math.trunc((value / 60) % 60, 10);
-export const getSeconds = value => Math.trunc(value % 60, 10);
+export const getHours = value => Math.trunc((value / 60 / 60) % 60);
+export const getMinutes = value => Math.trunc((value / 60) % 60);
+export const getSeconds = value => Math.trunc(value % 60);
 
 // Format time to UI friendly string
 export function formatTime(time = 0, displayHours = false, inverted = false) {
@@ -15,6 +15,10 @@ export function formatTime(time = 0, displayHours = false, inverted = false) {
   if (!is.number(time)) {
     return formatTime(0, displayHours, inverted);
   }
+
+  // Handle negative values (e.g. when using inverted display)
+  const isNegative = time < 0;
+  time = Math.abs(time);
 
   // Format time component to add leading zero
   const format = value => `0${value}`.slice(-2);
@@ -32,5 +36,5 @@ export function formatTime(time = 0, displayHours = false, inverted = false) {
   }
 
   // Render
-  return `${inverted && time > 0 ? '-' : ''}${hours}${format(mins)}:${format(secs)}`;
+  return `${(inverted && time > 0) || isNegative ? '-' : ''}${hours}${format(mins)}:${format(secs)}`;
 }
