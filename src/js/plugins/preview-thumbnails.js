@@ -92,7 +92,7 @@ class PreviewThumbnails {
     this.loaded = false;
     this.lastMouseMoveTime = Date.now();
     this.mouseDown = false;
-    this.loadedImages = [];
+    this.loadedImages = new Set();
 
     this.elements = {
       thumb: {},
@@ -448,7 +448,7 @@ class PreviewThumbnails {
 
     // Check to see if we've already downloaded higher quality versions of this image
     this.thumbnails.forEach((thumbnail, index) => {
-      if (this.loadedImages.includes(thumbnail.frames[thumbNum].text)) {
+      if (this.loadedImages.has(thumbnail.frames[thumbNum].text)) {
         qualityIndex = index;
       }
     });
@@ -510,8 +510,8 @@ class PreviewThumbnails {
       this.currentImageContainer.appendChild(previewImage);
       this.currentImageElement = previewImage;
 
-      if (!this.loadedImages.includes(thumbFilename)) {
-        this.loadedImages.push(thumbFilename);
+      if (!this.loadedImages.has(thumbFilename)) {
+        this.loadedImages.add(thumbFilename);
       }
     }
 
@@ -579,7 +579,7 @@ class PreviewThumbnails {
 
             if (newThumbFilename !== oldThumbFilename) {
               // Found one with a different filename. Make sure it hasn't already been loaded on this page visit
-              if (!this.loadedImages.includes(newThumbFilename)) {
+              if (!this.loadedImages.has(newThumbFilename)) {
                 foundOne = true;
                 this.player.debug.log(`Preloading thumb filename: ${newThumbFilename}`);
 
@@ -589,7 +589,7 @@ class PreviewThumbnails {
                 previewImage.src = thumbURL;
                 previewImage.onload = () => {
                   this.player.debug.log(`Preloaded thumb filename: ${newThumbFilename}`);
-                  if (!this.loadedImages.includes(newThumbFilename)) this.loadedImages.push(newThumbFilename);
+                  if (!this.loadedImages.has(newThumbFilename)) this.loadedImages.add(newThumbFilename);
 
                   // We don't resolve until the thumb is loaded
                   resolve();
@@ -637,7 +637,7 @@ class PreviewThumbnails {
 
   get usingSprites() {
     const firstFrame = this.thumbnails[0]?.frames?.[0];
-    return firstFrame && Object.keys(firstFrame).includes('w');
+    return firstFrame && 'w' in firstFrame;
   }
 
   get thumbAspectRatio() {

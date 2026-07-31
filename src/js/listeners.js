@@ -42,6 +42,13 @@ const PREVENT_DEFAULT_KEYS = new Set([
   '.',
 ]);
 
+// Sets for keyboard/event type checks (O(1) lookup)
+const SETTINGS_OPEN_KEYS = new Set([' ', 'Enter']);
+const SEEK_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+const SEEK_DONE_EVENTS = new Set(['mouseup', 'touchend', 'keyup']);
+const PRESS_START_EVENTS = new Set(['mousedown', 'touchstart']);
+const HOVER_SHOW_EVENTS = new Set(['touchstart', 'touchmove', 'mousemove']);
+
 class Listeners {
   constructor(player) {
     this.player = player;
@@ -260,7 +267,7 @@ class Listeners {
         }
 
         // Show, then hide after a timeout unless another control event occurs
-        const show = ['touchstart', 'touchmove', 'mousemove'].includes(event.type);
+        const show = HOVER_SHOW_EVENTS.has(event.type);
         let delay = 0;
 
         if (show) {
@@ -658,7 +665,7 @@ class Listeners {
       elements.buttons.settings,
       'keyup',
       (event) => {
-        if (![' ', 'Enter'].includes(event.key)) {
+        if (!SETTINGS_OPEN_KEYS.has(event.key)) {
           return;
         }
 
@@ -701,7 +708,7 @@ class Listeners {
       const seek = event.currentTarget;
       const attribute = 'play-on-seeked';
 
-      if (is.keyboardEvent(event) && !['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      if (is.keyboardEvent(event) && !SEEK_KEYS.has(event.key)) {
         return;
       }
 
@@ -711,7 +718,7 @@ class Listeners {
       // Was playing before?
       const play = seek.hasAttribute(attribute);
       // Done seeking
-      const done = ['mouseup', 'touchend', 'keyup'].includes(event.type);
+      const done = SEEK_DONE_EVENTS.has(event.type);
 
       // If we're done seeking and it was playing, resume playback
       if (play && done) {
@@ -844,7 +851,7 @@ class Listeners {
 
     // Update controls.pressed state (used for ui.toggleControls to avoid hiding when interacting)
     this.bind(elements.controls, 'mousedown mouseup touchstart touchend touchcancel', (event) => {
-      elements.controls.pressed = ['mousedown', 'touchstart'].includes(event.type);
+      elements.controls.pressed = PRESS_START_EVENTS.has(event.type);
     });
 
     // Show controls when they receive focus (e.g., when using keyboard tab key)

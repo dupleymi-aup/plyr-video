@@ -62,8 +62,8 @@ const support = {
       return false;
     }
 
-    // Add codec if required
-    if (Object.keys(defaultCodecs).includes(type)) {
+// Add codec if required
+    if (type in defaultCodecs) {
       type += `; codecs="${defaultCodecs[type]}"`;
     }
 

@@ -38,6 +38,17 @@ import { parseUrl } from './utils/urls';
 // TODO: Use a WeakMap for private globals
 // const globals = new WeakMap();
 
+// Set of embed provider names for O(1) lookup in isEmbed getter
+const EMBED_PROVIDERS = new Set([
+  providers.youtube,
+  providers.vimeo,
+  providers.rutube,
+  providers.yandex,
+  providers.vk,
+  providers.mailru,
+  providers.mtslink,
+]);
+
 // Plyr instance
 class Plyr {
   constructor(target, options) {
@@ -348,7 +359,7 @@ class Plyr {
   }
 
   get isEmbed() {
-    return this.isYouTube || this.isVimeo || this.isRutube || this.isYandexCloud || this.isVK || this.isMailRu || this.isMTSLink;
+    return EMBED_PROVIDERS.has(this.provider);
   }
 
   get isYouTube() {
@@ -1472,7 +1483,7 @@ class Plyr {
       });
     }
 
-// Provider-specific cleanup
+    // Provider-specific cleanup
     if (this.isHTML5) {
       // Cancel any pending quality change
       if (this._pendingQualityChange) {

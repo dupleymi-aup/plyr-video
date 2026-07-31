@@ -112,9 +112,9 @@ const source = {
       media.setup.call(this);
 
       // HTML5 stuff
-      if (this.isHTML5) {
+if (this.isHTML5) {
         // Setup captions
-        if (Object.keys(input).includes('tracks')) {
+        if ('tracks' in input) {
           source.insertElements.call(this, 'track', input.tracks);
         }
       }

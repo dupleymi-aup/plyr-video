@@ -6,6 +6,9 @@
 import i18n from './utils/i18n';
 import is from './utils/is';
 
+// Track kinds that are valid for captions/subtitles
+const CAPTION_KINDS = new Set(['captions', 'subtitles']);
+
 export function getTracks(plyr, update = false) {
   if (!plyr.media || !plyr.media.textTracks) {
     return [];
@@ -16,7 +19,7 @@ export function getTracks(plyr, update = false) {
 
   return tracks
     .filter(track => !isHTML5 || update || (plyr.captions?.meta?.has(track)))
-    .filter(track => ['captions', 'subtitles'].includes(track.kind));
+    .filter(track => CAPTION_KINDS.has(track.kind));
 }
 
 // Get UI label for track

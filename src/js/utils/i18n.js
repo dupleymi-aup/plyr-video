@@ -24,7 +24,7 @@ const i18n = {
     let string = getDeep(config.i18n, key);
 
     if (is.empty(string)) {
-      if (Object.keys(resources).includes(key)) {
+      if (key in resources) {
         return resources[key];
       }
 

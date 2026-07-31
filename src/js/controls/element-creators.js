@@ -65,19 +65,19 @@ class ElementCreators {
     };
 
     ['element', 'icon', 'label'].forEach((key) => {
-      if (Object.keys(attributes).includes(key)) {
+      if (key in attributes) {
         props[key] = attributes[key];
         delete attributes[key];
       }
     });
 
     // Default to 'button' type to prevent form submission
-    if (props.element === 'button' && !Object.keys(attributes).includes('type')) {
+    if (props.element === 'button' && !('type' in attributes)) {
       attributes.type = 'button';
     }
 
     // Set class name
-    if (Object.keys(attributes).includes('class')) {
+    if ('class' in attributes) {
       if (!attributes.class.split(' ').includes(this.player.config.classNames.control)) {
         extend(attributes, {
           class: `${attributes.class} ${this.player.config.classNames.control}`,

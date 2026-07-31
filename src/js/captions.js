@@ -3,24 +3,16 @@
 // ==========================================================================
 
 import controls from './controls';
-import { dedupe } from './utils/arrays';
-import browser from './utils/browser';
-import {
-  createElement,
-  emptyElement,
-  getAttributesFromSelector,
-  insertAfter,
-  removeElement,
-  toggleClass,
-} from './utils/elements';
+import { createElement, emptyElement, getAttributesFromSelector, insertAfter, toggleClass } from './utils/elements';
 import { on, triggerEvent } from './utils/events';
-import fetch from './utils/fetch';
 import i18n from './utils/i18n';
 import is from './utils/is';
-import sendCommand from './utils/post-message';
 import { getHTML } from './utils/strings';
 import { translate } from './utils/translate';
 import { parseUrl } from './utils/urls';
+
+// Track kinds that are valid for captions/subtitles
+const CAPTION_KINDS = new Set(['captions', 'subtitles']);
 
 /**
  * Captions class
@@ -462,7 +454,7 @@ class Captions {
     // Filter out removed tracks and tracks that aren't captions/subtitles (for example metadata)
     return tracks
       .filter(track => !this.isHTML5 || update || this.meta.has(track))
-      .filter(track => ['captions', 'subtitles'].includes(track.kind));
+      .filter(track => CAPTION_KINDS.has(track.kind));
   }
 
   // Match tracks based on languages and get the first
