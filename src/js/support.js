@@ -68,7 +68,7 @@ const support = {
     }
 
     try {
-      return Boolean(type && this.media.canPlayType(type).replace(/no/, ''));
+      return Boolean(type && this.media && is.function(this.media.canPlayType) && this.media.canPlayType(type).replace(/no/, ''));
     }
     catch {
       return false;

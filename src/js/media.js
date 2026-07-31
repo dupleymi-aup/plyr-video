@@ -11,6 +11,19 @@ import vk from './plugins/vk-video';
 import yandex from './plugins/yandex-video';
 import youtube from './plugins/youtube';
 import { createElement, toggleClass, wrap } from './utils/elements';
+import is from './utils/is';
+
+// Provider setup lookup table
+const providerSetup = {
+  html5: html5.setup,
+  youtube: youtube.setup,
+  vimeo: vimeo.setup,
+  rutube: rutube.setup,
+  yandex: yandex.setup,
+  vk: vk.setup,
+  mailru: mailru.setup,
+  mtslink: mtslink.setup,
+};
 
 const media = {
   // Setup media
@@ -50,29 +63,10 @@ const media = {
       this.elements.wrapper.appendChild(this.elements.poster);
     }
 
-    if (this.isHTML5) {
-      html5.setup.call(this);
-    }
-    else if (this.isYouTube) {
-      youtube.setup.call(this);
-    }
-    else if (this.isVimeo) {
-      vimeo.setup.call(this);
-    }
-    else if (this.isRutube) {
-      rutube.setup.call(this);
-    }
-    else if (this.isYandexCloud) {
-      yandex.setup.call(this);
-    }
-    else if (this.isVK) {
-      vk.setup.call(this);
-    }
-    else if (this.isMailRu) {
-      mailru.setup.call(this);
-    }
-    else if (this.isMTSLink) {
-      mtslink.setup.call(this);
+    // Dispatch to provider-specific setup via lookup table
+    const setup = providerSetup[this.provider];
+    if (is.function(setup)) {
+      setup.call(this);
     }
   },
 };

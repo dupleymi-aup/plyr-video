@@ -134,6 +134,7 @@
 - 2 новых теста в `test/utils/time.test.js`
 
 ## 20. ✅ Убрать дублирование в transcription.toggle()
+
 - Статус: ВЫПОЛНЕНО
 - Файл: `src/js/transcription.js`
 - `this.transcription.active` устанавливался дважды: в блоке `if (!passive)` и ниже безусловно
@@ -141,6 +142,7 @@
 - Пассивный режим теперь также корректно обновляет внутреннее состояние
 
 ## 21. ✅ Рефакторинг destroy() — объединение provider-веток
+
 - Статус: ВЫПОЛНЕНО
 - Файл: `src/js/plyr.js`
 - YouTube, Rutube, Yandex Cloud, VK, Mail.ru, MTS Link используют одинаковый паттерн `embed.destroy()`
@@ -149,6 +151,7 @@
 - 4 теста в `test/destroy-providers.test.js`
 
 ## 22. ✅ Оптимизация listeners.js — Set для O(1) lookup
+
 - Статус: ВЫПОЛНЕНО
 - Файл: `src/js/listeners.js`
 - `preventDefault` массив заменён на `PREVENT_DEFAULT_KEYS` Set на уровне модуля
@@ -156,12 +159,43 @@
 - 3 теста в `test/prevent-default-keys.test.js`
 
 ## 23. ✅ Async null-guards в transcription.js и captions.js
+
 - Статус: ВЫПОЛНЕНО
 - Файлы: `src/js/transcription.js`, `src/js/captions.js`
 - Асинхронные `translate()` колбэки могли выполниться после `destroy()`, когда `this.elements === null`
 - Добавлены проверки: `if (!this.elements || !this.elements.translation) return;`
 - Исправлено в `transcription.updateContainer()`, `captions.updateCues()`, `captions.toggleTranslation()`
 
+## 24. ✅ Рефакторинг media.js — provider lookup table вместо if/else
+
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/media.js`
+- 8 if/else веток заменены на lookup table `providerSetup = { html5: html5.setup, youtube: youtube.setup, ... }`
+- Добавлен импорт `is` для проверки функции
+- 9 тестов в `test/media-setup.test.js`
+
+## 25. ✅ Null-guard в support.mime() — защита от вызова после destroy
+
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/support.js`
+- `this.media.canPlayType()` мог упасть, если `this.media === null` (после destroy)
+- Добавлены проверки: `this.media && is.function(this.media.canPlayType)`
+
+## 26. ✅ Null-guard в style.getAspectRatio() — защита от вызова после destroy
+
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/utils/style.js`
+- `this.media.videoWidth` мог упасть, если `this.media === null`
+- Добавлена проверка: `this.isHTML5 && this.media`
+
+## 27. ✅ Оптимизация menu-items.js — Set для O(1) key lookup
+
+- Статус: ВЫПОЛНЕНО
+- Файл: `src/js/controls/menu-items.js`
+- `[' ', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes()` → `MENU_NAV_KEYS.has()`
+- `[' ', 'ArrowRight'].includes()` → `MENU_OPEN_KEYS.has()`
+- 5 тестов в `test/null-guards-additional.test.js`
+
 ---
 
-**Итого:** Все пункты выполнены. 562 тестов, 32 файла.
+**Итого:** Все пункты выполнены. 576 тестов, 34 файла.

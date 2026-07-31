@@ -9,6 +9,10 @@ import is from '../utils/is';
 import { extend } from '../utils/objects';
 import SettingsMenu from './settings-menu';
 
+// Keys that navigate through menus (used in bindMenuItemShortcuts)
+const MENU_NAV_KEYS = new Set([' ', 'ArrowUp', 'ArrowDown', 'ArrowRight']);
+const MENU_OPEN_KEYS = new Set([' ', 'ArrowRight']);
+
 class MenuItems {
   constructor(player) {
     this.player = player;
@@ -26,7 +30,7 @@ class MenuItems {
       'keydown keyup',
       (event) => {
         // We only care about space and ⬆️ ⬇️️ ➡️
-        if (![' ', 'ArrowUp', 'ArrowDown', 'ArrowRight'].includes(event.key)) {
+        if (!MENU_NAV_KEYS.has(event.key)) {
           return;
         }
 
@@ -42,7 +46,7 @@ class MenuItems {
         const isRadioButton = matches(menuItem, '[role="menuitemradio"]');
 
         // Show the respective menu
-        if (!isRadioButton && [' ', 'ArrowRight'].includes(event.key)) {
+        if (!isRadioButton && MENU_OPEN_KEYS.has(event.key)) {
           this.settingsMenu.showMenuPanel(type, true);
         }
         else {

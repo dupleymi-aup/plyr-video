@@ -74,7 +74,7 @@ export function getAspectRatio(input) {
   }
 
   // Get from HTML5 video
-  if (ratio === null && this.isHTML5) {
+  if (ratio === null && this.isHTML5 && this.media) {
     const { videoWidth, videoHeight } = this.media;
     ratio = [videoWidth, videoHeight];
   }
